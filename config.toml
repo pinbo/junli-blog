@@ -1,0 +1,44 @@
+baseurl = "/"
+languageCode = "en-us"
+title = "Junli Zhang's Blog"
+theme = "hugo-lithium-theme"
+googleAnalytics = ""
+disqusShortname = ""
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+enableEmoji = true
+publishDir = "docs"
+
+[permalinks]
+    post = "/:year/:month/:day/:slug/"
+
+[[menu.main]]
+    name = "About"
+    url = "/about/"
+[[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/pinbo"
+[[menu.main]]
+    name = "Twitter"
+    url = "https://twitter.com/aswillow"
+[[menu.main]]
+    name = "Slides"
+    url = "/slides/"
+
+[params]
+    description = "A website to share knowledge and ideas."
+
+    # options for highlight.js (version, additional languages, and theme)
+    highlightjsVersion = "9.11.0"
+    highlightjsCDN = "//cdn.bootcss.com"
+    highlightjsLang = ["r", "yaml"]
+    highlightjsTheme = "github"
+
+    MathJaxCDN = "//cdn.bootcss.com"
+    MathJaxVersion = "2.7.1"
+
+    [params.logo]
+    url = "github.svg"
+    width = 50
+    height = 50
+    alt = "Logo"
+

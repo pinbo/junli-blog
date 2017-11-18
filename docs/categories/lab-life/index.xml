@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lab Life on Junli Zhang&#39;s Blog</title>
+    <link>/categories/lab-life/</link>
+    <description>Recent content in Lab Life on Junli Zhang&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 07 Nov 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/lab-life/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Good idea or good working</title>
+      <link>/2017/11/07/good-idea-or-good-working/</link>
+      <pubDate>Tue, 07 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/11/07/good-idea-or-good-working/</guid>
+      <description>I always admire those people who have excellent ideas. At the same time, I also found that some successful people who succeed not because they have good ideas but because they just did it, did things that other people think not feasible or not possible or not worth it. They have only simple ideas but with real hard working. I always feel I am not that smart and it might be not a good choice to do research.</description>
+    </item>
+    
+  </channel>
+</rss>

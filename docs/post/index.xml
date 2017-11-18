@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Junli Zhang&#39;s Blog</title>
+    <link>/post/</link>
+    <description>Recent content in Posts on Junli Zhang&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 18 Nov 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Two good tutorials for creating Hugo websites through GitHub pages and Netlify</title>
+      <link>/2017/11/18/two-good-tutorials-for-creating-hugo-websites-through-github-pages-and-netlify/</link>
+      <pubDate>Sat, 18 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/11/18/two-good-tutorials-for-creating-hugo-websites-through-github-pages-and-netlify/</guid>
+      <description>I found two great tutorials using Hugo to build your own website and then publish on either GitHub or Netlify.
+ Publish on github with Hugo directly: https://youtu.be/3wkR8GyDODs
+ Publish on Netlify with Blogdown: https://alison.rbind.io/post/up-and-running-with-blogdown/
+  </description>
+    </item>
+    
+    <item>
+      <title>Make slides work in blogdown</title>
+      <link>/2017/11/16/make-slides-work-in-blogdown/</link>
+      <pubDate>Thu, 16 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/11/16/make-slides-work-in-blogdown/</guid>
+      <description>I made some slides introducing primer design tips. I want to put it in my blog; however, blogdown cannot render xaringan Rmd files if I put them in the post folder. I searched a little bit and found one solution: put the raw md file content in your remark.js slides html file. Here is how I do it. I am using the hugo-lithium-theme as an example.
+ I made the slides using xaringan;</description>
+    </item>
+    
+    <item>
+      <title>Marker-Development</title>
+      <link>/2017/11/11/marker-design/</link>
+      <pubDate>Sat, 11 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/11/11/marker-design/</guid>
+      <description>class: center, middle, inverse, title-slide
+Molecular Marker Development A simple introduction and computer demo Junli Zhang 2017/11/11 background-image: url(https://upload.wikimedia.org/wikipedia/commons/9/96/Polymerase_chain_reaction.svg)
+???
+Image credit: Wikimedia Commons
+Molecular Markers Wikipedia&amp;rsquo;s defination In genetics, a molecular marker (identified as genetic marker) is a fragment of DNA that is associated with a certain location within the genome.
+Reflect Polymorphism in a Population Steps of marker Development  Find DNA sequence variaitons within a population or between two parents</description>
+    </item>
+    
+    <item>
+      <title>Good idea or good working</title>
+      <link>/2017/11/07/good-idea-or-good-working/</link>
+      <pubDate>Tue, 07 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/11/07/good-idea-or-good-working/</guid>
+      <description>I always admire those people who have excellent ideas. At the same time, I also found that some successful people who succeed not because they have good ideas but because they just did it, did things that other people think not feasible or not possible or not worth it. They have only simple ideas but with real hard working. I always feel I am not that smart and it might be not a good choice to do research.</description>
+    </item>
+    
+    <item>
+      <title>Alias might be better than soft link sometimes</title>
+      <link>/2017/10/28/alias-might-be-better-than-soft-link-sometimes/</link>
+      <pubDate>Sat, 28 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/10/28/alias-might-be-better-than-soft-link-sometimes/</guid>
+      <description>I have been using Tassel and Haploview for a long time. Usually, I make a new folder under the folders of the two software for each project. However, this means that files in each project are distributed everywhere. Although I have a NOTE file in my project folder to record all the data and analysis locations, I still feel it is better to keep all files and analysis in the same project folder.</description>
+    </item>
+    
+  </channel>
+</rss>

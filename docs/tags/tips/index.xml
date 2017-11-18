@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tips on Junli Zhang&#39;s Blog</title>
+    <link>/tags/tips/</link>
+    <description>Recent content in Tips on Junli Zhang&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 18 Nov 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/tips/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Two good tutorials for creating Hugo websites through GitHub pages and Netlify</title>
+      <link>/2017/11/18/two-good-tutorials-for-creating-hugo-websites-through-github-pages-and-netlify/</link>
+      <pubDate>Sat, 18 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/11/18/two-good-tutorials-for-creating-hugo-websites-through-github-pages-and-netlify/</guid>
+      <description>I found two great tutorials using Hugo to build your own website and then publish on either GitHub or Netlify.
+ Publish on github with Hugo directly: https://youtu.be/3wkR8GyDODs
+ Publish on Netlify with Blogdown: https://alison.rbind.io/post/up-and-running-with-blogdown/
+  </description>
+    </item>
+    
+    <item>
+      <title>Make slides work in blogdown</title>
+      <link>/2017/11/16/make-slides-work-in-blogdown/</link>
+      <pubDate>Thu, 16 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/11/16/make-slides-work-in-blogdown/</guid>
+      <description>I made some slides introducing primer design tips. I want to put it in my blog; however, blogdown cannot render xaringan Rmd files if I put them in the post folder. I searched a little bit and found one solution: put the raw md file content in your remark.js slides html file. Here is how I do it. I am using the hugo-lithium-theme as an example.
+ I made the slides using xaringan;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,48 @@
+/* Special classes for acedemic*/
+.title {font-size: 3.3em; color:#606060;font-weight:bold;letter-spacing:0.05em}
+.subtitle {font-size: 1.4em}
+.author {font-size: 1.4em; color:#606060;font-weight:bold;letter-spacing:0.02em}  
+.coauthor {font-size: 1.0em; color:#606060;font-weight:bold;letter-spacing:0.02em}  
+.institution {font-size: 1.0em;}
+.date {font-size: 1.0em;font-style: italic}
+
+.cite {font-size: 0.8em; color:#33AA99;font-style: italic}
+.strike {color:salmon;text-decoration:line-through}
+
+/* more highlight or monospace*/
+.red { color: #fa0000; }
+.blue {color: blue; }
+.bold { font-weight: bold;}
+.large { font-size: 2em; }
+
+
+.mono {
+  background: #e7e8e2;
+  font-family: 'Source Code Pro', 'Lucida Console', Monaco, monospace;
+}
+
+/* gray out last list items */
+li p { line-height: 1.25em; }
+.graylist li { color: #777; }
+.graylist li:last-of-type {
+  color: #000;
+}
+
+/* wide left column */
+.wide-left {
+  float: left;
+  width: 67%;
+}
+.narrow-right {
+  float: right;
+  width: 30%;
+}
+
+.wide-right {
+  float: right;
+  width: 67%;
+}
+.narrow-left {
+  float: left;
+  width: 30%;
+}

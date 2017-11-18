@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Marker Development</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Junli Zhang" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="libs/extra.css" type="text/css" />
+    <link rel="stylesheet" href="https://afeld.github.io/emoji-css/emoji.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Marker Development
+## with Galaxy
+### Junli Zhang
+### 2017/11/11
+
+---
+
+
+
+
+class: center, middle, inverse, title-slide
+
+# Molecular Marker Development
+## A simple introduction and computer demo
+### Junli Zhang
+### 2017/11/11
+
+---
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/9/96/Polymerase_chain_reaction.svg)
+
+???
+
+Image credit: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3APolymerase_chain_reaction.svg)
+
+---
+
+# Molecular Markers
+## Wikipedia's defination
+In genetics, a **molecular marker** (identified as genetic marker) is a fragment of DNA that is associated with a certain location within the genome.
+
+## Reflect Polymorphism in a Population
+
+---
+# Steps of marker Development
+1. Find DNA sequence variaitons within a population or between two parents
+
+1. Need a way to screen the variations in a populations: chips, sequencing or PCR
+
+## Here I will just focus on PCR method, that is, we need to .red[design primers]!
+
+---
+
+# DNA sequence mutations
+
+### A mutation is a change in the "normal" base pair sequences
+
+- #### a single base pair substitution
+.remark-code[
+CGAGCTTGA**T**GACGAAGAAGGAG&lt;/br&gt;
+CGAGCTTGA![:color red](**A**)GACGAAGAAGGAG
+]
+
+--
+
+- #### a small deletion or insertion
+.remark-code[
+CGAGCTTGA**TGA**CGAAGAAGGAG&lt;/br&gt;
+CGAGCTTGA![:color red](**---**)CGAAGAAGGAG
+]
+
+--
+
+- #### a larger insertion or deletion or rearrangement
+- inversion, duplications, translocations etc
+
+???
+Credit: Youtube lecture [DNA Sequence Variation](https://youtu.be/ZXQuQJjdPvk)
+
+---
+
+## Types of molecular markers
+- RFLP: Restriction Fragment Length Polymorphism
+
+- RAPD: Random Amplified Polymorphic DNA
+
+- AFLP: Amplified Fragment Length Polymorphism
+
+- SSR: Simple Sequence Repeats
+- or microsatellite
+- ~1-5 bp core unit
+
+- SNP: Single Nucleotide Polymorphism
+
+### A very good review on genetic markers and QTL mapping
+.cite[Collard, B.C.Y., Jahufer, M.Z.Z., Brouwer, J.B. et al. Euphytica (2005) 142: 169. https://doi.org/10.1007/s10681-005-1681-5]
+
+---
+class: middle, center
+# Dorminant vs. Co-dorminant markers
+
+![dorminant-markers](files/dorminant-codorminant-markers.svg)
+
+---
+
+# Common PCR-based genotyping methods for SNP markers
+- CAPS: 
+    - Cleaved Amplified Polymorphic Sequences
+    - A Single Nucleotide Polymorphism (SNP) where one allele creates (or removes) a naturally occurring restriction site
+    - Codorminant
+
+--
+
+- dCAPS:
+    - Derived Cleaved Amplified Polymorphic Sequences
+    - For SNPs that do not create a natural restriction site.
+    - Uses mismatches in one PCR primer to create or remove a restriction site for one allele
+    - Codorminant
+
+--
+
+- KASP:
+    - Kompetitive Allele Specific PCR
+    - A homogenous, fluorescence-based genotyping variant of PCR. 
+    - Based on allele-specific oligo extension and fluorescence resonance energy transfer for signal generation
+    - Codorminant
+
+---
+
+![](files/CAPS.png)
+
+---
+
+background-image: url(https://www.ncbi.nlm.nih.gov/core/assets/probe/images/dCAPS_example.png)
+---
+# Genotyping - dCAPS
+
+- Derived CAPS uses a mismatched PCR primer to create or remove a restriction site based on the genotype of a SNP.
+
+--
+
+- Advantages:
+    - Can be used when the SNP does not create a natural CAPS/RFLP marker.
+    - Can be used to change a natural CAPS marker from a site using an expensive or rare enzyme to a cheap or common enzyme.
+
+--
+
+- Disadvantages:
+    - Mismatches in primer lowers PCR specificity.
+    - Laborious compared to hybridization with gene chip methods for SNP detection.
+    - Finding the right enzyme. Can use web site: http://helix.wustl.edu/dcaps/dcaps.html to find dCAPS primers for SNPs.
+
+???
+
+Credits: [dCAP genotyping slides](https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=10&amp;ved=0ahUKEwj3y86F-bHXAhVEllQKHQMpBF8QFghPMAk&amp;url=http%3A%2F%2Fwww.genetics-gsa.org%2Feducation%2Fpdf%2FHultman%2520and%2520Mellgren%25202014%2520Fetching%2520SNPs%2520Supplemental%25202%2520-%2520dCAPS%2520genotyping%2520slides.pptx&amp;usg=AOvVaw2Hb0zyAzAfqRomIx4MkizO)
+
+---
+
+# dCAPS
+
+**IWB1998**: CGAGCTTGATGACGAAGAAGGAGA[**T/C**]CGGGCAGACCCACGACGT
+
+**EcoRV**: GAT'ATC
+
+Allele   | Seq
+---    | ---
+C      | CGAGCTTGATGACGAAGAAG![:color blue](GAGA**C**C)GGGCAGACCCACGACGT
+T      | CGAGCTTGATGACGAAGAAG![:color blue](GAGA**T**C)GGGCAGACCCACGACGT
+Primer | CGAGCTTGATGACGAAGAAGGA![:color red](**T**)A
+
+--
+
+**After PCR**
+
+Allele   | Seq
+---    | ---
+C      | CGAGCTTGATGACGAAGAAG![:color blue](GA)![:color red](**T**)![:color blue](A**C**C)GGGCAGACCCACGACGT
+T      | CGAGCTTGATGACGAAGAAG![:color blue](GA)![:color red](**T**)![:color blue](A**T**C)GGGCAGACCCACGACGT
+
+---
+
+# dCAPS example: IWB1998
+.pull-left[
+#### Steps
+1. PCR with dCAPs primers
+
+1. Digest products with EcoRV
+
+1. Run on gel
+
+#### Expected results for three genotypes:
+
+– Homozygous C/C –181 bp
+
+– Homozygous T/T –157, 24 bp
+
+– Heterozygous C/T –181, 157, 24 bp
+]
+
+.pull-right[
+![](files/dCAPS-gel.svg)
+]
+
+???
+
+The 20 bpproduct will run off gel, since we run gel long enough to resolve between 163 and 143 bp
+
+---
+# CAPS gel scoring
+![:scale 100%](files/CAPS-scoring.png)
+
+---
+# KASP components
+
+![:scale 100%](files/kasp-components.png)
+
+---
+![:scale 95%](files/kasp-steps.png)
+
+---
+class: center
+![:scale 60%](files/KASP-results.png)
+
+---
+name: inverse
+class: center, middle, inverse
+
+## That is all the introductions. 
+## ![:emoji smiley] Let us develop markers ![:emoji smiley]
+
+---
+# Steps in primer design
+.wide-left[
+1. Find the locations on wheat pseudomolecule of the flanking markers
+  - Blast the sequences of your markers against the wheat pseudomolecule
+
+1. Find all the variations between the two parents of your population in the region between two flanking markers
+  - You already have the exon capture data for both parents on [T3](https://triticeaetoolbox.org/wheat/display_genotype.php?trial_code=2017_WheatCAP)
+  - Extract variations only in the target regions
+
+1. Design primers for a certain variations to screen recombinants
+  - Majority will be SNPs, small insertions or deletion.
+  - We fill focus on CAPS/dCAPS/KASP
+]
+
+.narrow-right[
+
+![](files/QTl7AS-4.svg)
+]
+---
+class: graylist
+# Requirements of PCR primers
+
+- ## Specific
+
+--
+
+- Length: 18 - 25
+
+--
+
+- Melting Temperature: around 60 &amp;deg;C
+
+--
+
+- GC Clamp: G or C bases within the last five bases in the 3' end helps promote specific binding, but more than 3 G/C should be avoided
+
+--
+
+- NO Secondary Structures
+
+--
+
+- Avoid Template Secondary Structure or other complex regions, such as retros
+
+--
+
+- Amplicon Length: qPCR and dCAPS are short (&lt; 300 bp), other markers usually &lt; 1 kb
+
+--
+
+- Primer Pair Tm Difference &lt; 5 C
+
+[More information](http://www.premierbiosoft.com/tech_notes/PCR_Primer_Design.html)
+
+---
+class: graylist
+# Primer Design Tips
+
+- The first nb in the 3' end is most important; avoid changing this one to introduce mutations in dCAPS primer design;
+
+  .remark-code[CGAGCTTGATGACGAAGAAGGA![:color red](**T**)]
+
+--
+
+- To be more specific, two nb difference in the first 4 bp from the 3' end
+
+  .remark-code[CGAGCTTGATGACGAAGAA![:color red](**GGAT**)]
+
+--
+
+- Sometimes we can introduce 1 mutation in the 3rd nb to make the primer more specific
+
+  .remark-code[CGAGCTTGATGACGAAGAAG.red.bold[G]A.red.bold[T]]
+
+--
+
+- We can add some tails to make the primer longer for dCAPS primer to be able to better seprate after digestion
+  
+  .remark-code[.blue[GAAGGTGACCAAGTTCATGCT]CGAGCTTGATGACGAAGAAG.red[**G**]AT]
+  
+[More reading](http://www.genomecompiler.com/tips-for-efficient-primer-design/)
+
+---
+
+# Primer design software
+
+- Primer3 (http://primer3.ut.ee/)
+
+- Polymarker for KASP in wheat
+(https://github.com/TGAC/bioruby-polyploid-tools)
+
+- CAPS Designer
+(https://solgenomics.net/tools/caps_designer/caps_input.pl)
+
+- dCAPS Finder 2.0
+(http://helix.wustl.edu/dcaps/dcaps.html)
+
+- GSP (Genome Specific Primers) (https://probes.pw.usda.gov/GSP/)
+
+- **SNP Primer Design** (a galaxy tool, http://169.237.215.34/galaxy/)
+
+---
+# SNP Primer Design
+
+### A pipeline to design .red[KASP/CAPS/dCAPS] primers for SNPS in wheat
+### A Python script which incorperates:
+- **Muscle**: Multiple sequence alignment program
+(http://www.drive5.com/muscle/)
+
+- **Primer3**: program for designing PCR primers
+(http://primer3.sourceforge.net/)
+
+- **blast+**: BLAST the wheat genome  
+(https://blast.ncbi.nlm.nih.gov/Blast.cgi)
+
+### I have a github repository for this tool
+https://github.com/pinbo/getKASP_pipeline
+
+---
+
+# How .blue[SNP Primer Design] works?
+1. Blast each SNP sequence against the pseudomolecule and get hits that are
+  - 90% similarity and
+  - 90% of length of the best hit AND &gt; 50 bp
+
+1. Get 500 bps on each side of the SNP for all the hits
+
+1. Multiple Sequence Alignment of the homeolog sequences with MUSCLE
+
+1. Find all the variation sites that can differ the target from other homeologs
+
+1. Use these sites as forced 3’ end in Primer3 and design homeolog specific sequences
+
+1. Blast all the primers against the pseudomolecule v1.0 with word length 7 to see whether it also hits other chromosomes
+    - Criterion of matches: &lt; 2 mismatches in the first 4 bps from 3'
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="libs/remark-macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"chakra": "libs/remark-latest.min.js"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();
+(function(time) {
+  var d2 = function(number) {
+    return ('0' + number).slice(-2); // left-pad 0 to minutes/seconds
+  },
+
+  time_format = function(total) {
+    var secs = Math.abs(total) / 1000;
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor(secs % 3600 / 60);
+    var s = Math.round(secs % 60);
+    var res = d2(m) + ':' + d2(s);
+    if (h > 0) res = h + ':' + res;
+    return res;  // [hh:]mm:ss
+  },
+
+  slide_number_div = function(i) {
+    return document.getElementsByClassName('remark-slide-number').item(i);
+  },
+
+  current_page_number = function(i) {
+    return slide_number_div(i).firstChild.textContent;  // text "i / N"
+  };
+
+  var timer = document.createElement('span'); timer.id = 'slide-time-left';
+  var time_left = time, k = slideshow.getCurrentSlideIndex(),
+      last_page_number = current_page_number(k);
+
+  setInterval(function() {
+    time_left = time_left - 1000;
+    timer.innerHTML = ' ' + time_format(time_left);
+    if (time_left < 0) timer.style.color = 'red';
+  }, 1000);
+
+  slide_number_div(k).appendChild(timer);
+
+  slideshow.on('showSlide', function(slide) {
+    var i = slide.getSlideIndex(), n = current_page_number(i);
+    // reset timer when a new slide is shown and the page number is changed
+    if (last_page_number !== n) {
+      time_left = time; last_page_number = n;
+      timer.innerHTML = ' ' + time_format(time); timer.style.color = null;
+    }
+    slide_number_div(i).appendChild(timer);
+  });
+})(60000);</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+  }
+});
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
