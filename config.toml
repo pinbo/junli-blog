@@ -13,15 +13,25 @@ enableEmoji = true
 [[menu.main]]
     name = "About"
     url = "/about/"
+    weight = 1
+[[menu.main]]
+    name = "Categories"
+    url = "/categories/"
+    weight = 2
+[[menu.main]]
+    name = "Tags"
+    url = "/tags/"
+    weight = 3
+[[menu.main]]
+    name = "Slides"
+    url = "/slides/"
+    weight = 4
 [[menu.main]]
     name = "GitHub"
     url = "https://github.com/pinbo"
 [[menu.main]]
     name = "Twitter"
     url = "https://twitter.com/aswillow"
-[[menu.main]]
-    name = "Slides"
-    url = "/slides/"
 
 [params]
     description = "A website to share knowledge and ideas."

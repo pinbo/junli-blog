@@ -1,8 +1,9 @@
 {{ if in .Params.tags "slides" }}
+
 {{/* Slides mode */}}
 {{ partial "head_remarkjs.html" . }}
 	<body>
-    <textarea id="source">
+	<textarea id="source">
 {{ .RawContent }}
 	</textarea>
 {{ partial "foot_remarkjs.html" . }}
@@ -24,11 +25,23 @@
     {{ if eq .Section "post" }}
     <span class="article-date">{{ .Date.Format "2006/01/02" }}</span>
     {{ end }}
+    <div style="color:grey; font-size:16px;">{{ if .Params.tags }}<strong>Tags:</strong> {{range .Params.tags}}<a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}">{{ . }}</a> {{end}}{{end}}</div>
+	<div style="color:grey; font-size:16px;">{{ if .Params.categories }}<strong>Categories:</strong> {{range .Params.categories}}<a href="{{ "/categories/" | relLangURL }}{{ . | urlize }}">{{ . }}</a> {{end}}{{end}}</div>
 
     <div class="article-content">
       {{ .Content }}
     </div>
   </article>
+  
+  <!-- Post Pagination: added by Junli on 11/19/2017 -->
+  <nav class="post-nav">
+    {{ with .NextInSection }}
+    <span class="nav-prev"><a href="{{ .URL }}"><< {{ .Title }}</a></span>  
+    {{- end }}
+    {{ with .PrevInSection }}
+    <span class="nav-next"><a href="{{ .URL }}">{{ .Title }} >></a></span>
+    {{- end }}
+  </nav>
 
   {{ partial "disqus.html" .}}
 
