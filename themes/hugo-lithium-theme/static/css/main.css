@@ -189,7 +189,7 @@ code {
 .archive-item-link {
   display: inline-block;
   text-decoration: none;
-  font-size: 21px;
+  /*font-size: 21px;*/
   /*font-weight: bold;*/
   color: #222;
   padding: 5px 0;
@@ -282,7 +282,8 @@ code {
   }
 
   .archive-title {
-    font-size: 38px;
+    /*font-size: 38px;*/
+    font-size: 32px;
   }
 
   .archive-item-date {
@@ -299,7 +300,8 @@ code {
   }
 
   .article-title {
-    font-size: 42px;
+    /*font-size: 42px;*/
+    font-size: 32px;
   }
 
   .article-duration {
