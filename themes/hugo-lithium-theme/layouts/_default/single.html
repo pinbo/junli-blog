@@ -34,7 +34,6 @@
   </article>
   
   <!-- Post Pagination: added by Junli on 11/19/2017 -->
-  <footer>
   <nav class="post-nav">
     {{ with .NextInSection }}
     <span class="nav-prev"><a href="{{ .URL }}"><< {{ .Title }}</a></span>  
@@ -43,7 +42,6 @@
     <span class="nav-next"><a href="{{ .URL }}">{{ .Title }} >></a></span>
     {{- end }}
   </nav>
-  </footer>
 
   {{ partial "disqus.html" .}}
 

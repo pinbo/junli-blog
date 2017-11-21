@@ -318,6 +318,6 @@ code {
 }
 
 /*added by Junli from Yihui's style*/
-.post-nav{display:flex;justify-content:space-between;font-weight:700}
+.post-nav{display:flex;justify-content:space-between;font-weight:600}
 .nav-next{margin-left:1em;text-align:right}
 .nav-prev{margin-right:1em}
