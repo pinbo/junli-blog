@@ -1,0 +1,78 @@
+---
+title: Fst from AMOVA and pairwise Fst
+author: Junli Zhang
+date: '2017-11-27'
+slug: fst-from-amova-and-pairwise-fst
+categories:
+  - R
+tags:
+  - Tips
+---
+
+
+
+<div id="amova" class="section level2">
+<h2>AMOVA</h2>
+<p>Today I figured out that we could get the overall Wright’s Fixation index (<em>Fst</em>) from Analysis of molecular variance (AMOVA). Here is an example to do AMOVA and calculate the <em>Fst</em>.</p>
+<pre class="r"><code>library(pegas)
+require(ape)
+data(woodmouse)
+d &lt;- dist.dna(woodmouse)
+g &lt;- factor(c(rep(&quot;A&quot;, 7), rep(&quot;B&quot;, 8)))
+p &lt;- factor(c(rep(1, 3), rep(2, 4), rep(3, 4), rep(4, 4)))
+amova(d ~ g/p, nperm = 100) # 2 levels</code></pre>
+<pre><code>## 
+##  Analysis of Molecular Variance
+## 
+## Call: amova(formula = d ~ g/p, nperm = 100)
+## 
+##                SSD          MSD df
+## g     0.0000807865 8.078650e-05  1
+## p     0.0001744503 8.722513e-05  2
+## Error 0.0011043314 1.003938e-04 11
+## Total 0.0013595681 9.711201e-05 14
+## 
+## Variance components:
+##            sigma2 P.value
+## g     -8.3518e-07  0.3663
+## p     -3.5454e-06  0.6040
+## Error  1.0039e-04        
+## 
+## Variance coefficients:
+##        a        b        c 
+## 3.714286 3.771429 7.466667</code></pre>
+<pre class="r"><code>m1 &lt;- amova(d ~ g/p, nperm = 100)</code></pre>
+<p>Based on the explanation on <a href="https://en.wikipedia.org/wiki/Fixation_index">Wikipedia</a>, <em>Wright’s definition illustrates that Fst measures the amount of genetic variance that can be explained by population structure.</em></p>
+<pre class="r"><code># overall Fst
+Fst &lt;- with(m1$varcomp, sum(sigma2[1:(length(sigma2)-1)])/sum(sigma2))
+Fst</code></pre>
+<pre><code>## [1] -0.04562482</code></pre>
+<p>Here the two population structure g and p do not have significant variance, so almost close to 0. Still not sure why it can calculate some negative variance.</p>
+</div>
+<div id="pairwise-fst" class="section level2">
+<h2>Pairwise Fst</h2>
+<p>Fst traditionally is calculated in Arlequin, but its input file is so difficult to prepare, so I still prefer doing it in R. After comparison, I found R package “StAMPP” has very close results with Arlequin.</p>
+<pre class="r"><code># import genotype data and convert to allele frequecies
+library(StAMPP)
+library(lattice)
+
+## Write a panel function (after examining &#39;args(panel.levelplot) to add text in the plot
+myPanel &lt;- function(x, y, z, ...) {
+  panel.levelplot(x,y,z,...)
+  panel.text(x, y, ifelse(x&lt;y, round(z,2), &quot;&quot;), col = &quot;red&quot;)
+}
+
+data(potato.mini, package=&quot;StAMPP&quot;)
+potato.freq &lt;- stamppConvert(potato.mini, &quot;r&quot;)
+# Calculate pairwise Fst values between each population
+potato.fst &lt;- stamppFst(potato.freq, 100, 95, 1)
+
+## color borrowed from Arlequin
+ColorRamp &lt;- colorRampPalette(c(&quot;white&quot;, &quot;steelblue1&quot;, &quot;blue3&quot;))
+fst = potato.fst$Fsts
+#fst = fst[nrow(fst):1,] # invert rows
+tt = levelplot(t(fst),panel = myPanel, col.regions=ColorRamp,xlab=&quot;Population&quot;,ylab=&quot;Population&quot;,main=&quot;Pairwise Fst&quot;)
+print(tt)</code></pre>
+<p><img src="/post/2017-11-27-fst-from-amova-and-pairwise-fst_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>I work on allohexaploid wheat. Although it is a hexaploid, but it performs like a diploid, so coding of the SNP data is like AA, BB, AB.</p>
+</div>

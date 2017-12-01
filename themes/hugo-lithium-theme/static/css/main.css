@@ -5,12 +5,14 @@ body {
   position: relative;
 }
 
+/*
 body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -moz-font-feature-settings: "liga" on;
 }
+*/
 
 h1,
 h2,
@@ -322,3 +324,16 @@ code {
 /*.nav-next{margin-left:1em;text-align:right}*/
 .nav-prev{margin-right:1em}
 .nav-next{margin-left:1em; float: right}
+
+/*auto image width*/
+.article-content img {
+  display: block;
+  max-width: 100%;
+}
+
+
+img.roundimg {
+  display: block;
+  max-width: 100%;
+  border-radius: 50%;
+}

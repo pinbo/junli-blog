@@ -1,0 +1,7 @@
+body {
+	font-family: 'Source Han Serif CN', 'source-han-serif-sc', 'Source Han Serif SC', 'Source Han Serif','Songti SC','Microsoft YaHei', Georgia, serif;
+}
+
+h1, h2, h3, h4, h5, h6, .nav, .article-duration, .archive-item-link {
+  font-family: 'Source Han Serif CN', 'source-han-serif-sc', 'Source Han Serif SC', 'Source Han Serif CN', 'Source Han Serif','Songti SC','Microsoft YaHei', Georgia, serif;
+}
