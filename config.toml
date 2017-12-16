@@ -29,9 +29,15 @@ enableEmoji = true
 [[menu.main]]
     name = "GitHub"
     url = "https://github.com/pinbo"
+    weight = 5
 [[menu.main]]
     name = "Twitter"
     url = "https://twitter.com/aswillow"
+    weight = 6
+[[menu.main]]
+    name = "Links"
+    url = "/links/"
+    weight = 7
 
 [params]
     description = "A website to share knowledge and ideas."
