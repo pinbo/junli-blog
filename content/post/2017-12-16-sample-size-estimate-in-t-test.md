@@ -10,18 +10,19 @@ tags:
   - lessons
 ---
 
-I planted 16 F2 plants to test whether a marker is significant in this population. I get about 4 plants of AA and 4 plants of BB, and I did the T-test between AA and BB group, but I found the pvalue is only about 0.08. Should I reject the null hypothesis that AA and BB are the same? I probably will, but this experiment has two few samples, so I do not have enough statistical power to reject the null hypothesis.
+I planted 16 F2 plants to test whether a marker is significant in this population. I get about 4 plants of AA and 4 plants of BB, and I did the T-test between AA and BB group, but I found the pvalue is only about 0.08. Should I reject the null hypothesis that AA and BB are the same? I probably will, but this experiment has too few samples, so I do not have enough statistical power to reject the null hypothesis.
 
-After a search, I found we could estimate the sample size we need in order to get a significance level, say 0.001. We just need to provide the desired significance level, the sample mean difference between the two groups (based on our first experiment or some other prior), the standard deviation of the population, and the desired power (`$1 - \beta$`, the possibility it is real, `$\beta$` is type II error). [Here is some detailed information](https://stats.idre.ucla.edu/other/gpower/power-analysis-for-two-group-independent-sample-t-test/).
+After a search, I found we could estimate the sample size we need in order to get a significance level, say `$\alpha = 0.001$`. We just need to provide the desired significance level (`$\alpha$`), the sample mean difference between the two groups (based on our first experiment or some other prior), the standard deviation of the population, and the desired power (`$1 - \beta$`, the possibility it is real, `$\beta$` is type II error). [Here is some detailed information](https://stats.idre.ucla.edu/other/gpower/power-analysis-for-two-group-independent-sample-t-test/).
 
 ![t-test](/images/20171217_ttest.jpg)
+Credit: https://stats.idre.ucla.edu/other/gpower/power-analysis-for-two-group-independent-sample-t-test/
 
 There is also [a good website for sample estimate](https://www.stat.ubc.ca/~rollin/stats/ssize/n2.html). Here I just remade the wheel for my practice.
 
 <script src="/libs/pvalue_to_sample_size_ttest.js"></script>
 <div id="sample_size">
 
-<p>Enter parameters below to estimate required sample size:</p>
+**Enter parameters below to estimate required sample size**
 
 <FORM>
 <pre>
