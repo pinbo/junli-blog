@@ -337,3 +337,8 @@ img.roundimg {
   max-width: 100%;
   border-radius: 50%;
 }
+
+form {
+  background-color: #CBF8DF;
+  border: 1px;
+}
