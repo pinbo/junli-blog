@@ -1,3 +1,17 @@
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="{{ .Site.RSSLink | relURL }}" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="{{ "images/hugo-logo.png" | relURL }}" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+      
+    </div>
+    {{ partial "footer_highlightjs" . }}
+
 <script src="{{ "/js/remark-latest.min.js" | relURL }}"></script>
 <script src="{{ "/js/remark-macros.js" | relURL }}"></script>
 
