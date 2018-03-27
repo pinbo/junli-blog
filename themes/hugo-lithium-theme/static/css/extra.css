@@ -21,28 +21,40 @@
   font-family: 'Source Code Pro', 'Lucida Console', Monaco, monospace;
 }
 
-/* gray out last list items */
-li p { line-height: 1.25em; }
-.graylist li { color: #777; }
-.graylist li:last-of-type {
-  color: #000;
+/* more from remark.js default.css */
+
+.footnote {
+  position: absolute;
+  bottom: 3em;
+  padding-right: 4em;
+  font-size: 90%;
+}
+.remark-code-line-highlighted     { background-color: #ffff88; }
+
+.inverse {
+  background-color: #272822;
+  color: #d6d6d6;
+  text-shadow: 0 0 20px #333;
+}
+.inverse h1, .inverse h2, .inverse h3 {
+  color: #f3f3f3;
 }
 
-/* wide left column */
-.wide-left {
-  float: left;
-  width: 67%;
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
 }
-.narrow-right {
-  float: right;
-  width: 30%;
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee }
+
+blockquote {
+  border-left: solid 5px lightgray;
+  padding-left: 1em;
 }
 
-.wide-right {
-  float: right;
-  width: 67%;
-}
-.narrow-left {
-  float: left;
-  width: 30%;
+/* for hiding original markdown, so I do not need to delete it */
+.hideDontTakeUpSpace {
+  display:none;
 }

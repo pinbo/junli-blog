@@ -1,18 +1,11 @@
-<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
-<script src="/js/remark-macros.js"></script>
-<script>
-	function removesource() {
-		var elem = document.getElementById('source');
-		elem.parentNode.removeChild(elem);
-		return false;
-	}
-</script>
+<script src="{{ "/js/remark-latest.min.js" | relURL }}"></script>
+<script src="{{ "/js/remark-macros.js" | relURL }}"></script>
+
 <script>
     //var slideshow = remark.create();
     var slide = remark.convert(document.getElementById("source").innerHTML);
     var content = document.getElementById("content");
     content.innerHTML += "<br>" + slide;
-    removesource();
 </script>
 
 <script type="text/x-mathjax-config">

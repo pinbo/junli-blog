@@ -1,8 +1,8 @@
 ---
-title: Maybe a trick of designing CAPS for backcrossing
+title: May be a trick of designing CAPS for backcrossing
 author: Junli Zhang
 date: '2018-03-23'
-slug: maybe-a-trick-of-designing-caps-for-backcrossing
+slug: may-be-a-trick-of-designing-caps-for-backcrossing
 categories:
   - Research
 tags:
