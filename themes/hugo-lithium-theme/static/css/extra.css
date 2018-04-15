@@ -58,3 +58,7 @@ blockquote {
 .hideDontTakeUpSpace {
   display:none;
 }
+
+.sequence {
+  font-family: courier, sans-serif; white-space: pre
+}
