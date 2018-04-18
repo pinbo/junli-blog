@@ -18,7 +18,10 @@ OR
 
 `I have .red[red color]` will show "I have .red[red color]".
 
-It cannot use blocks right now.
+It can use blocks right now.
+
+> this is a line  
+> another line
 
 ### Math is supported too
 When \\(a \ne 0\\), there are two solutions to \\(ax^2 + bx + c = 0\\) and they are

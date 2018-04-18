@@ -17,7 +17,7 @@
 
 <script>
     //var slideshow = remark.create();
-    var slide = remark.convert(document.getElementById("source").innerHTML);
+    var slide = remark.convert(document.getElementById("source").value);
     var content = document.getElementById("content");
     content.innerHTML += "<br>" + slide;
 </script>
