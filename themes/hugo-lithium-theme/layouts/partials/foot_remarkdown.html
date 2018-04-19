@@ -12,35 +12,16 @@
     </div>
     {{ partial "footer_highlightjs" . }}
 
-<script src="{{ "/js/remark-latest.min.js" | relURL }}"></script>
-<script src="{{ "/js/remark-macros.js" | relURL }}"></script>
+<script src="{{ "/js/marked.min.js" | relURL }}"></script>
+<script src="{{ "/js/lexer.js" | relURL }}"></script>
+<script src="{{ "/js/parser.js" | relURL }}"></script>
+<script src="{{ "/js/converter.js" | relURL }}"></script>
+<script src="{{ "/js/macros.js" | relURL }}"></script>
 
 <script>
-    //var slideshow = remark.create();
-    var slide = remark.convert(document.getElementById("source").value);
-    var content = document.getElementById("content");
-    content.innerHTML += "<br>" + slide;
-</script>
-
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  tex2jax: {
-  inlineMath: [['$','$'], ['\\(','\\)']],
-  processEscapes: true,
-  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-  }
-});
-</script>
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-(function () {
-  var script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
-  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
-    script.src  = script.src.replace(/^https?:/, '');
-  document.getElementsByTagName('head')[0].appendChild(script);
-})();
+	var slide = convert(document.getElementById("source").value);
+	var content = document.getElementById("content");
+	content.innerHTML += "<br>" + slide;
 </script>
 
   </body>
