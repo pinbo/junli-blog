@@ -331,8 +331,13 @@ code {
   max-width: 100%;
 }
 
-
 img.roundimg {
+  display: block;
+  max-width: 100%;
+  border-radius: 50%;
+}
+
+.roundimg img {
   display: block;
   max-width: 100%;
   border-radius: 50%;
