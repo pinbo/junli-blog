@@ -6,6 +6,7 @@ googleAnalytics = ""
 disqusShortname = "junli"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 enableEmoji = true
+hasCJKLanguage = true
 
 [permalinks]
     post = "/:year/:month/:day/:slug/"
