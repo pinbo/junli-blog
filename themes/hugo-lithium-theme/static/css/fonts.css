@@ -14,13 +14,18 @@
        url('../fonts/lato-v11-latin-regular.woff2') format('woff2'),
        url('../fonts/lato-v11-latin-regular.woff') format('woff');
 }
+
+@import url('https://fonts.googleapis.com/css?family=PT+Serif');
+
 body {
-  font-family: 'Merriweather', serif;
+  /*font-family: 'Merriweather', serif;
   /*font-family:Georgia,serif;font-style: normal;font-weight: 400; font-size:18px;*/
   /*font-family:Georgia,serif;font-size:18px;line-height:1.38889;color:#1a1a1a;background:#fff;-moz-font-feature-settings:"kern";-webkit-font-feature-settings:"kern";-ms-font-feature-settings:"kern";-o-font-feature-settings:"kern";font-feature-settings:"kern";font-kerning:normal;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-text-size-adjust:100%;*/
+  font-family:'PT Serif',Georgia,serif;
 }
 
 h1, h2, h3, h4, h5, h6, .nav, .article-duration, .archive-item-link, .footer {
   /*font-family: 'Lato', sans-serif;*/
-  font-family: 'Merriweather', serif;
+  /*font-family: 'Merriweather', serif;*/
+  font-family:'PT Serif',Georgia,serif;
 }
