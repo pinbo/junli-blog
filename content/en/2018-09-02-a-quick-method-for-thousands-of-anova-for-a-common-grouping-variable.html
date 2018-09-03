@@ -1,0 +1,44 @@
+---
+title: A quick method for thousands of ANOVA for a common grouping variable in R
+author: Junli Zhang
+date: '2018-09-02'
+slug: a-quick-method-for-thousands-of-anova-for-a-common-grouping-variable-in-r
+categories:
+  - R
+tags:
+  - Tips
+---
+
+
+
+<p>I have a RNAseq data for two lines (R and W) at 3 collection point (day 3, 6, 9). I wanted to do ANOVAs to test whether the expression of each of the 100,000 genes is different between the two lines at each day. I did the ANOVAs for each day, now I wanted to the ANOVAs with contrasts using all the 6 treatment together (R3, R6, R9 and W3, W6, W9).</p>
+<p>I found the code below is too slow, and it took about 3 hours to calculate the P values of all the genes.</p>
+<pre class="r"><code># dd7 is the organized data with one grouping factor &quot;lineday&quot; and the counts data of all the 100,000 genes.
+
+# function to calculate pvalues of one gene
+pvalue = function(marker){
+  ff = as.formula(paste0(marker, &quot;~lineday&quot;))
+  model = aov(ff, dd7)
+  dum = summary.aov(model, split=list(lineday = list(&quot;day3&quot;= 1, &quot;day6&quot; = 2, &quot;day9&quot;= 3)))
+  return(dum[[1]][2:4,5]) # pvalues for day3, day6, day9
+}
+# contrasts used in the anova for lineday
+day3  = c(1, 0,  0,  -1,  0,  0) # R3 vs. W3
+day6  = c(0,  1, 0,  0,  -1,  0) # R6 vs. W6
+day9  = c(0, 0, 1,  0,  0,  -1) # R9 vs. W9
+
+mat = cbind(day16, day6, day9)
+contrasts(dd7$lineday) &lt;- mat # set the contrast before anova for lineday
+nm = names(dd7) # first name is lineday
+allp = sapply(nm[-1], pvalue) # pvalues for all markers</code></pre>
+<p>This is too slow, so I did a search and found <a href="http://r.789695.n4.nabble.com/Is-there-a-fast-way-to-do-several-hundred-thousand-ANOVA-tests-td900181.html">this post</a>. Hadley Wickham pointed to another article “Computing Thousands of Test Statistics Simultaneously in R” included in this R <a href="http://stat-computing.org/newsletter/issues/scgn-18-1.pdf">newsletter</a>. And I found R builtin functions “lm” and “aov” can fit all the columns of y if y is a matrix, and I also found “summary” function can directly give you the F test results from the lm fits. Below is the code I updated and now it finishes in 1 minute.</p>
+<pre class="r"><code>lineday = dd7[, 1] # get the grouping variable
+contrasts(lineday) &lt;- mat # set the contrast
+system.time(mm &lt;- aov(as.matrix(dd7[-1])~ll)) # only 1.3 sec
+
+# below only takes 33 sec
+system.time(ss  &lt;-  summary.aov(mm, split=list(lineday = list(&quot;day3&quot;= 1, &quot;day6&quot; = 2, &quot;day9&quot;= 3)))) # get all the summaries: a list of anovas for each gene
+names(ss) = sub(&quot; Response &quot;, &quot;&quot;, names(ss)) # change the names
+allp = sapply(ss, function(x) x[2:4, 5]) # get all the pvalues
+class(allp)
+allp = t(allp) # transpose it</code></pre>
