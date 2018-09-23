@@ -53,8 +53,9 @@ function mytrim(x) {
 }
 
 // read fasta lines pasted in textarea with id "input"
-function readfasta(){
+function readfasta(mode){
 	var lines = document.getElementById("input").value.replace(/^\s+|\s+$/g,'').split('\n');
+	if (mode == "single_line") return lines; // a list
 	var seqdict = {};
 	var mykey = ">unnamed";
 	for(var i = 0; i < lines.length; i++){
@@ -67,19 +68,32 @@ function readfasta(){
 	return seqdict;
 }
 
+
 // overall function to get desired conversion
 function revcomp(){
     var sel = document.getElementById("box1"); // box1 is the selection ID
+    var sel2 = document.getElementById("box2"); // mode: fasta or single line: single line will treat each line as an input unit
 	var method = sel.options[sel.selectedIndex].value;
+	var mode = sel2.options[sel2.selectedIndex].value;
 	//var seq = document.getElementById("input").value.replace(/\s/g,""); // in case multiple lines
 	//var outseq = reverse_complement(seq, method);
-	var seqs = readfasta();
+	var seqs = readfasta(mode);
 	var outseq = "";
-	for (var i in seqs){
-		var rc = reverse_complement(seqs[i], method);
-		// if users paste in one sequece wihtout name
-		if (i == ">unnamed") outseq += rc + "\n\n";
-		else outseq += i + " " + method + "\n" + rc + "\n\n";
+	if (mode == "single_line"){// seqs is a list
+		for(var i = 0; i < seqs.length; i++){
+			//code here using lines[i] which will give you each line
+			var ll = mytrim(seqs[i]);
+			var rc = reverse_complement(ll, method);
+			outseq += rc + "\n";
+		}
+	}
+	else {//fasta mode, seqs is an dict
+		for (var i in seqs){
+			var rc = reverse_complement(seqs[i], method);
+			// if users paste in one sequece wihtout name
+			if (i == ">unnamed") outseq += rc + "\n\n";
+			else outseq += i + " " + method + "\n" + rc + "\n\n";
+		}
     }
     // output is the id for the output box
 	document.getElementById("output").value = outseq;
