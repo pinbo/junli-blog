@@ -11,7 +11,7 @@ tags:
 
 This weekend I was having fun to write a javascript script to convert DNA sequences to the reverse, complement, or reverse-complement sequences. Good websites on doing this are http://reverse-complement.com and http://www.bioinformatics.org/sms2/rev_comp.html. Below is just my simple practice.
 
-<script src='/js/simple-bioinformatics.js'></script>
+<script src='/libs/simple-bioinformatics.js'></script>
 
 <p id="demo">Please paste your sequences below.</p>
 
