@@ -30,7 +30,10 @@
 <link rel="stylesheet" href="{{ "css/fonts.css" | relURL }}" media="all">
 <link rel="stylesheet" href="{{ "css/main.css" | relURL }}" media="all">
 <link rel="stylesheet" href="{{ "css/extra.css" | relURL }}" media="all">
+
+<link href="{{ "/images/favicon.ico" | relURL }}" rel="shortcut icon" type="image/x-icon" />
 {{ range .Site.Params.customCSS }}
 <link rel="stylesheet" href="{{ . | relURL }}">
+
 {{ end }}
 {{ partial "head_custom" . }}
