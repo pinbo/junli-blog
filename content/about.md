@@ -3,9 +3,9 @@ title: "About"
 date: "2017-11-05"
 ---
 
-This is Junli Zhang, a plant scientist who love crops, especitally wheat. I have been working on wheat for more than 10 years, and want to incorperate a lot of deciplines into wheat study. I love hiking, jogging, and learning! I have learnt a bunch of computer languages, such as R, Python, Perl, SQL and Javascript. I got a lot of pleasure while learning new stuffs and enjoy more when I am using them in my reseach.
+This is Junli Zhang, a plant scientist who love crops, especitally wheat. I love hiking, jogging, and learning! I have learnt a bunch of computer languages, such as R, Python, Perl, SQL and Javascript. I got a lot of pleasure while learning new stuffs and enjoy more when I am using them in my reseach.
 
-I got my Ph.D. on Plant Science from University of Idaho. I am currently a Postdoctoral scholar in Dr. Jorge Dubcovsky's lab in University of California, Davis. I have been working on wheat genetics and breedings for about 10 years. I would like to share my thoughts and views with you.
+I got my Ph.D. on Plant Science from University of Idaho. I am currently an Assistant Project Scientist in Dr. Jorge Dubcovsky's lab in University of California, Davis. I have been working on wheat genetics and breedings for about 10 years. I would like to share my thoughts and experiences with you.
 
 Here are a few links about me:
 
