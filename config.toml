@@ -2,8 +2,8 @@ baseurl = "/"
 languageCode = "en-us"
 title = "Junli Zhang's Blog"
 theme = "hugo-lithium-theme"
-googleAnalytics = ""
-disqusShortname = "junli"
+googleAnalytics = "UA-136755204-1"
+#disqusShortname = "junli"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 enableEmoji = true
 hasCJKLanguage = true
@@ -11,33 +11,45 @@ hasCJKLanguage = true
 [permalinks]
     post = "/:year/:month/:day/:slug/"
 
+#[[menu.main]]
+#    name = "About"
+#    url = "/about/"
+#    weight = 1
 [[menu.main]]
-    name = "About"
-    url = "/about/"
+    name = "Blogs"
+    url = "/en/"
     weight = 1
 [[menu.main]]
-    name = "Categories"
-    url = "/categories/"
+    name = "Apps"
+    url = "/apps/"
     weight = 2
-[[menu.main]]
-    name = "Tags"
-    url = "/tags/"
-    weight = 3
 [[menu.main]]
     name = "Slides"
     url = "/slides/"
-    weight = 4
-[[menu.main]]
-    name = "GitHub"
-    url = "https://github.com/pinbo"
-    weight = 5
-[[menu.main]]
-    name = "Twitter"
-    url = "https://twitter.com/aswillow"
-    weight = 6
+    weight = 3
+#[[menu.main]]
+#    name = "GitHub"
+#    url = "https://github.com/pinbo"
+#    weight = 4
+#[[menu.main]]
+#    name = "Twitter"
+#    url = "https://twitter.com/aswillow"
+#    weight = 5
 [[menu.main]]
     name = "Links"
     url = "/links/"
+    weight = 4
+[[menu.main]]
+    name = "Categories"
+    url = "/categories/"
+    weight = 5
+[[menu.main]]
+    name = "Tags"
+    url = "/tags/"
+    weight = 6
+[[menu.main]]
+    name = "博客"
+    url = "/cn/"
     weight = 7
 
 [params]

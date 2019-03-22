@@ -1,8 +1,8 @@
 ---
-title: 'Weekend fun: a javascript to Reverse Complement a DNA sequence'
+title: 'Reverse complement of DNA sequences'
 author: Junli Zhang
 date: '2018-04-15'
-slug: weekend-fun-a-javascript-to-reverse-complement-a-dna-sequence
+slug: reverse-complement-dna-sequences
 categories:
   - Learning
 tags:
