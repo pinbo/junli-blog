@@ -30,9 +30,18 @@ Before using the primers, make sure to test the primer efficiency. Only primer p
 1. If the melting point is good, you can go ahead to calculate the efficiency. Here is [a good article](https://biosistemika.com/blog/qpcr-efficiency-over-100/) for you to learn how to do that.
 
 ## Other tricks
+- Always have negative controls (water)
+- Always use filter tips to avoid contamination
 - Have more than 3 biological replicates
 - I usually do not do technical replicates when I have enough biological replicates.
 - Choose a good internal control, ACTIN is not always good, depending on your tissue and stage.
 - Sometimes you need to set the threshold manually, for example, when to compare two different runs for the same set of samples.
 
+## Update 2019-03-22
+
+I repeated my qPCR using the same set of primers for several times, and later I found I got contaminations, because my negative control (water) also got strong amplification (Ct < 34). So I have to order new primers, replace all reagents, clean my bench and pipettes with 10% bleach, and even changed new clothes and prepared the qPCR in a hood. So here is something more to consider:
+
+- Do not open your PCR tubes in the preparation area to avoid contamination around your bench.
+- Always use filter tips and change gloves often too.
+- You may also need to consider setting another negative control: reverse transcription control (with or without reverse transcriptase), which will tell you the genomic DNA contamination and whether your reverse transcription is good.
 
