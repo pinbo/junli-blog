@@ -65,8 +65,8 @@ hasCJKLanguage = true
     MathJaxVersion = "2.7.1"
 
     [params.logo]
-    url = "github.svg"
-    width = 50
-    height = 50
+    url = "junli.jpg"
+    width = 120
+    height = 120
     alt = "Logo"
 

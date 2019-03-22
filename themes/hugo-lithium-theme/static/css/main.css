@@ -62,7 +62,7 @@ code {
 
 .nav-logo img {
   display: block;
-  max-height: 40px;
+  max-height: 80px;
   width: auto;
   border-radius: 50%;
 }
@@ -254,11 +254,12 @@ code {
   }
 
   .nav-logo {
-    margin-top: -13px;
+    margin-top: -20px;
+    margin-left: -20px;
   }
 
   .nav-logo img {
-    max-height: 50px;
+    max-height: 100px;
   }
 
   .nav-links {
