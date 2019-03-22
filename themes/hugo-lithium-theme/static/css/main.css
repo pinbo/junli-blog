@@ -44,7 +44,7 @@ code {
 }
 
 .nav {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 0 15px;
   text-align: right;
@@ -57,7 +57,7 @@ code {
 }
 
 .nav-logo:hover {
-  transform: scale(1.1);
+  transform: scale(1.2);
 }
 
 .nav-logo img {
@@ -255,7 +255,7 @@ code {
 
   .nav-logo {
     margin-top: -20px;
-    margin-left: -20px;
+    /*margin-left: 40px;*/
   }
 
   .nav-logo img {
