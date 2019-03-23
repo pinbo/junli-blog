@@ -5,8 +5,9 @@ date: "2017-12-15"
 
 ### Primer design
 
-- [Primer3] (http://primer3.ut.ee/): regular Primer design
-- [Polymarker](http://polymarker.tgac.ac.uk/): KASP primer design in wheat
+- [Primer3](http://primer3.ut.ee/): regular Primer design
+- [Polymarker](http://www.polymarker.info/): KASP primer design in wheat
+- [indCAPS](http://indcaps.kieber.cloudapps.unc.edu/): CAPS and dCAPS primer enzyme finder
 - [CAPS Designer](https://solgenomics.net/tools/caps_designer/caps_input.pl): CAPS enzyme finder
 - [dCAPS Finder 2.0](http://helix.wustl.edu/dcaps/dcaps.html): dCAPS enzyme finder
 - [GSP](https://probes.pw.usda.gov/GSP/): Genome Specific Primers design for wheat
