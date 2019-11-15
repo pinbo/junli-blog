@@ -28,3 +28,6 @@ date: "2017-12-15"
 
 ### Wheat Database
 - [T3 Wheat](https://triticeaetoolbox.org/wheat/)
+
+### Examples of Successful Applications of Jobs and Grants
+- [Ross-Ibarra Lab collections](https://github.com/RILAB/statements)
