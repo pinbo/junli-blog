@@ -26,6 +26,8 @@ The 2nd way might be easier and will introduce no other resistant genes. Now the
 
 If we use the 2nd method, we might sequence one pool of the resistant sister lines and one pool of the susceptible sister lines, which might help fast pinpoint the candidate gene.
 
+I think it might be better to do RNA-seq of the wild relative directly (if you know the line used for the introgression), which might be easier for *De novo* assembly, because you will not have the homologous genes.
+
 **Keep in mind: this is just my thought and I have not personally used this before.**
 
 The mutation method is similar to [MutRenseq](https://doi.org/10.1038/nbt.3543) (Steuernagel et al. 2016, Nat Biotechnol 34, 652–655), but does not use the NLR capture, because not all R genes are NLR genes.
