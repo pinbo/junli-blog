@@ -101,6 +101,7 @@ function checkIndel(leftSeq, rightSeq, gRNA, wtSeq, filename, fileContent){//rea
         }
         document.getElementById('output').value += "\n";
     }
+    document.getElementById("progress").value += 1;
 }
 
 // process multiple fastq files
@@ -109,6 +110,9 @@ function analyzeFiles() {
     //var files = evt.target.files; // FileList object
     // files is a FileList of File objects. List some properties.
     var files = document.getElementById('files').files;
+    document.getElementById("progress").max = files.length;
+    document.getElementById("progress").value = 0;
+    document.getElementById("progress").style.visibility = "visible";
     if (!files.length) {
         alert('Please select a file!');
         return;
@@ -215,6 +219,7 @@ function clearseq() {
     document.getElementById("demo").innerHTML = "";
     document.getElementById('output').value = "";
     document.getElementById("download-btn").style.visibility = "hidden";
+    document.getElementById("progress").style.visibility = "hidden";
 };
 
 // to convert one sequence

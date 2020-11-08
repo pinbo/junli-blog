@@ -34,7 +34,8 @@ tags:
       <option value="F">Forward Strand (R1)</option>
       <option value="R">Reverse Strand (R2)</option>
     </select>
-    <label for="box1">(Read1 or Read2? Forward strand is to check read1; reverse strand is for read2)</label><br><br>
+    <label for="box1">(Read1 or Read2? Forward strand is to check read1; reverse strand is for read2)</label><br>
+    <progress style="visibility:hidden" id="progress" value="0" max="100"></progress><br>
     <button style="visibility:hidden" id="download-btn" onclick="download()"> Download output csv file</button><br>
     <p id="demo"></p>
     <output id="output" style="display:none;"></output>
