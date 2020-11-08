@@ -104,3 +104,7 @@ blockquote {
     -moz-box-shadow: 3px 3px 3px #111;
     box-shadow: 3px 3px 3px #111;
 }
+
+/* for CRISjs*/
+#demo { font-size: 10px; color:grey}
+.crisjs {font-size: 14px; line-height: 1.2;}
