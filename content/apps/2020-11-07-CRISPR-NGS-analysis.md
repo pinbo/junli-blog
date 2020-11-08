@@ -11,11 +11,7 @@ tags:
   - NGS
 ---
 
-Click the "**Clear**" button to clear the sample input. Click the "**Example input**" button to get the example inputs (then select the example fastq.gz files https://github.com/pinbo/CRISjs).
-
-After putting in the sequences and selecting fastq or fastq.gz files, click the "**Start Analyze**" button. Then download the summary file by clicking the "**Download output csv file**" button.
-
-**!!! Make sure both the left and the right flanking sequences are in the same read or merged read in the fastq file !!!**
+**See Help below on your first use**
 
 <script src="/libs/pako_inflate.min.js"></script>
 <script src="/libs/FileSaver.min.js"></script>
@@ -43,13 +39,20 @@ After putting in the sequences and selecting fastq or fastq.gz files, click the 
 <button style="visibility:hidden" id="download-btn" onclick="download()"> Download output csv file</button><br><br>
 <output id="output" style="visibility:hidden;"></output>
 
-<h2>Help</h2>
-<p id="help">
-  This program summarize CRISPR editing results based on the idea of <a href="https://github.com/patrickc01/CRIS.py">CRIS.py</a>. You can read the paper <a href="https://www.nature.com/articles/s41598-019-40896-w">here</a>. The basic idea is summarized in its Fig. 1. 
-</p>
+## Help
+This program summarize CRISPR editing results based on the idea of [CRIS.py](https://github.com/patrickc01/CRIS.py). You can read the paper [here](https://www.nature.com/articles/s41598-019-40896-w). The basic idea is summarized in its Fig. 1. 
 <img src="/images/CRISjs.png" alt="CRISjs dialog" width=100%>
-<p id="help2">
-  All three sequences (the left and right flanking sequences and the gRNA sequences) should be on the <strong>same strand as the template</strong>. If you are working on polyploid species, your left or right flanking sequences should be unique to your template (subgenome) if the fastq files include homolog/homeologs.
-</p>
-<p id="help2">If you have a lot of fastq files, you may use the standalone command line program <a href="https://github.com/pinbo/CRISgo">CRISgo</a>.</p>
+
+All three sequences (the left and right flanking sequences and the gRNA sequences) should be on the **same strand as the template**. If you are working on polyploid species, your left or right flanking sequences should be unique to your template (subgenome) if the fastq files include homolog/homeologs.
+
+### Step
+
+1. Input all the required sequences. Make sure both the left and the right flanking sequences are in the same read or merged read in the fastq file.
+2. Select fastq or fastq.gz files by clicking "**Choose files**".
+3. Start analyzing by clicking the "**Start Analyze**" button. 
+4. Download the summary file by clicking the "**Download output csv file**" button.
+
+You can click the "**Example input**" button to get the example inputs (then select the example fastq.gz files https://github.com/pinbo/CRISjs/tree/main/example-input).
+
+If you have a lot of fastq files, you may use the standalone command line program [CRISgo](https://github.com/pinbo/CRISgo).
 
