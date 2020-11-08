@@ -79,7 +79,8 @@ function checkIndel(leftSeq, rightSeq, gRNA, wtSeq, filename, fileContent){//rea
         }
     }
     // check linenumber to make sure everything is read
-    console.log(filename + " has line number " + (lineNum - 1));
+    //console.log(filename + " has line number " + (lineNum - 1));
+    document.getElementById("demo").innerHTML += filename + " has line number " + (lineNum - 1) + "<br>";
     //return [matchLeft, matchRight, matchGRNA, matchBoth, nindel, indels, uniqMutSeq];
     pamPos = wtSeq.indexOf(gRNA) + gRNA.length; // PAM position
     console.log("matchBoth  " + matchBoth);

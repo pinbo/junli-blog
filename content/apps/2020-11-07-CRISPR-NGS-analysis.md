@@ -25,7 +25,6 @@ tags:
 <input id="grna" name="guideRNA" placeholder="the gRNA sequence" size="40"><br>
 <label for="wt">Wild type sequence</label><br>
 <textarea id="wt" name="Wildtype" rows="5" cols="80" placeholder="The target gene sequences (long enough to include both the left and right flanking sequences)"></textarea>
-<p id="demo"></p>
 <button onclick="clearseq()">Clear</button>
 <button onclick="putExample()">Example Input</button><br>
 <label for="files">Choose fastq or fastq.gz files for analysis</label><br>
@@ -37,6 +36,7 @@ tags:
 </select>
 <label for="box1">(Read1 or Read2? Forward strand is to check read1; reverse strand is for read2)</label><br><br>
 <button style="visibility:hidden" id="download-btn" onclick="download()"> Download output csv file</button><br><br>
+<p id="demo"></p><br>
 <output id="output" style="display:none;"></output>
 
 ## Help
