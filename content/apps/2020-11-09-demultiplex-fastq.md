@@ -34,10 +34,10 @@ tags:
 <p id="demo3"></p>
 <output id="output" style="display:none"></output>
 
-<script src="libs/pako.min.js"></script>
-<script src="libs/FileSaver.min.js"></script>
-<script src="libs/demultiplex.js"></script>
-<script src="libs/jszip.min.js"></script>
+<script src="/libs/pako.min.js"></script>
+<script src="/libs/FileSaver.min.js"></script>
+<script src="/libs/demultiplex.js"></script>
+<script src="/libs/jszip.min.js"></script>
 
 ## Help
 
