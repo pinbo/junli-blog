@@ -66,8 +66,7 @@
 	{{ if eq .Section "post" }}
 	<span class="article-date">{{ .Date.Format "2006/01/02" }}</span>
 		{{ end }}
-	<div style="color:grey; font-size:16px;">{{ if .Params.tags }}<strong>Tags:</strong> {{range .Params.tags}}<a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}">{{ . }}</a> {{end}}{{end}}</div>
-	<div style="color:grey; font-size:16px;">{{ if .Params.categories }}<strong>Categories:</strong> {{range .Params.categories}}<a href="{{ "/categories/" | relLangURL }}{{ . | urlize }}">{{ . }}</a> {{end}}{{end}}</div>
+
 
 	<div class="article-content">
 		  {{ .Content }}
