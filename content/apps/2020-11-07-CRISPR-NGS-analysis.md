@@ -24,7 +24,7 @@ tags:
     <label for="grna">Your guide RNA sequence:</label>
     <input id="grna" name="guideRNA" placeholder="the gRNA sequence" size="40"><br>
     <label for="wt">Wild type sequence</label><br>
-    <textarea id="wt" name="Wildtype" rows="5" cols="80" placeholder="The target gene sequences (long enough to include both the left and right flanking sequences)"></textarea>
+    <textarea id="wt" name="Wildtype" rows="5" cols="80" placeholder="The target gene sequences (long enough to include both the left and right flanking sequences)"></textarea><br>
     <button onclick="clearseq()">Clear</button>
     <button onclick="putExample()">Example Input</button><br>
     <label for="files">Choose fastq or fastq.gz files for analysis</label><br>
