@@ -1,0 +1,114 @@
+/*@import 'https://fonts.googleapis.com/css?family=Open+Sans';*/
+/*@import url('https://fonts.googleapis.com/css?family=PT+Serif');*/
+
+@page {
+  margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+}
+
+html {
+  /*padding-left: 1cm;
+  padding-right: 1cm;
+  margin-top: -20px;
+  /*font-family: 'Open Sans';*/
+  font-family: "Times New Roman", Times, serif;
+}
+
+body{
+    margin: 0 auto;
+    font-size: 12pt;    
+    /*font-family: 'PT Serif', serif;*/
+    line-height: 1.2;
+    max-width: 7in;
+    text-align: justify;
+}
+
+h1, h2, h3 {
+  color: #111111;
+  font-weight: bold;
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+h1 {
+    font-size: 14pt;
+}
+
+h2 {
+    font-size: 12pt;
+}
+
+h3 {
+    font-size: 11pt;
+}
+
+
+/* fit to div */
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+a {
+    color: #0099ff;
+    /*margin: 0;
+    padding: 0;
+    vertical-align: baseline;*/
+}
+
+
+/* classes */
+/* added by junli*/
+
+.hideDontTakeUpSpace {
+  display:none;
+}
+
+/* for title*/
+h1:first-of-type {
+  text-align: center;
+  font-size: 24pt;
+  padding: 0 auto;
+  margin: 0;
+}
+
+h1 + p:first-of-type {
+  text-align: center;
+  border: 1px;
+  border-style: solid none;
+  padding: 10px;
+  margin-left: 0;
+}
+
+/* everything after h1 except h1 */
+h1 ~ *:not(h1) {
+    margin-left: 20px;
+}
+
+ol, ul {
+  padding-left: 15px;
+}
+
+
+/* for education */
+.entry {
+	width:720px;
+	display: block;
+	clear: both;
+	font-size: 12pt;
+	font-weight: normal;
+}
+
+.entry ul {
+    width:500px;
+    float:left;
+    list-style-type: none;
+    margin-top: 6px;
+}
+
+.entry h2 {
+	width:160px;
+	float:left;
+	margin-top: 6px;
+}
+
+
