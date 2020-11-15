@@ -49,4 +49,4 @@ We do two round of PCRs to add barcodes to the PCR amplicons. The final PCR ampl
 
 The program firstly look for left adapter and right adapter to get the orientation of the read: left adapter = R1 and right adapter = R2. Then check the barcode combination to sort them into different samples.
 
-The final output is a zipped file containing all fastq.gz files. You can check the editing events in the samples with the [**CRISPR Editing Analysis**](https://junli.netlify.app/apps/crispr-editing-check/) program.
+The final output is a zipped file containing all fastq.gz files. You can check the editing events in the samples with the [**CRISPR Editing Analysis**](/apps/crispr-editing-check) program.
