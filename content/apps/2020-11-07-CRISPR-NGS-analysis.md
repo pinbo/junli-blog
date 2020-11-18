@@ -77,14 +77,14 @@ The first line is "Intact reference": the unedited sequences from the left flank
 > **nleftSeq/nrightSeq**: number_of_reads_with_leftSeq / number_of_reads_with_rightSeq  
 > **#1_mutation**: the most frequenct mutations (SNP or indel)  
 > **#1_count**: number of reads with #1_mutation  
-> **#1_\%**: #1_count / number_of_matched_reads * 100  
+> **#1\_%**: #1_count / number_of_matched_reads * 100  
 > **#1_seq**: the #1 mutation sequence from the left flanking to the right flanking  
 > **#1_ref**: the reference allele  
 > **#1_alt**: the mutation allele  
 > **#1_bp_left_of_PAM**: distance from the PAM sequence  
 > **#2_mutation**: the 2nd most frequenct mutations (SNP or indel)  
 > **#2_count**: number of reads with #2_mutation  
-> **#2_\%**: #2_count / number_of_matched_reads * 100  
+> **#2\_%**: #2_count / number_of_matched_reads * 100  
 > **#2_seq**: the #2 mutation sequence from the left flanking to the right flanking  
 > **#2_ref**: the reference allele  
 > **#2_alt**: the mutation allele  
