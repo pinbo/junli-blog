@@ -121,8 +121,8 @@ function analyzeFiles() {
     const [leftSeq, rightSeq, gRNA, wtSeq] = getSeq();
     document.getElementById('output').value += "Intact reference sequence," + wtSeq + "\n\n";
     document.getElementById('output').value += "fastq_file,number_of_matched_reads,number_of_reads_with_intact_gRNA,%intact_gRNA,total_indel,%indel,number_of_reads_with_leftSeq,number_of_reads_with_rightSeq,nleftSeq/nrightSeq,";
-    document.getElementById('output').value += "#1_indel,#1_count,#1_%,#1_seq,#1_ref,#1_alt,#1_bp_left_of_PAM,";
-    document.getElementById('output').value += "#2_indel,#2_count,#2_%,#2_seq,#2_ref,#2_alt,#2_bp_left_of_PAM\n";
+    document.getElementById('output').value += "#1_mutation,#1_count,#1_%,#1_seq,#1_ref,#1_alt,#1_bp_left_of_PAM,";
+    document.getElementById('output').value += "#2_mutation,#2_count,#2_%,#2_seq,#2_ref,#2_alt,#2_bp_left_of_PAM\n";
     for(var i = 0, f; f = files[i]; i++) {
         //output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
         // read file content
