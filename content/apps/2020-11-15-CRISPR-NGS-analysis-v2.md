@@ -96,6 +96,8 @@ The first line is "Intact reference": the unedited sequences from the left flank
 > **#2_ref**: the reference allele  
 > **#2_alt**: the mutation allele  
 > **#2_bp_left_of_PAM**: distance from the PAM sequence
+> **wtSeq_count**: wild type sequence (unedited) between the two flanking sequences.
+> **wtSeq\_%**: wtSeq_count / number_of_matched_reads * 100
 
 
 
