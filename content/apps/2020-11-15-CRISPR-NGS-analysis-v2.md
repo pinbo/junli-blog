@@ -82,6 +82,8 @@ The first line is "Intact reference": the unedited sequences from the left flank
 > **number_of_reads_with_leftSeq**: number of reads with the left flanking sequence  
 > **number_of_reads_with_rightSeq**: number of reads with the right flanking sequence  
 > **nleftSeq/nrightSeq**: number_of_reads_with_leftSeq / number_of_reads_with_rightSeq  
+> **wtSeq_count**: wild type sequence (unedited) between the two flanking sequences  
+> **wtSeq\_%**: wtSeq_count / number_of_matched_reads * 100  
 > **#1_mutation**: the most frequenct mutations (SNP or indel)  
 > **#1_count**: number of reads with #1_mutation  
 > **#1\_%**: #1_count / number_of_matched_reads * 100  
@@ -90,14 +92,8 @@ The first line is "Intact reference": the unedited sequences from the left flank
 > **#1_alt**: the mutation allele  
 > **#1_bp_left_of_PAM**: distance from the PAM sequence  
 > **#2_mutation**: the 2nd most frequenct mutations (SNP or indel)  
-> **#2_count**: number of reads with #2_mutation  
-> **#2\_%**: #2_count / number_of_matched_reads * 100  
-> **#2_seq**: the #2 mutation sequence from the left flanking to the right flanking  
-> **#2_ref**: the reference allele  
-> **#2_alt**: the mutation allele  
-> **#2_bp_left_of_PAM**: distance from the PAM sequence  
-> **wtSeq_count**: wild type sequence (unedited) between the two flanking sequences  
-> **wtSeq\_%**: wtSeq_count / number_of_matched_reads * 100
+
+
 
 
 
