@@ -21,9 +21,9 @@ tags:
 <input id="rightBarcodeLen" name="rightBarcodeLen" placeholder="right barcode length" size="20" value="8"><br>
 <button onclick="clearseq()">Clear</button>
 <button onclick="putExample()">Example Adapters</button><br>
-<label for="barcode">Select the barcode file</label>
+<label for="barcode">Select the barcode file (a file with 3 columns separated by tab: sample ID, left barcode sequence, right barcode sequence)</label><br>
 <input type="file" id="barcode" name="barcode" /><br>
-<label for="fastq">Select the fastq or fastq.gz file</label>
+<label for="fastq">Select the fastq or fastq.gz file to demultiplex</label><br>
 <input type="file" id="fastq" name="fastq" /><br>
 
 <button style="display:none" onclick="readBarcode()">Read Barcodes</button>
