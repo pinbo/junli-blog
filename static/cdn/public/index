@@ -1,0 +1,22 @@
+cdn.biowasm.com
+Sun Jan 24 04:42:55 PM PST 2021
+|-- [ 51K]  aioli
+|   |-- [ 24K]  1.4.1
+|   |   |-- [ 12K]  aioli.js
+|   |   `-- [7.8K]  aioli.worker.js
+|   `-- [ 24K]  latest
+|       |-- [ 12K]  aioli.js
+|       `-- [7.8K]  aioli.worker.js
+|-- [195K]  bwa
+|   `-- [191K]  latest
+|       |-- [ 92K]  bwa.html
+|       |-- [ 72K]  bwa.js
+|       `-- [ 23K]  bwa.wasm
+`-- [1.3M]  samtools
+    `-- [1.3M]  1.11
+        |-- [117K]  samtools.data
+        |-- [ 92K]  samtools.html
+        |-- [111K]  samtools.js
+        `-- [983K]  samtools.wasm
+
+ 1.5M used in 7 directories, 15 files
