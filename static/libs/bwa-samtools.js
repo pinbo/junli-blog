@@ -1,0 +1,191 @@
+let bwa = new Aioli("bwa2/latest");
+let samtools = new Aioli("samtools/latest"); // null before init
+// Initialize bwa and output the version
+bwa
+.init()
+.then(() => bwa.exec("index"))
+.then(d => console.log(d.stdout, "ERRRRR", d.stderr));
+
+// download all the bams as a zip file
+// samtools.downloadBinary("/samtools/examples/out2.bam.bai").then(d => saveAs(d, "download.bam"));
+async function downloadBam(){
+    let files = await samtools.ls("/data"); // an array of files
+    let zip = new JSZip();
+    let promises = [];
+    for (let i = 0, f; f = files[i]; i++) {
+        if (f.includes(".bam.bai")) {
+            // let indexfile = "/data/" + f;
+            let bamfile = f.replace(".bai", "");
+            console.log("Prepare downloading ", bamfile, " and ", f);
+            // let indexblob = samtools.downloadBinary("/data/" + f);
+            // let bamblob = samtools.downloadBinary("/data/" + bamfile);
+            // zip.file(f, indexblob);
+            // zip.file(bamfile, bamblob);
+            let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file(f, d));
+            let bb = samtools.downloadBinary("/data/" + bamfile).then(d => d.arrayBuffer()).then(d => zip.file(bamfile, d));
+            let cc = await Promise.all([aa, bb]);
+            promises.push(cc);
+        }
+    }
+    const d = await Promise.all(promises);
+    console.log("Finished preparing downloanding bams!");
+    zip.generateAsync({type:"blob"})
+        .then(function(content) {
+            saveAs(content, "indexed_bams.zip");
+        });
+}
+
+// make bams
+async function makeBam(){
+    await transferSam(); // first transfer all the sam files to samtools worker
+    let files = await samtools.ls("/data"); // an array of files
+    console.log(files);
+    let promises = [];
+    for (let i = 0, f; f = files[i]; i++) {
+        if (f.includes(".sam")) {
+            promises.push(samtoBam("/data/" + f));
+        }
+    }
+    const d = await Promise.all(promises);
+    console.log("Finished make bams!")
+}
+
+// sam to bam for single files
+// samtools.ls("/data").then(d => console.log(d))
+// samtoBam("/data/out_1.sam")
+// samtools.exec("index /data/out_1.bam")
+async function samtoBam(samfile){ // samfile full path
+    console.log("sam file is: ", samfile);
+    let bamfile = samfile.replace(".sam", ".bam");
+    console.log("bam file is: ", bamfile);
+    // await samtools.ls("/data").then(console.log)
+    let cmd = ["sort", samfile, bamfile].join(' '); // I edited the samtools c file to make the 2nd argument bam output
+    console.log(cmd);
+    let std = await samtools.exec(cmd);//.then(() => samtools.exec("index " + bamfile));
+    console.log("STDERR\n", std.stderr);
+    samtools.rm(samfile); // remove sam files after getting the bam files to save space
+    let indexfile = bamfile + ".bai";
+    let cmd2 = ["index", bamfile].join(' ');
+    console.log(cmd2);
+    let std2 = await samtools.exec("index " + bamfile);
+    console.log("STDERR\n", std2.stderr);
+    return bamfile;
+}
+
+// delay before
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+// transfer sam files to samtools /data
+async function transferSam(){
+    // Initialize samtools and output the version
+    await samtools.init()
+    .then(() => samtools.exec("--version"))
+    .then(d => console.log("Samtools: ", d.stdout, "\nSTDERR\n", d.stderr));
+    let files = await bwa.ls("/data"); // an array of files
+    // let promises = [];
+    for (var i = 0, f; f = files[i]; i++) {
+        if (f.includes(".sam")) {
+            // promises.push(Aioli.transfer("/data/" + f, "/data/" + f, Aioli.workers[0], Aioli.workers[1]));
+            Aioli.transfer("/data/" + f, "/data/" + f, Aioli.workers[0], Aioli.workers[1]);
+        }
+    }
+    // await Promise.all(promises);
+    await delay(1000);
+    console.log("Finished transfering files!");
+    return 0;
+}
+
+// When a user selects a .sam file from their computer,
+// run `bwa view -q20` on the file
+function loadFiles(event)
+{
+    // document.getElementById("demo1").innerHTML = "";
+    // var filenames = [];
+    var files = event.target.files;
+    for (var i = 0, f; f = files[i]; i++) {
+        loadSingleFile(f);
+        // filenames.push(f.name);
+        document.getElementById("demo1").innerHTML += f.name + "\t";
+    }
+    // return(filenames);
+}
+document.getElementById("reference").addEventListener("change", loadRef, false);
+document.getElementById("fastq").addEventListener("change", loadFq, false);
+
+function loadFq(event)
+{
+    document.getElementById("demoFq").innerHTML = "";
+    // var filenames = [];
+    var files = event.target.files;
+    for (var i = 0, f; f = files[i]; i++) {
+        loadSingleFile(f);
+        document.getElementById("demoFq").innerHTML += f.name + "\t";
+    }
+    // bwa.ls("/bwa2/examples").then(d => console.log(d));
+    // return(filenames);
+}
+// load fasta file
+// test wethere 2 init will change things
+async function loadRef(event)
+{
+    let files = event.target.files;
+    let f = files[0];
+    document.getElementById("demoRef").innerHTML = f.name;
+    await Aioli.mount(f) // return new file path
+    .then(() => bwa.ls("/data"))
+    .then(d => console.log(d));
+    // index
+    bwa.exec("index /data/" + f.name)
+    .then(d => console.log(d.stdout, "End of stdout\n", d.stderr, "End of stderr"))
+}
+
+// for writing stdout to file
+function stdInfo(name, content) {
+    this.name = name;
+    this.content= content;
+}
+// test wethere 2 init will change things
+function loadSingleFile(file)
+{
+    return Aioli
+    .mount(file); // First mount the file
+}
+
+// run bwa mem on all fastq files
+// loop through all fastq.gz files
+async function makeSam(){
+    // let reference = document.getElementById("demoRef").innerHTML.split("\t")[0];
+    let filenames = document.getElementById("demoFq").innerHTML.split("\t");
+    let reference = document.getElementById("demoRef").innerHTML;
+    // bwa index reference
+    // let wd = "/bwa2/examples/";
+    let wd = "/data/";
+    console.log("FASTQ files\n", filenames);
+    console.log(reference);
+    for (i = 0; i < filenames.length; i++) {
+        let ff = filenames[i];
+        if (ff.includes("_R1_001.fastq.gz")) {
+            console.log("Processing: ", ff);
+            let prefix = ff.replace("_R1_001.fastq.gz", "");
+            bwamem(prefix, reference);
+        }
+    }
+}
+
+// make sam file with bwa mem
+// bwamem("2", "references.fa").then(d => console.log(d));
+async function bwamem (prefix, reference) {
+    // let wd = "/bwa2/examples/";
+    let wd = "/data/";
+    let R1 = wd + prefix + "_R1_001.fastq.gz";
+    let R2 = wd + prefix + "_R2_001.fastq.gz"
+    let out = wd + "out_" + prefix + ".sam";
+    reference = wd + reference;
+    // bwa mem
+    let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
+    console.log(cmd);
+    let std = await bwa.exec(cmd);
+    console.log(std.stderr);
+    console.log("Finished writing ", out);
+    // return out; 
+}
