@@ -12,6 +12,26 @@ tags:
   - samtools
 ---
 
+## Before start
+BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
+
+- chromium based browsers (Google Chrome and new Microsoft Edge): go to [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
+
+- Firefox: go to [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
+
+## Get started
+
+This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). It runs commands like this:
+```sh
+## map reads to the templates with bwa
+bwa index <your-references.fa>
+bwa mem <your-references.fa> <R1.fastq.gz> <R2.fastq.gz> > out.sam
+## make sorted bam files with samtools
+samtools sort out.sam > out.bam
+samtools index out.bam
+```
+
+
 <h4>I. Choose reference file (a fasta file)</h4>
 <input id="reference" type="file">
 
