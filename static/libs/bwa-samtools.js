@@ -48,6 +48,7 @@ async function makeBam(){
     }
     const d = await Promise.all(promises);
     console.log("Finished make bams!")
+    document.getElementById("sort").innerHTML += "BAM files have been created. You can click the DOWNLOAD button below.";
 }
 
 // sam to bam for single files
@@ -162,14 +163,17 @@ async function makeSam(){
     let wd = "/data/";
     console.log("FASTQ files\n", filenames);
     console.log(reference);
+    let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
         if (ff.includes("_R1_001.fastq.gz")) {
             console.log("Processing: ", ff);
             let prefix = ff.replace("_R1_001.fastq.gz", "");
-            bwamem(prefix, reference);
+            promises.push(bwamem(prefix, reference));
         }
     }
+    await Promise.all(promises);
+    document.getElementById("bwa").innerHTML = "Finished mapping reads; You can proceed to make bam files.";
 }
 
 // make sam file with bwa mem
