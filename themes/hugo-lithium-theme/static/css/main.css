@@ -96,7 +96,7 @@ code {
 
 .content {
   max-width: 700px;
-  margin: 5px auto 5px;
+  margin: 30px auto 5px;
   padding: 0 10px;
   font-size: 16px;
   line-height: 1.5;
@@ -274,7 +274,7 @@ code {
 
   .content {
     font-size: 18px;
-    line-height: 1.2;
+    line-height: 1.4;
   }
 
   .highlight {
