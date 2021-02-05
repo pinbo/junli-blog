@@ -42,7 +42,7 @@ This tool is for **paired end** fastq files. Please run the 3 steps below to get
 <input id="fastq" type="file" multiple>
 
 <p id="demo1"></p>
-<p id="demoRef"></p>
+<p id="demoRef" style="display:none;"></p>
 <p id="demoFq" style="display:none;"></p>
 
 <h4>III. Map reads and create bam files</h4>
