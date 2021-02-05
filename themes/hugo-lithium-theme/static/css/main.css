@@ -98,7 +98,7 @@ code {
   margin: 40px auto 10px;
   padding: 0 15px;
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.5;
   color: #333;
 }
 
@@ -273,7 +273,7 @@ code {
 
   .content {
     font-size: 18px;
-    line-height: 1.8;
+    line-height: 1.2;
   }
 
   .highlight {
