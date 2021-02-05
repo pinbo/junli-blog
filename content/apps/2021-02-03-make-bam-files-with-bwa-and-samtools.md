@@ -15,9 +15,9 @@ tags:
 ## Before start
 BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
 
-- chromium based browsers (Google Chrome and new Microsoft Edge): go to [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
+- chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
 
-- Firefox: go to [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
+- Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
 
 ## Get started
 
@@ -30,7 +30,10 @@ bwa mem <your-references.fa> <R1.fastq.gz> <R2.fastq.gz> > out.sam
 samtools sort out.sam > out.bam
 samtools index out.bam
 ```
+This tool is for **paired end** fastq files. Please run the 3 steps below to get the indexed bams from fastq files. 
 
+<label for="suffix">The suffix of your read 1 (R1) fastq files, default is "_R1_001.fastq.gz" for files names like xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz.</label><br>
+<input id="suffix" name="LeftAdapter" value="_R1_001.fastq.gz" size="40"><br>
 
 <h4>I. Choose reference file (a fasta file)</h4>
 <input id="reference" type="file">

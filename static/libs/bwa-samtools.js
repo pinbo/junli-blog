@@ -9,6 +9,7 @@ bwa
 // download all the bams as a zip file
 // samtools.downloadBinary("/samtools/examples/out2.bam.bai").then(d => saveAs(d, "download.bam"));
 async function downloadBam(){
+    document.getElementById("download").innerHTML = "... Preparing files for downloading. It may take some time ...";
     let files = await samtools.ls("/data"); // an array of files
     let zip = new JSZip();
     let promises = [];
@@ -48,7 +49,7 @@ async function makeBam(){
     }
     const d = await Promise.all(promises);
     console.log("Finished make bams!")
-    document.getElementById("sort").innerHTML += "BAM files have been created. You can click the DOWNLOAD button below.";
+    document.getElementById("sort").innerHTML = "BAM files have been created. You can click the DOWNLOAD button below.";
 }
 
 // sam to bam for single files
@@ -59,6 +60,7 @@ async function samtoBam(samfile){ // samfile full path
     console.log("sam file is: ", samfile);
     let bamfile = samfile.replace(".sam", ".bam");
     console.log("bam file is: ", bamfile);
+    document.getElementById("sort").innerHTML = "... Making bam file " + bamfile;
     // await samtools.ls("/data").then(console.log)
     let cmd = ["sort", samfile, bamfile].join(' '); // I edited the samtools c file to make the 2nd argument bam output
     console.log(cmd);
@@ -96,20 +98,6 @@ async function transferSam(){
     return 0;
 }
 
-// When a user selects a .sam file from their computer,
-// run `bwa view -q20` on the file
-function loadFiles(event)
-{
-    // document.getElementById("demo1").innerHTML = "";
-    // var filenames = [];
-    var files = event.target.files;
-    for (var i = 0, f; f = files[i]; i++) {
-        loadSingleFile(f);
-        // filenames.push(f.name);
-        document.getElementById("demo1").innerHTML += f.name + "\t";
-    }
-    // return(filenames);
-}
 document.getElementById("reference").addEventListener("change", loadRef, false);
 document.getElementById("fastq").addEventListener("change", loadFq, false);
 
@@ -158,6 +146,7 @@ async function makeSam(){
     // let reference = document.getElementById("demoRef").innerHTML.split("\t")[0];
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
     let reference = document.getElementById("demoRef").innerHTML;
+    let suffix =  document.getElementById("suffix").value; // R1 suffix
     // bwa index reference
     // let wd = "/bwa2/examples/";
     let wd = "/data/";
@@ -166,9 +155,9 @@ async function makeSam(){
     let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
-        if (ff.includes("_R1_001.fastq.gz")) {
+        if (ff.includes(suffix)) {
             console.log("Processing: ", ff);
-            let prefix = ff.replace("_R1_001.fastq.gz", "");
+            let prefix = ff.replace(suffix, "");
             promises.push(bwamem(prefix, reference));
         }
     }
@@ -180,9 +169,11 @@ async function makeSam(){
 // bwamem("2", "references.fa").then(d => console.log(d));
 async function bwamem (prefix, reference) {
     // let wd = "/bwa2/examples/";
+    let suffix =  document.getElementById("suffix").value; // R1 suffix
+    let R2suffix = suffix.replace("R1", "R2");
     let wd = "/data/";
-    let R1 = wd + prefix + "_R1_001.fastq.gz";
-    let R2 = wd + prefix + "_R2_001.fastq.gz"
+    let R1 = wd + prefix + suffix;
+    let R2 = wd + prefix + R2suffix;
     let out = wd + "out_" + prefix + ".sam";
     reference = wd + reference;
     // bwa mem
@@ -191,5 +182,6 @@ async function bwamem (prefix, reference) {
     let std = await bwa.exec(cmd);
     console.log(std.stderr);
     console.log("Finished writing ", out);
+    document.getElementById("bwa").innerHTML = "... Mapping " + prefix;
     // return out; 
 }
