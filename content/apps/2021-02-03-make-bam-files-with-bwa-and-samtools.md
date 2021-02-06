@@ -12,14 +12,14 @@ tags:
   - samtools
 ---
 
-## Before start
+### Before start
 BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
 
 - chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
 
 - Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
 
-## Get started
+### Get started
 
 This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). It runs commands like this:
 ```sh
