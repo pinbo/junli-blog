@@ -2,21 +2,41 @@
 <html lang="{{ .Site.LanguageCode }}">
   <head>
     {{ partial "head.html" . }}
-    <link href="/libs/default.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        .bar-header{padding-left:8px}
+        a, a > code {
+            color: rgb(51, 90, 197);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .left-column {
+            width: 22%;
+            float: left;
+            background-color:#f1f1f1!important;
+            padding-top: 1em;
+        }
+        .right-column {
+            width: 75%;
+            float: right;
+            padding-top: 1em;
+        }
+        .left-column li{list-style-type:none;padding:8px}
+      </style>
   </head>
   <body>
-    <div class="wrapper">
+    <div>
       <header class="header">
         {{ partial "nav.html" . }}
       </header>
 
 <body>
-    <div style="margin:0 auto; max-width:1200px;">
-        <div class="w3-sidebar w3-light-grey w3-bar-block left-column" >
-            <h3 class="w3-bar-item">Tools</h3>
+    <div style="margin:0 auto; max-width:1000px;">
+        <div class="left-column" >
+            <h3 class="bar-header">Tool List</h3>
             {{ range (where .Site.RegularPages "Section" "==" "apps") }}
-                <a href="{{ .RelPermalink }}" class="w3-bar-item w3-button">{{ .Name }}</a>
+            <li><a href="{{ .RelPermalink }}" class="w3-bar-item w3-button">{{ .Name }}</a></li>
             {{ end }}
         </div>
 
