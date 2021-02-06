@@ -38,7 +38,7 @@ After loading the template fasta file and all the fastq files, now we will use `
 <p id="bwa"  style="color:pink;font-style: italic;"></p>
 <p id="sort" style="color:pink;font-style: italic;"></p>
 <button id="download-btn" onclick="downloadBam()" style="visibility:hidden">Download indexed bam files</button>
-<p id="download"></p>
+<p id="download" style="color:pink;font-style: italic;"></p>
 <script src="/tools/aioli/latest/aioli.js"></script>
 <script src="/libs/bwa-samtools.js"></script>
 <script src="/libs/FileSaver.min.js"></script>
