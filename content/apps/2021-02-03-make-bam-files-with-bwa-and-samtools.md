@@ -56,7 +56,7 @@ samtools sort out.sam > out.bam
 samtools index out.bam
 ```
 
-#### Enable SIMD for your browser
+### Enable SIMD for your browser
 
 BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
 
