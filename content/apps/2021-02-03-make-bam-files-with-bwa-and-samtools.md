@@ -63,3 +63,5 @@ BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please en
 - chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
 
 - Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
+
+- Other browers do not seem to support this yet.
