@@ -127,8 +127,8 @@ async function loadRef(event)
     // index
     await bwa.exec("index /data/" + f.name)
     .then(d => console.log(d.stdout, "End of stdout\n", d.stderr, "End of stderr"));
-    let files = await bwa.ls("/data");
-    if (files.length < 8) {
+    let ff = await bwa.ls("/data");
+    if (ff.length < 8) {
         document.getElementById("indexErr").innerHTML = "Indexing the reference FAILED. Please refresh the page to retry!";
     }
 }
