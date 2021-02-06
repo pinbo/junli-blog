@@ -115,6 +115,14 @@ function loadFq(event)
         document.getElementById("demoFq").innerHTML += f.name + "\t";
     }
 }
+
+// load sing file
+function loadSingleFile(file)
+{
+    return Aioli
+    .mount(file); // First mount the file
+}
+
 // load fasta file
 async function loadRef(event)
 {
