@@ -36,6 +36,13 @@ async function downloadBam(){
         });
 }
 
+// all in one
+async function analyzeBam(){
+    await makeSam();
+    await makeBam();
+    document.getElementById("download-btn").style.visibility = "visible";
+}
+
 // make bams
 async function makeBam(){
     await transferSam(); // first transfer all the sam files to samtools worker
