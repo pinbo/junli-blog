@@ -12,27 +12,12 @@ tags:
   - samtools
 ---
 
-### Before start
-BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
+**Before start**: Please enable [SIMD](https://v8.dev/features/simd) in your web brower [see [Help](#enable-simd-for-your-browser) below].
 
-- chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
+This tool is for **paired end** fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz).  
+Please run the 3 steps below to get the indexed bams from a list of fastq files. 
 
-- Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
-
-### Get started
-
-This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). It runs commands like this:
-```sh
-## map reads to the templates with bwa
-bwa index <your-references.fa>
-bwa mem <your-references.fa> <R1.fastq.gz> <R2.fastq.gz> > out.sam
-## make sorted bam files with samtools
-samtools sort out.sam > out.bam
-samtools index out.bam
-```
-This tool is for **paired end** fastq files. Please run the 3 steps below to get the indexed bams from fastq files. 
-
-<label for="suffix">The suffix of your read 1 (R1) fastq files, default is "_R1_001.fastq.gz" for files names like xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz.</label><br>
+<label for="suffix">Provide the suffix of your read 1 (R1) fastq files:</label><br>
 <input id="suffix" name="LeftAdapter" value="_R1_001.fastq.gz" size="40"><br>
 
 <h4>I. Choose reference file (a fasta file)</h4>
@@ -59,3 +44,23 @@ After loading the template fasta file and all the fastq files, now we will use t
 <script src="/libs/bwa-samtools.js"></script>
 <script src="/libs/FileSaver.min.js"></script>
 <script src="/libs/jszip.min.js"></script>
+
+### Help
+
+This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). It runs commands like this:
+```sh
+## map reads to the templates with bwa
+bwa index <your-references.fa>
+bwa mem <your-references.fa> <R1.fastq.gz> <R2.fastq.gz> > out.sam
+## make sorted bam files with samtools
+samtools sort out.sam > out.bam
+samtools index out.bam
+```
+
+#### Enable SIMD for your browser
+
+BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
+
+- chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
+
+- Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
