@@ -26,7 +26,7 @@ Please run the 3 steps below to get the indexed bams from a list of fastq files.
 <h4>II. Choose demultiplexed fastq(.gz) files</h4>
 <input id="fastq" type="file" multiple>
 
-<p id="demo1"></p>
+<p id="indexErr" style="color:red;"></p>
 <p id="demoRef" style="display:none;"></p>
 <p id="demoFq" style="display:none;"></p>
 

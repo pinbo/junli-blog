@@ -92,14 +92,11 @@ async function transferSam(){
     .then(() => samtools.exec("--version"))
     .then(d => console.log("Samtools: ", d.stdout, "\nSTDERR\n", d.stderr));
     let files = await bwa.ls("/data"); // an array of files
-    // let promises = [];
     for (var i = 0, f; f = files[i]; i++) {
         if (f.includes(".sam")) {
-            // promises.push(Aioli.transfer("/data/" + f, "/data/" + f, Aioli.workers[0], Aioli.workers[1]));
             Aioli.transfer("/data/" + f, "/data/" + f, Aioli.workers[0], Aioli.workers[1]);
         }
     }
-    // await Promise.all(promises);
     await delay(1000);
     console.log("Finished transfering files!");
     return 0;
@@ -117,11 +114,8 @@ function loadFq(event)
         loadSingleFile(f);
         document.getElementById("demoFq").innerHTML += f.name + "\t";
     }
-    // bwa.ls("/bwa2/examples").then(d => console.log(d));
-    // return(filenames);
 }
 // load fasta file
-// test wethere 2 init will change things
 async function loadRef(event)
 {
     let files = event.target.files;
@@ -131,20 +125,12 @@ async function loadRef(event)
     .then(() => bwa.ls("/data"))
     .then(d => console.log(d));
     // index
-    bwa.exec("index /data/" + f.name)
-    .then(d => console.log(d.stdout, "End of stdout\n", d.stderr, "End of stderr"))
-}
-
-// for writing stdout to file
-function stdInfo(name, content) {
-    this.name = name;
-    this.content= content;
-}
-// test wethere 2 init will change things
-function loadSingleFile(file)
-{
-    return Aioli
-    .mount(file); // First mount the file
+    await bwa.exec("index /data/" + f.name)
+    .then(d => console.log(d.stdout, "End of stdout\n", d.stderr, "End of stderr"));
+    let files = await bwa.ls("/data");
+    if (files.length < 8) {
+        document.getElementById("indexErr").innerHTML = "Indexing the reference FAILED. Please refresh the page to retry!";
+    }
 }
 
 // run bwa mem on all fastq files
@@ -169,7 +155,7 @@ async function makeSam(){
         }
     }
     await Promise.all(promises);
-    document.getElementById("bwa").innerHTML = "Finished mapping reads; You can proceed to make bam files.";
+    document.getElementById("bwa").innerHTML = "Finished mapping reads.";
 }
 
 // make sam file with bwa mem
