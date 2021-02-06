@@ -2,6 +2,7 @@
 <html lang="{{ .Site.LanguageCode }}">
   <head>
     {{ partial "head.html" . }}
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link href="/libs/default.css" rel="stylesheet" />
   </head>
   <body>
@@ -10,15 +11,14 @@
         {{ partial "nav.html" . }}
       </header>
 
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <body>
     <div style="margin:0 auto; max-width:1200px;">
         <div class="w3-sidebar w3-light-grey w3-bar-block left-column" >
             <h3 class="w3-bar-item">Tools</h3>
             {{ range (where .Site.RegularPages "Section" "==" "apps") }}
-                <a href="{{ .URL }}" class="w3-bar-item w3-button">{{ .Name }}</a>
+                <a href="{{ .RelPermalink }}" class="w3-bar-item w3-button">{{ .Name }}</a>
             {{ end }}
         </div>
 
         <div class="right-column">
-            <h3>{{ .Title }}</h3>
+            <h2>{{ .Title }}</h2>

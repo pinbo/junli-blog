@@ -1,4 +1,4 @@
-{{ if (len (findRE "^/cn/" .URL)) }}
+{{ if (len (findRE "^/cn/" .Permalink)) }}
 <link rel="stylesheet" href="{{ "/css/fonts_cn.css" | relURL }}" />
 <script async src="/js/load-typekit.js"></script>
 {{ end }}

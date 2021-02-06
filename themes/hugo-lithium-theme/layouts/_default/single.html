@@ -31,10 +31,10 @@
 </article>
 <nav class="post-nav">
 {{ with .NextInSection }}
-	<span class="nav-prev"><a href="{{ .URL }}"><< {{ .Title }}</a></span>  
+	<span class="nav-prev"><a href="{{ .Permalink }}"><< {{ .Title }}</a></span>  
 {{- end }}
 {{ with .PrevInSection }}
-	<span class="nav-next"><a href="{{ .URL }}">{{ .Title }} >></a></span>
+	<span class="nav-next"><a href="{{ .Permalink }}">{{ .Title }} >></a></span>
 {{- end }}
 </nav>
 {{ partial "disqus.html" .}}
@@ -82,10 +82,10 @@
 	  <!-- Post Pagination: added by Junli on 11/19/2017 -->
 	  <nav class="post-nav">
 		{{ with .NextInSection }}
-		<span class="nav-prev"><a href="{{ .URL }}"><< {{ .Title }}</a></span>  
+		<span class="nav-prev"><a href="{{ .Permalink }}"><< {{ .Title }}</a></span>  
 		{{- end }}
 		{{ with .PrevInSection }}
-		<span class="nav-next"><a href="{{ .URL }}">{{ .Title }} >></a></span>
+		<span class="nav-next"><a href="{{ .Permalink }}">{{ .Title }} >></a></span>
 		{{- end }}
 	  </nav>
 
