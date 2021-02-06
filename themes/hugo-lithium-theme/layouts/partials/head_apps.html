@@ -37,7 +37,7 @@
         <div class="left-column" >
             <h3 class="bar-header">Tool List</h3>
             {{ range (where .Site.RegularPages "Section" "==" "apps") }}
-            <li><a href="{{ .RelPermalink }}" class="w3-bar-item w3-button">{{ .Name }}</a></li>
+            <li><a href="{{ .RelPermalink }}">{{ .Name }}</a></li>
             {{ end }}
         </div>
 
