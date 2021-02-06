@@ -44,7 +44,7 @@ After loading the template fasta file and all the fastq files, now we will use `
 <script src="/libs/FileSaver.min.js"></script>
 <script src="/libs/jszip.min.js"></script>
 
-### Help
+## Help
 
 This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). It runs commands like this:
 ```sh
