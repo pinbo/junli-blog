@@ -35,8 +35,8 @@ Please run the 3 steps below to get the indexed bams from a list of fastq files.
 After loading the template fasta file and all the fastq files, now we will use `bwa` and `samtools` to create indexed bam files for viewing in the software [IGV](https://software.broadinstitute.org/software/igv/download).
 
 <button onclick="analyzeBam()">Map reads and Make bam files</button>
-<p id="bwa"></p>
-<p id="sort"></p>
+<p id="bwa"  style="color:pink;font-style: italic;"></p>
+<p id="sort" style="color:pink;font-style: italic;"></p>
 <button id="download-btn" onclick="downloadBam()" style="visibility:hidden">Download indexed bam files</button>
 <p id="download"></p>
 <script src="/tools/aioli/latest/aioli.js"></script>
