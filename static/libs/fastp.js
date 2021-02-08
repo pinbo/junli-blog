@@ -67,7 +67,7 @@ async function filter(){
     if (document.getElementById("interleaved_out").checked){output = "--stdout"}
     let baseQuality = "-q " + document.getElementById("basequality").value;
     let addopt = document.getElementById("addopt").innerHTML.replace(/(?:\r\n|\r|\n)/g, " ");
-    let cmd = [input, interleaved, adapterTim, baseQuality, addopt, output].join(" ");
+    let cmd = [input, interleaved, adapterTim, baseQuality, addopt, output].join(" ").replace(/  +/g, ' ');
 
     fastp.setwd("/data") // set working directory
     console.log("input is", cmd);
