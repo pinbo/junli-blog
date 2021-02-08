@@ -42,12 +42,13 @@ https://github.com/OpenGene/fastp
 <input type="checkbox" id="interleaved_out" name="interleaved_out" value="--stdout">
 <label for="interleaved_out" style="font-size:90%;color:blue;">Interleaved output?</label><br>
 
-<div id="download-btn" style="visibility:hidden">
+<div id="download-btn" style="display:none">
     <h4>Step 3: Download filtered files and summary html</h4>
     <button onclick="download()">Download the filtered fastq file(s)</button><br><br>
 </div>
-<p id="error" style="color:red;"></p>
 <pre><code id="stdout"></code></pre>
+<p id="error" style="color:red;"></p>
+
 
 ## Acknowledgement
 1. **fastp**: https://github.com/OpenGene/fastp

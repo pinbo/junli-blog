@@ -87,7 +87,7 @@ async function filter(){
         out2.content = await pako.gzip(dd.stdout);
         fastp.write(out2);
     }
-    document.getElementById("download-btn").style.visibility = "visible";
+    document.getElementById("download-btn").style.display = "block";
 }
 
 // for writing stdout to file
