@@ -71,6 +71,7 @@ async function filter(){
 
     fastp.setwd("/data") // set working directory
     console.log("input is", cmd);
+    document.getElementById("stdout").innerHTML = "Filtering ...";
     let dd = await fastp.exec(cmd);
     document.getElementById("stdout").innerHTML = dd.stderr;
 
