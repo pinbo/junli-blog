@@ -65,12 +65,15 @@ function readFile(file, onLoadCallback){
 // get barcode from the barcode file
 // 3 columns: sample name, left barcode, right barcode
 function getBarcode(fileContent){
+    // now I can use only right n characters of the left and right barcode
+    var leftBarcodeLen = document.getElementById('leftBarcodeLen').value;
+	var rightBarcodeLen = document.getElementById('rightBarcodeLen').value;
 	var lines = fileContent.split(/\r?\n/);
 	//var barcodes = {}; // a dictionary of barcodes
 	for (var line of lines){
 		if (line){
 			var ss = line.split(/\t/);
-			dictBarcode[ss[1] + "-" + ss[2]] = ss[0];
+			dictBarcode[ss[1].slice(-leftBarcodeLen) + "-" + ss[2].slice(-rightBarcodeLen)] = ss[0];
 		}
 	}
 	//return barcodes;
