@@ -31,7 +31,7 @@ https://github.com/OpenGene/fastp
 <label for="trimAdapter">Trim adapters? (NOT necessary for CRISPR checking in this website)</label>
 
 <input type="checkbox" id="merge" name="merge" value="-m">
-<label for="merge">Merge read1 and read2 if there are overlaps?</label>
+<label for="merge">Merge read1 and read2 if there are overlaps? (3 output: merged, non-merged-R1, non-merged-R2)</label>
 
 <label for="addopt">Additional filtering options. Click the help button below to see a list of options</label><br>
 <textarea id="addopt" name="addopt" rows="3" cols="60" placeholder="Additional Options for the tool: -g -x etc"></textarea><br>
