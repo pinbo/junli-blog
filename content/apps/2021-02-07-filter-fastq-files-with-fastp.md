@@ -49,8 +49,9 @@ https://github.com/OpenGene/fastp
     <h4>Step 3: Download filtered files and summary html</h4>
     <button onclick="download()">Download the filtered fastq file(s)</button><br><br>
 </div>
-<pre><code id="stdout"></code></pre>
 <p id="error" style="color:red;"></p>
+<pre><code id="stdout"></code></pre>
+
 
 
 ## Acknowledgement
