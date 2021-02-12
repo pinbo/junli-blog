@@ -65,3 +65,7 @@ BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please en
 - Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
 
 - Other browers do not seem to support this yet.
+
+## Acknowledgement
+
+Thank [Robert Aboukhalil](https://github.com/robertaboukhalil) for his development of [aioli and biowasm](https://github.com/biowasm). I successfully compiled **bwa** and **samtools**  by learning the patch and compiling script form [biowasm](https://github.com/biowasm/biowasm).
