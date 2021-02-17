@@ -39,10 +39,10 @@ hasCJKLanguage = true
     name = "Links"
     url = "/links/"
     weight = 4
-[[menu.main]]
-    name = "Categories"
-    url = "/categories/"
-    weight = 5
+#[[menu.main]]
+#    name = "Categories"
+#    url = "/categories/"
+#    weight = 5
 [[menu.main]]
     name = "Tags"
     url = "/tags/"
@@ -51,6 +51,10 @@ hasCJKLanguage = true
     name = "博客"
     url = "/cn/"
     weight = 7
+[[menu.main]]
+    name = "Contact Me"
+    url = "/contact_me/"
+    weight = 8
 
 [params]
     description = "A website to share knowledge and ideas."
