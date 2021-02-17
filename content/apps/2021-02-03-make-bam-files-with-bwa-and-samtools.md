@@ -56,6 +56,8 @@ samtools sort out.sam > out.bam
 samtools index out.bam
 ```
 
+Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-web](https://github.com/pinbo/bwa-samtools-web).
+
 ### Enable SIMD for your browser
 
 BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
