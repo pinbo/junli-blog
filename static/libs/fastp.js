@@ -66,7 +66,7 @@ async function filter(){
     }
     if (document.getElementById("merge").checked){
         if ((filenames.length == 1 && document.getElementById("interleaved").checked) || filenames.length == 2){
-            output = output.replace("filtered", "filtered_unmerged") + " -m --merged_out filtered_merged_" + filenames[0];
+            output = output.replace(/filtered/g, "filtered_unmerged") + " -m --merged_out filtered_merged_" + filenames[0];
         } else {
             alert("ERROR: Your input file cannot be merged! Make your input is paired end: read1 and read2 fastq files OR 1 interleaved fastq file!");
             return 1;
