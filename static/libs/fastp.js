@@ -66,7 +66,7 @@ async function filter(){
     }
     if (document.getElementById("merge").checked){
         if ((filenames.length == 1 && document.getElementById("interleaved").checked) || filenames.length == 2){
-            output += " -m --merged_out filtered_merged_" + filenames[0];
+            output = output.replace("filtered", "filtered_unmerged") + " -m --merged_out filtered_merged_" + filenames[0];
         } else {
             alert("ERROR: Your input file cannot be merged! Make your input is paired end: read1 and read2 fastq files OR 1 interleaved fastq file!");
             return 1;
@@ -74,7 +74,10 @@ async function filter(){
     }
     if (document.getElementById("interleaved_out").checked){
         if (document.getElementById("merge").checked){
-            document.getElementById("error").innerHTML = "Warning: merged reads cannot be interleaved. Ignored.";
+            document.getElementById("error").innerHTML = "Warning: merged reads cannot be interleaved. Option Ignored.";
+            document.getElementById("interleaved_out").checked = false;
+        } else if (filenames.length == 1 && !document.getElementById("interleaved").checked) {
+            document.getElementById("error").innerHTML = "Warning: Single end reads cannot be interleaved. If your input is an interleaved fastq, please check the 'Interleaved PE'. Option Ignored.";
             document.getElementById("interleaved_out").checked = false;
         } else {
             output = "--interleaved_out -o filtered_interleaved_" + filenames[0];
