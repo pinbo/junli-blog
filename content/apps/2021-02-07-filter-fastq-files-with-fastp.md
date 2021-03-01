@@ -56,7 +56,7 @@ https://github.com/OpenGene/fastp
 
 ## Acknowledgement
 1. **fastp**: https://github.com/OpenGene/fastp
-2. **WebAssembly of fastp** was downloaded from https://cdn.biowasm.com/
+2. **WebAssembly of fastp** was compiled from source based on the patch file of https://github.com/biowasm/biowasm/tree/main/tools/fastp with additional option `--interleaved_out` added.
 
 <script src="/tools/aioli/latest/aioli.js"></script>
 <script src="/libs/FileSaver.min.js"></script>
