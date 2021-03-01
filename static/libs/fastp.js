@@ -62,11 +62,26 @@ async function filter(){
     let interleaved = "";
     if (document.getElementById("interleaved").checked){
         interleaved = "--interleaved_in";
-        output = "-o filtered_R1_" + filenames[0] + " -O filtered_R2_" + filenames[1];
+        output = "-o filtered_R1_" + filenames[0] + " -O filtered_R2_" + filenames[0];
     }
-    if (document.getElementById("interleaved_out").checked){output = "--interleaved_out -o filtered_interleaved_" + filenames[0]}
+    if (document.getElementById("merge").checked){
+        if ((filenames.length == 1 && document.getElementById("interleaved").checked) || filenames.length == 2){
+            output += " -m --merged_out filtered_merged_" + filenames[0];
+        } else {
+            alert("ERROR: Your input file cannot be merged! Make your input is paired end: read1 and read2 fastq files OR 1 interleaved fastq file!");
+            return 1;
+        }
+    }
+    if (document.getElementById("interleaved_out").checked){
+        if (document.getElementById("merge").checked){
+            document.getElementById("error").innerHTML = "Warning: merged reads cannot be interleaved. Ignored.";
+            document.getElementById("interleaved_out").checked = false;
+        } else {
+            output = "--interleaved_out -o filtered_interleaved_" + filenames[0];
+        }
+    }
     let baseQuality = "-q " + document.getElementById("basequality").value;
-    let addopt = document.getElementById("addopt").innerHTML.replace(/(?:\r\n|\r|\n)/g, " ");
+    let addopt = document.getElementById("addopt").value.replace(/(?:\r\n|\r|\n)/g, " ");
     let cmd = [input, interleaved, adapterTim, baseQuality, addopt, output].join(" ").replace(/  +/g, ' ');
 
     fastp.setwd("/data") // set working directory
@@ -75,7 +90,7 @@ async function filter(){
     let dd = await fastp.exec(cmd);
     document.getElementById("stdout").innerHTML = dd.stderr;
 
-    document.getElementById("download-btn").style.visibility = "visible";
+    document.getElementById("download-btn").style.display = "block";
 }
 
 // download all the bams as a zip file
