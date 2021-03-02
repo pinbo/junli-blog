@@ -74,7 +74,7 @@ async function samtoBam(samfile){ // samfile full path
     let std = await samtools.exec(cmd);//.then(() => samtools.exec("index " + bamfile));
     console.log("STDERR\n", std.stderr);
     samtools.rm(samfile); // remove sam files after getting the bam files to save space
-    let indexfile = bamfile + ".bai";
+    // let indexfile = bamfile + ".bai";
     let cmd2 = ["index", bamfile].join(' ');
     console.log(cmd2);
     let std2 = await samtools.exec("index " + bamfile);
@@ -150,7 +150,7 @@ async function makeSam(){
     let suffix =  document.getElementById("suffix").value; // R1 suffix
     // bwa index reference
     // let wd = "/bwa2/examples/";
-    let wd = "/data/";
+    // let wd = "/data/";
     console.log("FASTQ files\n", filenames);
     console.log(reference);
     let promises = [];
@@ -169,15 +169,14 @@ async function makeSam(){
 // make sam file with bwa mem
 // bwamem("2", "references.fa").then(d => console.log(d));
 async function bwamem (prefix, reference) {
-    // let wd = "/bwa2/examples/";
     let suffix =  document.getElementById("suffix").value; // R1 suffix
     let R2suffix = suffix.replace("R1", "R2");
-    let wd = "/data/";
-    let R1 = wd + prefix + suffix;
-    let R2 = wd + prefix + R2suffix;
-    let out = wd + "out_" + prefix + ".sam";
+    bwa.setwd("/data/"); // set working directory
+    let R1 = prefix + suffix;
+    let R2 = prefix + R2suffix;
+    let out = "out_" + prefix + ".sam";
     // let rg = "-R \@RG\\tID:" + prefix + "\\tSM:" + prefix; // read group tag
-    reference = wd + reference;
+    reference = reference;
     // bwa mem
     let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
     console.log(cmd);
