@@ -176,10 +176,10 @@ async function bwamem (prefix, reference) {
     let R1 = wd + prefix + suffix;
     let R2 = wd + prefix + R2suffix;
     let out = wd + "out_" + prefix + ".sam";
-    let rg = "-R \@RG\\tID:" + prefix + "\\tSM:" + prefix; // read group tag
+    // let rg = "-R \@RG\\tID:" + prefix + "\\tSM:" + prefix; // read group tag
     reference = wd + reference;
     // bwa mem
-    let cmd = ["mem", rg, reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
+    let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);
