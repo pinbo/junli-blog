@@ -20,7 +20,7 @@ function download(){
 	zip.generateAsync({type:"blob"})
 		.then(function(content) {
 			// see FileSaver.js
-			saveAs(content, "decomplexed-samples.zip");
+			saveAs(content, "demultiplexed-samples.zip");
 		});
 }
 
