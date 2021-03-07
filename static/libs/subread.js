@@ -51,7 +51,8 @@ async function makeBam (prefix, index="my_index") {
     document.getElementById("bam").innerHTML = "... Making bam file " + out;
     console.log(std.stderr);
     console.log("Finished writing ", out);
-    document.getElementById("stderr").value += std.stderr + "\n";
+    document.getElementById("stderr").value += std.stderr + "\nCreated " + out;
+    scrollLogToBottom("stderr");
 }
 
 function loadFq(event)
@@ -241,4 +242,10 @@ function downloadAll(){
     // merge_indels();
     // merge_sv();
     // download_stderr();
+}
+
+// function to show the bottom of the textarea
+function scrollLogToBottom(id) {
+    logTa = document.getElementById(id)
+    logTa.scrollTop = logTa.scrollHeight;
 }
