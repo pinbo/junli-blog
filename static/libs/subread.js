@@ -51,7 +51,7 @@ async function makeBam (prefix, index="my_index") {
     document.getElementById("bam").innerHTML = "... Making bam file " + out;
     console.log(std.stderr);
     console.log("Finished writing ", out);
-    document.getElementById("stderr").value += std.stderr + "\nCreated " + out;
+    document.getElementById("stderr").value += std.stderr + "Created " + out + "\n";
     scrollLogToBottom("stderr");
 }
 
@@ -81,6 +81,7 @@ async function loadRef(event)
     if (ff.length < 8) {
         document.getElementById("indexErr").innerHTML = "Indexing the reference FAILED. Please refresh the page to retry!";
     }
+    scrollLogToBottom("stderr");
 }
 
 // delay before
