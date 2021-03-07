@@ -14,6 +14,7 @@ tags:
 FASTP is a tool designed to provide fast all-in-one preprocessing for FastQ files.  
 Please check out the fastp github page for some detailed information:  
 https://github.com/OpenGene/fastp
+<p id=recommend" style="color:darkviolet;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
 
 <h4>Step 1: load fastq files and set filtering options</h4>
 <div id="options" style="font-size:90%;color:blue;">
