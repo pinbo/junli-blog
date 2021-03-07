@@ -16,7 +16,7 @@ tags:
 This tool is for **paired end** fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz).  
 Please run the 3 steps below to get the indexed bams from a list of fastq files.  
 **Please make sure you have at least 1.5 Gb of free memory.**  
-**Please use a new private brower window (open from the menu at the topright corner) to avoid troubles caused by cookies and caches.** 
+<p id=recommend" style="color:pink;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
 
 <label for="suffix">Provide the suffix of your fastq files:</label><br>
 Read 1: <input id="suffix1" value="_R1_001.fastq.gz" size="40"><br>
