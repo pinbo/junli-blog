@@ -255,7 +255,7 @@ class Aioli
     // ------------------------------------------------------------------------
     // Mount a File, Blob or string URL
     // ------------------------------------------------------------------------
-    static async mount(file, name=null, directory=null)
+    static async mount(file, name=null, directory=null, worker=null) // junli added worker, so it only add files to 1 worker
     {
         let mountedFile = {};
 
@@ -296,17 +296,9 @@ class Aioli
         mountedFile.path = `${directory}/${name}`;
         mountedFile.directory = directory;
         Aioli.files = Aioli.files.concat(mountedFile);
-
-        // Notify attached workers to mount a new file?
-        let promises = [];
-        for(let worker of Aioli.workers)
-            promises.push(worker.send("mount", mountedFile));
-        // symlink
-        // for(let file of Aioli.files)
-        //     FS.symlink(file.path, "/bwa2/example/" + file.name);
-
-        const d = await Promise.all(promises);
-        return await new Promise(resolve => resolve(mountedFile));
+        worker = worker || Aioli.workers[0];//default is the 1st 1
+        const d = await worker.send("mount", mountedFile);
+        return d;
     }
 
 
