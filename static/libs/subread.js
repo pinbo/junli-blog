@@ -57,8 +57,7 @@ async function makeBam (prefix, index="my_index") {
 
 function loadFq(event)
 {
-    // document.getElementById("demoFq").innerHTML = "";
-    // var filenames = [];
+    document.getElementById("demoFq").innerHTML = "";
     var files = event.target.files;
     for (var i = 0, f; f = files[i]; i++) {
         Aioli.mount(f, null, null, Aioli.workers[1]);// only to worker align
