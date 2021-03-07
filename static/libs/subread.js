@@ -236,6 +236,7 @@ function download_stderr(){
 }
 // download all files at once
 function downloadAll(){
+    document.getElementById("download").innerHTML = "... Preparing files for downloading. It may take some time ...";
     downloadBam();
     // merge_indels();
     // merge_sv();
