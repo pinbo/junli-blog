@@ -147,18 +147,15 @@ async function makeSam(){
     // let reference = document.getElementById("demoRef").innerHTML.split("\t")[0];
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
     let reference = document.getElementById("demoRef").innerHTML;
-    let suffix =  document.getElementById("suffix").value; // R1 suffix
-    // bwa index reference
-    // let wd = "/bwa2/examples/";
-    // let wd = "/data/";
+    let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
     console.log("FASTQ files\n", filenames);
     console.log(reference);
     let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
-        if (ff.includes(suffix)) {
+        if (ff.includes(suffix1)) {
             console.log("Processing: ", ff);
-            let prefix = ff.replace(suffix, "");
+            let prefix = ff.replace(suffix1, "");
             promises.push(bwamem(prefix, reference));
         }
     }
@@ -169,11 +166,11 @@ async function makeSam(){
 // make sam file with bwa mem
 // bwamem("2", "references.fa").then(d => console.log(d));
 async function bwamem (prefix, reference) {
-    let suffix =  document.getElementById("suffix").value; // R1 suffix
-    let R2suffix = suffix.replace("R1", "R2");
+    let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
+    let suffix2 = document.getElementById("suffix1").value;
     bwa.setwd("/data/"); // set working directory
-    let R1 = prefix + suffix;
-    let R2 = prefix + R2suffix;
+    let R1 = prefix + suffix1;
+    let R2 = prefix + suffix2;
     let out = "out_" + prefix + ".sam";
     // let rg = "-R \@RG\\tID:" + prefix + "\\tSM:" + prefix; // read group tag
     reference = reference;
