@@ -41,7 +41,7 @@ After loading the template fasta file and all the fastq files, now we will use [
 <p id="download" style="color:pink;font-style: italic;"></p>
 
 **Running Summary** [you can also check the debug information with the brower developer tool (Ctrl+Shifp+I for Chrome and Firefox)]:
-<textarea id="stderr" name="stderr" rows="20" cols="100" style="font-family: monospace;font-size: 10px;" placeholder="Software running informaiton will be shown here"></textarea><br>
+<textarea id="stderr" name="stderr" rows="27" cols="100" style="font-family: monospace;font-size: 10px;" placeholder="Software running informaiton will be shown here"></textarea><br>
 
 <script src="/tools/aioli/latest/aioli.js"></script>
 <script src="/libs/subread.js"></script>
