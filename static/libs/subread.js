@@ -109,15 +109,22 @@ async function downloadBam(){
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam")) {
             console.log("Prepare downloading ", f);
-            let aa = await align.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file(f, d));
+            let aa = await align.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
             promises.push(aa);
         }
     }
+    let bb = await download_stderr().then(d => d.arrayBuffer()).then(d => zip.file("Subread_running_summary.txt", d));
+    promises.push(bb);
+    let cc = await merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_less_or_equal_16_bp.csv", d));
+    promises.push(cc);
+    let dd = await merge_sv().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_more_than_16_bp.csv", d));
+    promises.push(dd);
+    
     const d = await Promise.all(promises);
     console.log("Finished preparing downloanding bams!");
 	zip.generateAsync({type:"blob"})
 		.then(function(content) {
-			saveAs(content, "indexed_bams.zip");
+			saveAs(content, "bams_and_indel_summary.zip");
 		});
 }
 
@@ -155,7 +162,8 @@ async function merge_indels(){
     const d = await Promise.all(promises);
     indelSummary += promises.join("");
     let blob = new Blob([indelSummary], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, "Summary_of_indels_less_or_equal_16_bp.csv");
+    // saveAs(blob, "Summary_of_indels_less_or_equal_16_bp.csv");
+    return blob;
 }
 
 // process indel vcf content for only 1 file
@@ -190,7 +198,8 @@ async function merge_sv(){ // structure variations and big indels > 15bp
     const d = await Promise.all(promises);
     indelSummary += promises.join("");
     let blob = new Blob([indelSummary], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, "Summary_of_indels_more_than_16_bp.csv");
+    // saveAs(blob, "Summary_of_indels_more_than_16_bp.csv");
+    return blob;
 }
 
 // process indel vcf content for only 1 file
@@ -222,12 +231,13 @@ async function process_sv_vcf(f){//filename
 function download_stderr(){
     runningSummary = document.getElementById("stderr").value;
     let blob = new Blob([runningSummary], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, "Software_running_summary.txt");
+    // saveAs(blob, "Software_running_summary.txt");
+    return blob;
 }
 // download all files at once
 function downloadAll(){
     downloadBam();
-    merge_indels();
-    merge_sv();
-    download_stderr();
+    // merge_indels();
+    // merge_sv();
+    // download_stderr();
 }
