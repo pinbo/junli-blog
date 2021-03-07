@@ -113,11 +113,11 @@ async function downloadBam(){
             promises.push(aa);
         }
     }
-    let bb = await download_stderr().then(d => d.arrayBuffer()).then(d => zip.file("Subread_running_summary.txt", d));
+    let bb = await download_stderr().arrayBuffer().then(d => zip.file("Subread_running_summary.txt", d));
     promises.push(bb);
-    let cc = await merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_less_or_equal_16_bp.csv", d));
+    let cc = await merge_indels().arrayBuffer().then(d => zip.file("Summary_of_indels_less_or_equal_16_bp.csv", d));
     promises.push(cc);
-    let dd = await merge_sv().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_more_than_16_bp.csv", d));
+    let dd = await merge_sv().arrayBuffer().then(d => zip.file("Summary_of_indels_more_than_16_bp.csv", d));
     promises.push(dd);
     
     const d = await Promise.all(promises);
