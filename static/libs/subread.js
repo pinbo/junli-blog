@@ -76,7 +76,7 @@ async function loadRef(event)
     await delay(500);
     buildindex.ls("/data").then(console.log);
     // index
-    buildindex.exec("-M 1000 -o /data/my_index /data/" + f.name)
+    buildindex.exec("-M 500 -o /data/my_index /data/" + f.name)
     .then(std => document.getElementById("stderr").value += std.stderr + "\n");
     let ff = await buildindex.ls("/data");
     if (ff.length < 8) {
