@@ -66,6 +66,8 @@ subread-align -i my_index -r xxxx_R1_001.fastq.gz -R xxxx_R2_001.fastq.gz
 
 Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-web](https://github.com/pinbo/bwa-samtools-web).
 
+If this web app did not work for you,  you can also try the [R script](/libs/call_indels_with_Rsubread.R) that uses Rsubread.
+
 ## Acknowledgement
 
 - [subread](http://subread.sourceforge.net/) is a great software for calling big indels.
