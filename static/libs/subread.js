@@ -4,31 +4,19 @@ document.getElementById("fastq").addEventListener("change", loadFq, false);
 let align = new Aioli("subread-align/2.0.1");
 let buildindex = new Aioli("subread-buildindex/2.0.1");
 // Initialize
-// buildindex will be Aioli.workers[0]
-// align will be Aioli.workers[1]
-buildindex
-.init()
-.then(() => align.init())
+buildindex.init();
+align.init()
 .then(() => align.exec("-v"))
 .then(d => console.log("STDOUT", d.stdout, "STDERR", d.stderr));
 
-// align will be Aioli.workers[1]
-// align
-// .init()
-// .then(() => align.exec("-v"))
-// .then(d => console.log(d.stdout, "ERRRRR", d.stderr));
-
 // make all bams
 async function makeAll(){
-    await transferIndex();
-    await delay(1000);
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
     let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
         if (ff.includes(suffix1)) {
-            // document.getElementById("bam").innerHTML = "Processing: " + ff;
             let prefix = ff.replace(suffix1, "");
             promises.push(makeBam(prefix));
         }
@@ -62,7 +50,7 @@ function loadFq(event)
     document.getElementById("demoFq").innerHTML = "";
     var files = event.target.files;
     for (var i = 0, f; f = files[i]; i++) {
-        Aioli.mount(f, null, null, Aioli.workers[1]);// only to worker align
+        Aioli.mount(f, null, null, align);// only to worker align
         document.getElementById("demoFq").innerHTML += f.name + "\t";
     }
 }
@@ -72,17 +60,20 @@ async function loadRef(event)
     let files = event.target.files;
     let f = files[0];
     document.getElementById("demoRef").innerHTML = f.name;
-    await Aioli.mount(f, null, null, Aioli.workers[0]); // only to worker buildindex
+    await Aioli.mount(f, null, null, buildindex); // only to worker buildindex
     await delay(500);
     buildindex.ls("/data").then(console.log);
     // index
-    buildindex.exec("-M 500 -o /data/my_index /data/" + f.name)
+    buildindex.exec("-M 1000 -o /data/my_index /data/" + f.name)
     .then(std => document.getElementById("stderr").value += std.stderr + "\n");
     let ff = await buildindex.ls("/data");
     if (ff.length < 8) {
         document.getElementById("indexErr").innerHTML = "Indexing the reference FAILED. Please refresh the page to retry!";
+    } else {
+        scrollLogToBottom("stderr");
+        await transferIndex();
+        buildindex.worker.terminate();
     }
-    scrollLogToBottom("stderr");
 }
 
 // delay before
@@ -93,14 +84,12 @@ async function transferIndex(){
     // let promises = [];
     for (var i = 0, f; f = files[i]; i++) {
         if (f.includes("my_index")) {
-            // promises.push(Aioli.transfer("/data/" + f, "/data/" + f, Aioli.workers[0], Aioli.workers[1]));
-            Aioli.transfer("/data/" + f, "/data/" + f, Aioli.workers[0], Aioli.workers[1]);
+            Aioli.transfer("/data/" + f, "/data/" + f, buildindex, align);
         }
     }
     // await Promise.all(promises);
     await delay(1000);
     console.log("Finished transfering files!");
-    return 0;
 }
 
 // download all the output files as a zip file
