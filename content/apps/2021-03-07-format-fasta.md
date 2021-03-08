@@ -9,11 +9,11 @@ tags:
   - fasta
 ---
 
-This tool format a fasta file to fix line length, which is required by some software, such as `subread`.
+This tool format a fasta file to fixed line length, which is required by some software, such as `subread`.
 
 <label for="fasta">Select a FASTA file</label>:
 <input type="file" id="fasta"/><br>
-<label for="line_width">Line width to format (bp)</label>
+<label for="line_width">Line length to format (bp)</label>
 <input id="line_width" value="60" size="4"><br>
 </form>
 <button id="download-btn" onclick="download()">Download formatted fasta file</button>
