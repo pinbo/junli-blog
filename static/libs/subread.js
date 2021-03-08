@@ -5,16 +5,18 @@ let align = new Aioli("subread-align/2.0.1");
 let buildindex = new Aioli("subread-buildindex/2.0.1");
 // Initialize
 // buildindex will be Aioli.workers[0]
+// align will be Aioli.workers[1]
 buildindex
 .init()
-.then(() => buildindex.exec(""))
-.then(d => console.log(d.stdout, "ERRRRR", d.stderr));
+.then(() => align.init())
+.then(() => align.exec("-v"))
+.then(d => console.log("STDOUT", d.stdout, "STDERR", d.stderr));
 
 // align will be Aioli.workers[1]
-align
-.init()
-.then(() => align.exec("-v"))
-.then(d => console.log(d.stdout, "ERRRRR", d.stderr));
+// align
+// .init()
+// .then(() => align.exec("-v"))
+// .then(d => console.log(d.stdout, "ERRRRR", d.stderr));
 
 // make all bams
 async function makeAll(){
