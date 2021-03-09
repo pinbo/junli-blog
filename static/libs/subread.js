@@ -149,13 +149,20 @@ async function indexAll(){
 // samtools.downloadBinary("/samtools/examples/out2.bam.bai").then(d => saveAs(d, "download.bam"));
 async function downloadBam(){
     let files = await samtools.ls("/data"); // an array of files
+    let fn = files.length; // if no files were transfered promise.all(making bam) was blocked, download files from align /data
+    if (fn == 2) files = await align.ls("/data");
     let zip = new JSZip();
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam")) {
             console.log("Prepare downloading ", f);
-            let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
-            promises.push(aa);
+            if (fn > 2){
+                let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
+                promises.push(aa);
+            } else {
+                let aa = align.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
+                promises.push(aa);
+            }
         }
     }
     let bb = download_stderr().arrayBuffer().then(d => zip.file("Subread_running_summary.txt", d));
@@ -165,7 +172,7 @@ async function downloadBam(){
     let dd = merge_sv().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_more_than_16_bp.csv", d));
     promises.push(dd);
     
-    const d = await Promise.all(promises);
+    await Promise.all(promises);
     console.log("Finished preparing downloanding bams!");
 	zip.generateAsync({type:"blob"})
 		.then(function(content) {
