@@ -13,18 +13,17 @@ align.init()
 async function makeAll(){
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
-    // let promises = [];
+    document.getElementById("download-btn").style.visibility = "visible"; // in case promise.all did not finish
+    let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
         if (ff.includes(suffix1)) {
             let prefix = ff.replace(suffix1, "");
-            // promises.push(makeBam(prefix));
-            makeBam(prefix);
+            promises.push(makeBam(prefix));
         }
     }
-    // const dd = await Promise.all(promises);
-    // document.getElementById("bam").innerHTML = "All the files have been processed!";
-    document.getElementById("download-btn").style.visibility = "visible";
+    const dd = await Promise.all(promises);
+    document.getElementById("bam").innerHTML = "All the files have been processed!";
 }
 
 // make single bam
