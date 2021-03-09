@@ -25,6 +25,9 @@ Please run the 3 steps below to get the indexed bams from a list of fastq files.
 <input id="suffix2" value="_R2_001.fastq.gz" size="40"><br>
 
 <h4>I. Load reference file (a fasta file)</h4>
+
+**Requirement**: each line should be <1000 bp, othewise please [format your fasta here](/apps/format-fasta/).
+
 <input id="reference" type="file">
 
 <h4>II. Load demultiplexed fastq(.gz) files</h4>
