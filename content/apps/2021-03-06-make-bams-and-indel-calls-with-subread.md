@@ -40,6 +40,7 @@ After loading the template fasta file and all the fastq files, now we will use [
 
 <button onclick="makeAll()">Map reads and Make bam files</button>
 <p id="bam" style="color:pink;font-style: italic;"></p>
+<p id="bamErr" style="color:red;font-style: italic;"></p>
 <button id="download-btn" onclick="downloadAll()" style="visibility:hidden">Download indexed bam files</button>
 <p id="download" style="color:pink;font-style: italic;"></p>
 
