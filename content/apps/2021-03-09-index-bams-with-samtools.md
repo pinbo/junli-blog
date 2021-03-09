@@ -20,7 +20,7 @@ This tool is for indexing small bam files with `samtools index`. All the operati
 <input id="fastq" type="file" multiple>
 <p id="demoFq" style="display:none;"></p>
 
-<h4>III. Make index</h4>
+<h4>II. Make index</h4>
 
 `.bai` indexes will be created with `samtools index`.
 
