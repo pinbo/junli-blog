@@ -57,8 +57,9 @@ class Aioli
 
             // Separate URLs to make it easier to test modifying Aioli while using the CDN for Wasm modules
             // urlModule: `https://cdn.biowasm.com/${config.module}/${config.version || "latest"}`,
-            urlModule: `https://junli.netlify.app/tools/${config.module}/${config.version || "latest"}`,
-            // urlModule: `./${config.module}/${config.version || "latest"}`, // does not work
+            // urlModule: `https://junli.netlify.app/tools/${config.module}/${config.version || "latest"}`,
+            urlModule: `${window.location.origin}/tools/${config.module}/${config.version || "latest"}`,
+            // urlModule: `/tools/${config.module}/${config.version || "latest"}`, // does not work
             // urlAioli: "https://cdn.biowasm.com/aioli/latest/aioli.worker.js",  // to use a local worker.js, specify "./aioli.worker.js"
             urlAioli: "/tools/aioli/latest/aioli.worker.js"
         };
