@@ -25,10 +25,10 @@ This tool is for indexing small bam files with `samtools index`. All the operati
 `.bai` indexes will be created with `samtools index`.
 
 <button onclick="makeAll()">Index bams</button>
-<p id="bam" style="color:pink;font-style: italic;"></p>
+<p id="bam" style="color:tomato;font-style: italic;"></p>
 <p id="indexErr" style="color:red;"></p>
 <button id="download-btn" onclick="downloadBam()" style="visibility:hidden">Download indexed bam files</button>
-<p id="download" style="color:pink;font-style: italic;"></p>
+<p id="download" style="color:tomato;font-style: italic;"></p>
 
 <script src="/tools/aioli/latest/aioli.js"></script>
 <script src="/libs/samtools-index.js"></script>
