@@ -29,6 +29,7 @@ async function makeAll(){
         }
     }
     await Promise.all(promises);
+    await transferBam();
     await indexAll(); // wait indexing
     document.getElementById("bam").innerHTML = "All the files have been processed!";
 }
