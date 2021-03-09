@@ -66,7 +66,9 @@ subread-align -i my_index -r xxxx_R1_001.fastq.gz -R xxxx_R2_001.fastq.gz
 
 Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-web](https://github.com/pinbo/bwa-samtools-web).
 
-If this web app did not work for you,  you can also try the [R script](/libs/call_indels_with_Rsubread.R) that uses Rsubread.
+### Notes
+- If this web app did not work for you,  you can also try the [R script](/libs/call_indels_with_Rsubread.R) that uses Rsubread.
+- If IGV cannot load your bams (or shows nothing), it is possible due to bad index. You can remake the bam indexes with the tool [Index bams with SAMTOOLS](/apps/index-bams-with-samtools/). Then replace the old indexes.
 
 ## Acknowledgement
 
