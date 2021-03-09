@@ -13,16 +13,17 @@ align.init()
 async function makeAll(){
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
-    let promises = [];
+    // let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
         if (ff.includes(suffix1)) {
             let prefix = ff.replace(suffix1, "");
-            promises.push(makeBam(prefix));
+            // promises.push(makeBam(prefix));
+            makeBam(prefix);
         }
     }
-    await Promise.all(promises);
-    document.getElementById("bam").innerHTML = "All the files have been processed!";
+    // const dd = await Promise.all(promises);
+    // document.getElementById("bam").innerHTML = "All the files have been processed!";
     document.getElementById("download-btn").style.visibility = "visible";
 }
 
@@ -38,11 +39,12 @@ async function makeBam (prefix, index="my_index") {
     let cmd = ["-i", index, "-r", R1, "-R", R2, "-o", out, "-t 1 -I 16 --sv --sortReadsByCoordinates"].join(' ');
     console.log(cmd);
     let std = await align.exec(cmd);
-    document.getElementById("bam").innerHTML = "... Making bam file " + out;
+    document.getElementById("bam").innerHTML = "Finished making bam file " + out;
     console.log(std.stderr);
     console.log("Finished writing ", out);
     document.getElementById("stderr").value += std.stderr + "Created " + out + "\n";
     scrollLogToBottom("stderr");
+    return 0;
 }
 
 function loadFq(event)
@@ -101,15 +103,15 @@ async function downloadBam(){
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam")) {
             console.log("Prepare downloading ", f);
-            let aa = await align.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
+            let aa = align.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
             promises.push(aa);
         }
     }
-    let bb = await download_stderr().arrayBuffer().then(d => zip.file("Subread_running_summary.txt", d));
+    let bb = download_stderr().arrayBuffer().then(d => zip.file("Subread_running_summary.txt", d));
     promises.push(bb);
-    let cc = await merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_less_or_equal_16_bp.csv", d));
+    let cc = merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_less_or_equal_16_bp.csv", d));
     promises.push(cc);
-    let dd = await merge_sv().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_more_than_16_bp.csv", d));
+    let dd = merge_sv().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_more_than_16_bp.csv", d));
     promises.push(dd);
     
     const d = await Promise.all(promises);
