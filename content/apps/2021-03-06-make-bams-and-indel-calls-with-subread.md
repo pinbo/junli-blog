@@ -39,10 +39,10 @@ Please run the 3 steps below to get the indexed bams from a list of fastq files.
 After loading the template fasta file and all the fastq files, now we will use [subread](http://subread.sourceforge.net/) to create indexed bam files for viewing in the software [IGV](https://software.broadinstitute.org/software/igv/download) and call indels and structure variations.
 
 <button onclick="makeAll()">Map reads and Make bam files</button>
-<p id="bam" style="color:pink;font-style: italic;"></p>
+<p id="bam" style="color:Tomato;font-style: italic;"></p>
 <p id="bamErr" style="color:red;font-style: italic;"></p>
 <button id="download-btn" onclick="downloadAll()" style="visibility:hidden">Download indexed bam files</button>
-<p id="download" style="color:pink;font-style: italic;"></p>
+<p id="download" style="color:Tomato;font-style: italic;"></p>
 
 **Running Summary** [you can also check the debug information with the brower developer tool (Ctrl+Shift+I for Chrome and Firefox)]:
 <textarea id="stderr" name="stderr" rows="28" cols="85" style="font-family: monospace;font-size: 12px;" placeholder="Software running informaiton will be shown here"></textarea><br>
