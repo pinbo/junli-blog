@@ -16,7 +16,7 @@ function formatFasta(evt) {
         var line;
         let width = parseInt(document.getElementById("line_width").value);
         for(;;){
-            if(i==lines.length || (line=lines[i])[0]=='>'){
+            if(i==lines.length || (line=lines[i].trim())[0]=='>'){// trim to avoid space at the beginning
                 if(dna.length != 0){
                     pre.appendChild(document.createTextNode(title+"\n"));
                     while(dna.length != 0){
@@ -26,10 +26,10 @@ function formatFasta(evt) {
                     }
                 }
                 if(i===lines.length) break;
-                title=line;
+                title=line.replace(/> +/, '>');// in case something like "> seq1"
                 dna="";
             }
-            else dna+=line.trim();
+            else dna+=line.trim().replace(/ +/g,""); // in case space inside
             ++i;
         }
     };
