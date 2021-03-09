@@ -3,10 +3,16 @@ document.getElementById("fastq").addEventListener("change", loadFq, false);
 
 let align = new Aioli("subread-align/2.0.1");
 let buildindex = new Aioli("subread-buildindex/2.0.1");
+let samtools = new Aioli("samtools/latest"); // for indexing only
 // Initialize
 buildindex.init();
+
 align.init()
 .then(() => align.exec("-v"))
+.then(d => console.log("STDOUT", d.stdout, "STDERR", d.stderr));
+
+samtools.init()
+.then(() => samtools.exec("index"))
 .then(d => console.log("STDOUT", d.stdout, "STDERR", d.stderr));
 
 // make all bams
@@ -22,7 +28,8 @@ async function makeAll(){
             promises.push(makeBam(prefix));
         }
     }
-    const dd = await Promise.all(promises);
+    await Promise.all(promises);
+    await indexAll(); // wait indexing
     document.getElementById("bam").innerHTML = "All the files have been processed!";
 }
 
@@ -90,19 +97,63 @@ async function transferIndex(){
     }
     // await Promise.all(promises);
     await delay(1000);
-    console.log("Finished transfering files!");
+    console.log("Finished transfering index files!");
 }
+
+// transfer bam files to samtools worker for making index
+// because I found a lot of indexes are broken from subread align
+async function transferBam(){
+    let files = await align.ls("/data"); // an array of files
+    // let promises = [];
+    for (var i = 0, f; f = files[i]; i++) {
+        if (f.endsWith(".bam")) {
+            Aioli.transfer("/data/" + f, "/data/" + f, align, samtools);
+        }
+    }
+    // await Promise.all(promises);
+    await delay(1000);
+    console.log("Finished transfering bam files!");
+}
+
+// index single bams
+async function indexBam (filename) {
+    let cmd = ["index", filename].join(' ');
+    console.log(cmd);
+    let std = await samtools.exec(cmd);
+    document.getElementById("bam").innerHTML = "Finished indexing " + filename;
+    document.getElementById("bamErr").innerHTML = std.stderr;
+    console.log(std.stderr);
+}
+
+// index all bams
+// make all bams
+async function indexAll(){
+    let wd = "/data/";
+    samtools.setwd(wd);
+    let files = await samtools.ls("/data"); // an array of files
+    let promises = [];
+    for (i = 0; i < files.length; i++) {
+        let ff = files[i];
+        if (ff.endsWith(".bam")) {
+            promises.push(indexBam(ff));
+        }
+    }
+    return Promise.all(promises);
+    // document.getElementById("bam").innerHTML = "All the files have been processed!";
+    // document.getElementById("download-btn").style.visibility = "visible";
+}
+
 
 // download all the output files as a zip file
 // samtools.downloadBinary("/samtools/examples/out2.bam.bai").then(d => saveAs(d, "download.bam"));
 async function downloadBam(){
-    let files = await align.ls("/data"); // an array of files
+    let files = await samtools.ls("/data"); // an array of files
     let zip = new JSZip();
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam")) {
             console.log("Prepare downloading ", f);
-            let aa = align.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
+            let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams_by_subread/" + f, d));
             promises.push(aa);
         }
     }
