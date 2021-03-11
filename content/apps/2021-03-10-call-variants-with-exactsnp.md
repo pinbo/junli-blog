@@ -21,11 +21,11 @@ This tool is for calling SNPs and small indels from bam files with subread tool 
 <input id="reference" type="file"><br>
 <p id="demoRef" style="display:none;"></p>
 
-<h4>I. Load bam files</h4>
+<h4>II. Load bam files</h4>
 <input id="fastq" type="file" multiple>
 <p id="demoFq" style="display:none;"></p>
 
-<h4>II. Call variants</h4>
+<h4>III. Call variants</h4>
 
 One vcf file will be created for each bam. A summary tab-delimited text file merging all vcf files will be created too.
 
