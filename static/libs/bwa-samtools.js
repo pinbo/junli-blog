@@ -5,7 +5,13 @@ bwa
 .init()
 .then(() => bwa.exec("index"))
 .then(d => console.log(d.stdout, "ERRRRR", d.stderr));
-
+// to call variants
+let exactSNP = new Aioli("exactSNP/2.0.1");
+// exactSNP will be Aioli.workers[1]
+exactSNP
+.init()
+.then(() => exactSNP.exec("-v"))
+.then(d => console.log("STDOUT\n", d.stdout, "STDERR\n", d.stderr));
 // download all the bams as a zip file
 // samtools.downloadBinary("/samtools/examples/out2.bam.bai").then(d => saveAs(d, "download.bam"));
 async function downloadBam(){
@@ -15,24 +21,29 @@ async function downloadBam(){
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam.bai")) {
-            // let indexfile = "/data/" + f;
-            let bamfile = f.replace(".bai", "");
-            console.log("Prepare downloading ", bamfile, " and ", f);
-            // let indexblob = samtools.downloadBinary("/data/" + f);
-            // let bamblob = samtools.downloadBinary("/data/" + bamfile);
-            // zip.file(f, indexblob);
-            // zip.file(bamfile, bamblob);
-            let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file(f, d));
-            let bb = samtools.downloadBinary("/data/" + bamfile).then(d => d.arrayBuffer()).then(d => zip.file(bamfile, d));
-            let cc = await Promise.all([aa, bb]);
-            promises.push(cc);
+            console.log("Prepare downloading ", f);
+            let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
+            // let bb = samtools.downloadBinary("/data/" + bamfile).then(d => d.arrayBuffer()).then(d => zip.file(bamfile, d));
+            // let cc = await Promise.all([aa, bb]);
+            promises.push(aa);
         }
     }
-    const d = await Promise.all(promises);
+    // bams in exactSNP worer
+    files = await exactSNP.ls("/data"); // an array of files
+    for (let i = 0, f; f = files[i]; i++) {
+        if (f.includes(".bam")) {
+            console.log("Prepare downloading ", f);
+            let aa = exactSNP.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
+            promises.push(aa);
+        }
+    }
+    let cc = merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_SNPs_and_small_indels.txt", d));
+    promises.push(cc);
+    await Promise.all(promises);
     console.log("Finished preparing downloanding bams!");
     zip.generateAsync({type:"blob"})
         .then(function(content) {
-            saveAs(content, "indexed_bams.zip");
+            saveAs(content, "bams_and_variant_summary.zip");
         });
 }
 
@@ -40,7 +51,9 @@ async function downloadBam(){
 async function analyzeBam(){
     await makeSam();
     await makeBam();
-    document.getElementById("download-btn").style.visibility = "visible";
+    await transferBam();
+    await callAll();
+    // document.getElementById("download-btn").style.visibility = "visible";
 }
 
 // make bams
@@ -56,7 +69,7 @@ async function makeBam(){
     }
     const d = await Promise.all(promises);
     console.log("Finished make bams!")
-    document.getElementById("sort").innerHTML = "BAM files have been created. You can click the DOWNLOAD button below.";
+    document.getElementById("sort").innerHTML = "BAM files have been created. Variants will be called";
 }
 
 // sam to bam for single files
@@ -94,7 +107,7 @@ async function transferSam(){
     let files = await bwa.ls("/data"); // an array of files
     for (var i = 0, f; f = files[i]; i++) {
         if (f.includes(".sam")) {
-            Aioli.transfer("/data/" + f, "/data/" + f, Aioli.workers[0], Aioli.workers[1]);
+            Aioli.transfer("/data/" + f, "/data/" + f, bwa, samtools);
         }
     }
     await delay(1000);
@@ -111,16 +124,9 @@ function loadFq(event)
     // var filenames = [];
     var files = event.target.files;
     for (var i = 0, f; f = files[i]; i++) {
-        loadSingleFile(f);
+        Aioli.mount(f, null, null, bwa);
         document.getElementById("demoFq").innerHTML += f.name + "\t";
     }
-}
-
-// load sing file
-function loadSingleFile(file)
-{
-    return Aioli
-    .mount(file); // First mount the file
 }
 
 // load fasta file
@@ -129,7 +135,7 @@ async function loadRef(event)
     let files = event.target.files;
     let f = files[0];
     document.getElementById("demoRef").innerHTML = f.name;
-    await Aioli.mount(f) // return new file path
+    await Aioli.mount(f, null, null, bwa) // return new file path
     .then(() => bwa.ls("/data"))
     .then(d => console.log(d));
     // index
@@ -182,4 +188,93 @@ async function bwamem (prefix, reference) {
     console.log("Finished writing ", out);
     document.getElementById("bwa").innerHTML = "... Mapping " + prefix;
     // return out; 
+}
+
+// transfer sam files to samtools /data
+async function transferBam(){//transfer refernces and bam files to exactSNP worker
+    let ref = document.getElementById("demoRef").innerHTML;
+    Aioli.transfer("/data/" + ref, "/data/" + ref, bwa, exactSNP);
+    let files = await samtools.ls("/data"); // an array of files
+    for (var i = 0, f; f = files[i]; i++) {
+        if (f.endsWith(".bam")) {
+            Aioli.transfer("/data/" + f, "/data/" + f, samtools, exactSNP);
+        }
+    }
+    await delay(1000);
+    console.log("Finished transfering bam files!");
+    return 0;
+}
+// call SNPs for all bams
+async function callAll(){
+    let filenames = await exactSNP.ls("/data");
+    document.getElementById("download-btn").style.visibility = "visible"; // in case promise.all did not finish
+    let promises = [];
+    for (i = 0; i < filenames.length; i++) {
+        let ff = filenames[i];
+        if (ff.includes(".bam")) {
+            console.log("Processing: ", ff);
+            promises.push(callVar(ff));
+        }
+    }
+    await Promise.all(promises);
+    document.getElementById("sort").innerHTML = "All the files have been processed!";
+}
+
+// call single bam
+async function callVar (bam) {
+    let ref = document.getElementById("demoRef").innerHTML;
+    let wd = "/data/";
+    exactSNP.setwd(wd);
+    let out = bam + ".vcf";
+    let cmd = ["-b -i", bam, "-g", ref, "-o", out].join(' ');
+    console.log(cmd);
+    let std = await exactSNP.exec(cmd);
+    document.getElementById("sort").innerHTML = "Finished calling SNPs for " + bam;
+    console.log(std.stderr);
+    console.log("Finished writing ", out);
+    // document.getElementById("stderr").value += std.stderr + "\n";
+}
+// merge all the indel.vcf files
+async function merge_indels(){
+    let files = await exactSNP.ls("/data"); // an array of files
+    let promises = [];
+    let indelSummary = "Sample\tGene\tPOS\tREF\tALT\tQUAL\tTotalCoverage\tindelCoverage\tindelPercent\tindelSize\n";
+    for (let i = 0, f; f = files[i]; i++) {
+        if (f.includes(".vcf")) {
+            let aa = await process_indel_vcf(f);
+            promises.push(aa);
+        }
+    }
+    await Promise.all(promises);
+    indelSummary += promises.join("");
+    let blob = new Blob([indelSummary], { type: "text/plain;charset=utf-8" });
+    // saveAs(blob, "Summary_of_SNPs_and_indels_less_or_equal_16_bp.csv");
+    return blob;
+}
+
+// process indel vcf content for only 1 file
+async function process_indel_vcf(f){//filename
+    let filename = f.replace(".bam.vcf", "");
+    let vcf = await exactSNP.cat("/data/" + f);
+    let lines = vcf.split(/\r?\n/);
+    let summary = "";
+    for (let line of lines){
+        if (line && !line.includes("#")){
+            let ss = line.split(/\t/);
+            if (ss[7].includes("MM")){// SNPs
+                let ee = ss[7].split(/;/);
+                let DP = ee[0].replace("DP=", "");
+                let SR = ee[2].replace("MM=", "");
+                let pct = String(parseInt(SR) / parseInt(DP) * 100); // percent of indels
+                let size = String(ss[4].length - ss[3].length);
+                summary += [filename, ss[0], ss[1], ss[3], ss[4], ss[5], DP, SR, pct, size].join('\t') + "\n";
+            } else { // indels
+                let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
+                let pct = String(parseInt(DP[1]) / parseInt(DP[0]) * 100); // percent of indels
+                let size = String(ss[4].length - ss[3].length);
+                summary += [filename, ss[0], ss[1], ss[3], ss[4], ss[5], DP[0], DP[1], pct, size].join('\t') + "\n";
+            }
+        }
+    }
+    return summary;
 }
