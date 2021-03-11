@@ -87,7 +87,7 @@ async function downloadVar(){
 async function merge_indels(){
     let files = await exactSNP.ls("/data"); // an array of files
     let promises = [];
-    let indelSummary = "Sample\tGene\tPOS\tREF\tALT\tQUAL\tTotalCoverage\tindelCoverage\tindelPercent\tindelSize\n";
+    let indelSummary = "Sample\tGene\tPOS\tREF\tALT\tWTCoverage\tmutCoverage\tindelPercent\tindelSize\n";
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".vcf")) {
             let aa = await process_indel_vcf(f);
@@ -113,15 +113,15 @@ async function process_indel_vcf(f){//filename
             if (ss[7].includes("MM")){// SNPs
                 let ee = ss[7].split(/;/);
                 let DP = ee[0].replace("DP=", "");
-                let SR = ee[2].replace("MM=", "");
-                let pct = String(parseInt(SR) / parseInt(DP) * 100); // percent of indels
-                let size = String(ss[4].length - ss[3].length);
-                summary += [filename, ss[0], ss[1], ss[3], ss[4], ss[5], DP, SR, pct, size].join('\t') + "\n";
+                let SR = ee[1].replace("MMsum=", "");
+                let pct = String(parseInt(SR) / (parseInt(SR) + parseInt(DP)) * 100); // percent of mut
+                let size = "0";
+                summary += [filename, ss[0], ss[1], ss[3], ss[4], DP, SR, pct, size].join('\t') + "\n";
             } else { // indels
                 let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
-                let pct = String(parseInt(DP[1]) / parseInt(DP[0]) * 100); // percent of indels
+                let pct = String(parseInt(DP[1]) / (parseInt(DP[0])+parseInt(DP[1])) * 100); // percent of indels
                 let size = String(ss[4].length - ss[3].length);
-                summary += [filename, ss[0], ss[1], ss[3], ss[4], ss[5], DP[0], DP[1], pct, size].join('\t') + "\n";
+                summary += [filename, ss[0], ss[1], ss[3], ss[4], DP[0], DP[1], pct, size].join('\t') + "\n";
             }
         }
     }
