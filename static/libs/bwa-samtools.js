@@ -266,12 +266,12 @@ async function process_indel_vcf(f){//filename
                 let DP = ee[0].replace("DP=", ""); // WT counts
                 let SR = ee[1].replace("MMsum=", ""); // all mut alleles counts
                 let SRsingle = ee[2].replace("MM=", ""); // "3,5" for 2 alt alleles
-                let pct = String(parseInt(SR) / (parseInt(SR) + parseInt(DP)) * 100); // percent of mut
+                let pct = (parseInt(SR) / (parseInt(SR) + parseInt(DP)) * 100).toFixed(1); // percent of mut
                 let size = "0"; // all SNPs
                 summary += [filename, ss[0], ss[1], ss[3], ss[4], DP, SRsingle, pct, size].join('\t') + "\n";
             } else { // indels
                 let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
-                let pct = String(parseInt(DP[1]) / (parseInt(DP[0])+parseInt(DP[1])) * 100); // percent of indels
+                let pct = (parseInt(DP[1]) / (parseInt(DP[0])+parseInt(DP[1])) * 100).toFixed(1); // percent of indels
                 let size = String(ss[4].length - ss[3].length);
                 summary += [filename, ss[0], ss[1], ss[3], ss[4], DP[0], DP[1], pct, size].join('\t') + "\n";
             }
