@@ -50,7 +50,7 @@ After loading the template fasta file and all the fastq files, now we will use `
 
 ## Help
 
-This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). It runs commands like this:
+This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/), [SAMTOOLS](http://www.htslib.org/) and [subread exactSNP](http://subread.sourceforge.net/). It runs commands like this:
 ```sh
 ## map reads to the templates with bwa
 bwa index <your-references.fa>
@@ -58,6 +58,8 @@ bwa mem <your-references.fa> <R1.fastq.gz> <R2.fastq.gz> > out.sam
 ## make sorted bam files with samtools
 samtools sort out.sam > out.bam
 samtools index out.bam
+## call variants with subread exactSNP
+exactSNP -b -i out.bam -g your-reference.fa -o calledSNPs.vcf
 ```
 
 Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-web](https://github.com/pinbo/bwa-samtools-web).
@@ -74,4 +76,4 @@ BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please en
 
 ## Acknowledgement
 
-Thank [Robert Aboukhalil](https://github.com/robertaboukhalil) for his development of [aioli and biowasm](https://github.com/biowasm). I successfully compiled **bwa** and **samtools**  by learning the patch and compiling script from [biowasm](https://github.com/biowasm/biowasm).
+Thank [Robert Aboukhalil](https://github.com/robertaboukhalil) for his development of [aioli and biowasm](https://github.com/biowasm). I successfully compiled **bwa**, **samtools** and **Subread** by learning the patch and compiling scripts from [biowasm](https://github.com/biowasm/biowasm).
