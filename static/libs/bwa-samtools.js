@@ -139,6 +139,7 @@ async function loadRef(event)
     .then(() => bwa.ls("/data"))
     .then(d => console.log(d));
     // index
+    await delay(1000); // mount did not really await
     await bwa.exec("index /data/" + f.name)
     .then(d => console.log(d.stdout, "End of stdout\n", d.stderr, "End of stderr"));
     let ff = await bwa.ls("/data");
