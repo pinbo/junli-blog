@@ -5,6 +5,10 @@ bwa
 .init()
 .then(() => bwa.exec("index"))
 .then(d => console.log(d.stdout, "ERRRRR", d.stderr));
+// init samtools
+samtools.init()
+.then(() => samtools.exec("--version"))
+.then(d => console.log("Samtools: ", d.stdout, "\nSTDERR\n", d.stderr));
 // to call variants
 let exactSNP = new Aioli("exactSNP/2.0.1");
 // exactSNP will be Aioli.workers[1]
@@ -101,9 +105,9 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 // transfer sam files to samtools /data
 async function transferSam(){
     // Initialize samtools and output the version
-    await samtools.init()
-    .then(() => samtools.exec("--version"))
-    .then(d => console.log("Samtools: ", d.stdout, "\nSTDERR\n", d.stderr));
+    // await samtools.init()
+    // .then(() => samtools.exec("--version"))
+    // .then(d => console.log("Samtools: ", d.stdout, "\nSTDERR\n", d.stderr));
     let files = await bwa.ls("/data"); // an array of files
     for (var i = 0, f; f = files[i]; i++) {
         if (f.includes(".sam")) {
