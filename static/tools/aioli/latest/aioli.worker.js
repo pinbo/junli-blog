@@ -151,7 +151,7 @@ API = {
         STDERR[id] = "";
 
         // Call main function with command
-        Module.callMain(command.split(" "));
+        Module.callMain(command.split(/ +/));
 
         // Re-open stdout/stderr (fix error "error closing standard output: -1")
         FS.streams[1] = FS.open("/dev/stdout", "w");
