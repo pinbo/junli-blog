@@ -52,15 +52,17 @@ async function loadRef(event)
 {
     let files = event.target.files;
     let f = files[0];
-    document.getElementById("demoRef").innerHTML = "formatted_references.fa"; //f.name;
+    document.getElementById("demoRef").innerHTML = f.name;
     await Aioli.mount(f, null, null, exactSNP); // only to worker exactSNP
     // format the fasta
     await delay(500);
+    exactSNP.ls("/data").then(console.log);
     let fc = await exactSNP.cat("/data/" + f);//file content
     let newfile = {};
     newfile.name = "/data/formatted_references.fa";
     newfile.content = formatFasta(fc);
     exactSNP.write(newfile);
+    document.getElementById("demoRef").innerHTML = "formatted_references.fa";
 }
 
 // delay before
