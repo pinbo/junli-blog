@@ -190,11 +190,11 @@ API = {
 
             // junli added for adding a file in the default filesystem
             let reader= new FileReader();
-            reader.addEventListener('loadend', function(){
+            reader.onload = function() {
                 let result=reader.result;
                 const uint8_view = new Uint8Array(result);
                 FS.writeFile(file.path, uint8_view);
-            });
+            }
             reader.readAsArrayBuffer(file.file);
         }
 
