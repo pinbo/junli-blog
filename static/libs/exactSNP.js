@@ -53,18 +53,25 @@ async function loadRef(event)
     let files = event.target.files;
     let f = files[0];
     document.getElementById("demoRef").innerHTML = f.name;
-    await Aioli.mount(f, null, null, exactSNP); // only to worker exactSNP
-    // format the fasta
-    await delay(500);
-    exactSNP.ls("/data").then(console.log);
-    let fc = await exactSNP.cat("/data/" + f);//file content
-    let newfile = {};
+    let fc = await readTextFileAsync(f);
+    var newfile = {};
     newfile.name = "/data/formatted_references.fa";
     newfile.content = formatFasta(fc);
     exactSNP.write(newfile);
     document.getElementById("demoRef").innerHTML = "formatted_references.fa";
 }
 
+// function to read a text file async, for loadRef
+function readTextFileAsync(file) {
+    return new Promise((resolve, reject) => {
+      let reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsText(file);
+    })
+}
 // delay before
 const delay = ms => new Promise(res => setTimeout(res, ms));
 // transfer sam files to samtools /data
