@@ -11,8 +11,8 @@ tags:
   - NGS
 ---
 
-**Input is an interleaved fastq file**  
-You can use tool ["Filter fastq files with FASTP"](/apps/filter-fastq-files-with-fastp) to make an interleaved fastq if you have two fastq files (R1 and R2).
+**Input is an interleaved fastq file or two paired-end fastq files (R1 and R2).**  
+Strongly suggest filtering your fastq files using ["Filter fastq files with FASTP"](/apps/filter-fastq-files-with-fastp) before demultiplexing.
 
 
 <label for="left">Your left adapter sequence:</label>
