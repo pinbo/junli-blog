@@ -178,7 +178,7 @@ async function makeSam(){
 // bwamem("2", "references.fa").then(d => console.log(d));
 async function bwamem (prefix, reference) {
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
-    let suffix2 = document.getElementById("suffix1").value;
+    let suffix2 = document.getElementById("suffix2").value;
     bwa.setwd("/data/"); // set working directory
     let R1 = prefix + suffix1;
     let R2 = prefix + suffix2;
