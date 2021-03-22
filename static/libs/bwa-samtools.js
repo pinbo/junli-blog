@@ -47,7 +47,7 @@ async function downloadBam(){
     console.log("Finished preparing downloanding bams!");
     zip.generateAsync({type:"blob"})
         .then(function(content) {
-            saveAs(content, "bams_and_variant_summary.zip");
+            saveAs(content, "bams_and_variant_summary_bwamem.zip");
         });
 }
 
