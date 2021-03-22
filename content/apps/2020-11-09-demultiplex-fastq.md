@@ -28,7 +28,7 @@ You can use tool ["Filter fastq files with FASTP"](/apps/filter-fastq-files-with
 <label for="barcode">Select the barcode file (a file with 3 columns separated by tab: sample ID, left barcode sequence, right barcode sequence)</label><br>
 <input type="file" id="barcode" name="barcode" /><br>
 <label for="fastq">Select the fastq or fastq.gz file to demultiplex</label><br>
-<input type="file" id="fastq" name="fastq" /><br>
+<input type="file" id="fastq" name="fastq" multiple/><br>
 
 <button style="display:none" onclick="readBarcode()">Read Barcodes</button>
 <button onclick="startAnalyze()">Start Demultiplex</button>

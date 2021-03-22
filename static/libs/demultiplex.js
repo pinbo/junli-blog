@@ -92,14 +92,48 @@ function readBarcode(){
 }
 
 // read fastq file
-function readFastq(){
+async function readFastq(){
 	var files = document.getElementById('fastq').files;
     if (!files.length) {
       alert('Please select a fastq or fastq.gz file!');
       return;
     }
-	var f = files[0];
-	readFile(f, demultiplex)
+    if (files.length == 1) { // interleaved fastq
+        var f = files[0];
+        // readFile(f, demultiplex);
+        let content = await readTextFileAsync(f);
+        demultiplex(content);
+    } else { // R1 and R2
+        let content1 = readTextFileAsync(files[0]);
+        let content2 = readTextFileAsync(files[1]);
+        let aa = await Promise.all([content1, content2]);
+        let bb = await Promise.all([string2line(aa[0]), string2line(aa[1])]);
+        let f1 = bb[0];
+        let f2 = bb[1];
+        console.log(f1.length);
+        console.log(f2.length);
+        let interleaved = interleave(f1, f2);
+        demultiplex(interleaved);
+    }
+}
+
+// function to read a text file async, for loadRef
+function readTextFileAsync(file) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        if (file.name.split('.').pop() == "gz") {
+            reader.onload  = () => {
+                // resolve(pako.inflate(new Uint8Array(reader.result), { to: 'string' }));
+                resolve(pako.inflate(reader.result, { to: 'string' }));
+            }
+        } else {
+            reader.onload = () => {
+                resolve(new TextDecoder('utf-8').decode(reader.result, {stream: true}));
+            };
+        }
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    })
 }
 
 // function process
@@ -118,6 +152,7 @@ class sample {
 // process fastq file
 function demultiplex(fileContent){
 	var lines = fileContent.split(/\r?\n/);
+    console.log("Interleaved fastq files have line number ", lines.length);
 	// document.getElementById("progress1").max = lines.length;
 	// document.getElementById("progress1").value = 0;
 	// document.getElementById("demultiplex-progress").style.visibility = "visible";
@@ -193,4 +228,20 @@ function demultiplex(fileContent){
 	}
 	document.getElementById('demo2').innerHTML = "Finished demultiplexing";
 	document.getElementById("download-btn").style.visibility = "visible";
+}
+
+// interleave two fastq files
+function interleave(f1, f2) { // f1 and f2 are arrays of lines
+    let interleaved = [];
+    for (var n = 0; n < f1.length; n+=4){
+        interleaved.push(f1.slice(n, n+4).join("\n"));
+        interleaved.push(f2.slice(n, n+4).join("\n"));
+    }
+    return interleaved.join("\n");
+}
+
+// function to split a string
+// var lines = [];
+async function string2line (string){
+    return string.split(/\r?\n/);
 }
