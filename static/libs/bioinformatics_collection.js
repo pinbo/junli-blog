@@ -24,3 +24,34 @@ function formatFasta (fileContent, width = 60) {// 60 bp per line
     }
     return newContent;
 }
+
+// clear input sequences
+function clearseq() {
+    document.getElementById("left").value = "";
+    document.getElementById("right").value = "";
+	document.getElementById("demo1").innerHTML = "";
+	document.getElementById("demo2").innerHTML = "";
+    document.getElementById('output').value = "";
+    document.getElementById("download-btn").style.visibility = "hidden";
+	// document.getElementById("demultiplex-progress").style.visibility = "hidden";
+	// document.getElementById("gzip-progress").style.visibility = "hidden";
+};
+
+// function to read a text file async, for loadRef
+function readTextFileAsync(file) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        if (file.name.split('.').pop() == "gz") {
+            reader.onload  = () => {
+                // resolve(pako.inflate(new Uint8Array(reader.result), { to: 'string' }));
+                resolve(pako.inflate(reader.result, { to: 'string' }));
+            }
+        } else {
+            reader.onload = () => {
+                resolve(new TextDecoder('utf-8').decode(reader.result, {stream: true}));
+            };
+        }
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    })
+}
