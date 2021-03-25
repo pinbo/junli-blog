@@ -103,7 +103,7 @@ async function downloadVar(){
 async function merge_indels(){
     let files = await exactSNP.ls("/data"); // an array of files
     let promises = [];
-    let indelSummary = "Sample\tGene\tPOS\tREF\tALT\tWTCoverage\tmutCoverage\tindelPercent\tindelSize\n";
+    let indelSummary = "Sample\tGene\tPOS\tREF\tALT\tTotalCoverage\tmutCoverage\tindelPercent\tindelSize\n";
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".vcf")) {
             let aa = await process_indel_vcf(f);
@@ -131,7 +131,7 @@ async function process_indel_vcf(f){//filename
                 let DP = ee[0].replace("DP=", "");
                 let SR = ee[1].replace("MMsum=", "");
                 let SRsingle = ee[2].replace("MM=", ""); // "3,5" for 2 alt alleles
-                let pct = (parseInt(SR) / (parseInt(SR) + parseInt(DP)) * 100).toFixed(1); // percent of mut
+                let pct = (parseInt(SR) / parseInt(DP) * 100).toFixed(1); // percent of mut
                 let size = "0";
                 summary += [filename, ss[0], ss[1], ss[3], ss[4], DP, SRsingle, pct, size].join('\t') + "\n";
             } else { // indels
