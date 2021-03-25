@@ -186,7 +186,8 @@ async function bwamem (prefix, reference) {
     // let rg = "-R \@RG\\tID:" + prefix + "\\tSM:" + prefix; // read group tag
     reference = reference;
     // bwa mem
-    let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
+    // let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
+    let cmd = ["mem -o", out, reference, R1, R2].join(' '); // I modifed fastmap.c to use the 4th arguments as output
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);
