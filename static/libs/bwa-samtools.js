@@ -279,7 +279,7 @@ async function process_indel_vcf(f){//filename
                 let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
                 let pct = (parseInt(DP[1]) / (parseInt(DP[0])*2) * 100).toFixed(1); // percent of indels
                 let size = String(ss[4].length - ss[3].length);
-                summary += [filename, ss[0], ss[1], ss[3], ss[4], DP[0], DP[1], pct, size].join('\t') + "\n";
+                summary += [filename, ss[0], ss[1], ss[3], ss[4], parseInt(DP[0])*2, DP[1], pct, size].join('\t') + "\n";
             }
         }
     }
