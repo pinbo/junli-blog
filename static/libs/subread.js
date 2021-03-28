@@ -204,7 +204,7 @@ async function downloadIndex(){
 async function merge_indels(){
     let files = await align.ls("/data"); // an array of files
     let promises = [];
-    let indelSummary = "Sample,Gene,POS,REF,ALT,QUAL,TotalCoverage,indelCoverage,indelPercent,indelSize\n";
+    let indelSummary = "Sample,Gene,POS,REF,ALT,TotalCoverage,indelCoverage,indelPercent,indelSize\n";
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam.indel.vcf")) {
             let aa = await process_indel_vcf(f);
@@ -228,9 +228,10 @@ async function process_indel_vcf(f){//filename
         if (line && !line.includes("#")){
             let ss = line.split(/\t/);
             let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
-            let pct = String(parseInt(DP[1]) / parseInt(DP[0]) * 100); // percent of indels
+            if (DP[1] - DP[0] > 0) DP[0] = DP[1];
+            let pct = (parseInt(DP[1]) / parseInt(DP[0]) * 100).toFixed(1); // percent of indels
             let size = String(ss[4].length - ss[3].length);
-            summary += [filename, ss[0], ss[1], ss[3], ss[4], ss[5], DP[0], DP[1], pct, size].join(',') + "\n";
+            summary += [filename, ss[0], ss[1], ss[3], ss[4], DP[0], DP[1], pct, size].join(',') + "\n";
         }
     }
     return summary;
