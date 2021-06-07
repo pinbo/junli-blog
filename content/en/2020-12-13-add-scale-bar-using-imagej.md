@@ -7,6 +7,7 @@ categories:
   - Method
 tags:
   - Tips
+  - tutorial
 ---
 
 If you take a picture comparing the differences between a wild type plant and its mutant, you need to add a scale bar for publication. [ImageJ](https://imagej.nih.gov/ij/) is commonly used software to annotate images for scientific publication. Here is just a simple tutorial on how to add a scale bar to your image.
