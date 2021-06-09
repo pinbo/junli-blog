@@ -10,7 +10,7 @@ tags:
   - SNP
 ---
 
-This is a simple tool to convert a vcf file to SNP table.
+This is a simple tool to convert a vcf file to SNP table. 
 
 <label for="infile">Select a .vcf file (NOT compressed gz file)</label>:<br>
 <input type="file" id="infile"><br><br>
@@ -21,3 +21,18 @@ This is a simple tool to convert a vcf file to SNP table.
 
 <script src="/libs/FileSaver.min.js"></script>
 <script src="/libs/vcf2snp.js"></script>
+
+### Help
+Output includes:
+
+> **CHROM**: chromosome  
+> **POS**: position  
+> **REF**: reference allele  
+> **ALT**: alternative alleles (mutations compared to the reference)  
+> **QUAL**: variant quality (the more reads and more counts of ALT alleles, the higher quality)  
+> **AC**: "Allele count in genotypes, for each ALT allele, in the same order as listed"  
+> **AN**: "Total number of alleles in called genotypes"; AN/2 = number of lines with data  
+> **DP**: total reads; "Approximate read depth; some reads may have been filtered"  
+> **MQ**: Mapping Quality
+
+Then genotying data of each line: **N** is missing and **H** is heterozygous.
