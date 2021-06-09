@@ -112,7 +112,7 @@ function gt2snp(allele_list, gt) {
 	if (gt.includes(".")) // missing "./." or "."
 		c = "N";
 	else {
-		let [a, b] = gt.split("/");
+		let [a, b] = gt.split(/\/|\|/); // "/" unphased; "|" is phased
 		if (a == b) // homozygous
 			c = allele_list[a];
 		else
