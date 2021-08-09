@@ -1,5 +1,6 @@
 // This is just an example of the function below.
 document.getElementById('start').onclick = function() {
+    document.getElementById("output").value = ""; // reset the output
     var file = document.getElementById('infile').files[0];
     if (!file) {
         // console.log('No file selected.');
