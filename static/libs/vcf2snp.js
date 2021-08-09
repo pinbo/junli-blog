@@ -11,7 +11,8 @@ document.getElementById('start').onclick = function() {
     // readSomeLines is defined below.
     readSomeLines(file, parseLine, function onComplete() {
         // console.log('Read all lines');
-        alert("Completed!");
+        // alert("Completed!");
+        download();
     });
 };
 
@@ -44,8 +45,10 @@ function readSomeLines(file, forEachLine, onComplete) {
         console.log(lines.length);
     
         for (var i = 0; i < lines.length; ++i) {
-            let tt = forEachLine(lines[i]);
-            document.getElementById('output').value += tt;
+            if (lines[i]){ // in case of user modified and introduced blank lines
+                let tt = forEachLine(lines[i]);
+                document.getElementById('output').value += tt;
+            }
         }
         offset += CHUNK_SIZE;
         seek();
@@ -124,5 +127,6 @@ function gt2snp(allele_list, gt) {
 function download(){
     let snps = document.getElementById("output").value;
     let blob = new Blob([snps], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, "converted-snps.txt");
+    var file = document.getElementById('infile').files[0];
+    saveAs(blob, "converted-snps-" + file.name + ".txt");
 }
