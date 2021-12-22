@@ -60,7 +60,8 @@ async function makeAll(){
 // run fastp on one pair of fastq(.gz) files
 async function filter(read1, read2=""){
     let input = "";
-    let output = "-j " + "fastp-" + read1 + ".json " + " -h " + "fastp-" + read1 + ".html ";
+    let output = "";
+    let reportfile = "-j " + "fastp-" + read1 + ".json " + " -h " + "fastp-" + read1 + ".html";
     if (read2) {// paired end
         input = "-i " + read1 + " -I " + read2;
         output = "-o filtered_" + read1 + " -O filtered_" + read2;
@@ -97,7 +98,7 @@ async function filter(read1, read2=""){
     let baseQuality = "-q " + document.getElementById("basequality").value;
     let addopt = document.getElementById("addopt").value.replace(/(?:\r\n|\r|\n)/g, " ");
     // let cmd = [input, interleaved, adapterTim, baseQuality, addopt, output].join(" ").replace(/  +/g, ' ');
-    let cmd = [input, interleaved, baseQuality, addopt, output].join(" ").replace(/  +/g, ' ');
+    let cmd = [input, interleaved, baseQuality, addopt, output, reportfile].join(" ").replace(/  +/g, ' ');
 
     fastp.setwd("/data") // set working directory
     console.log("input is", cmd);
