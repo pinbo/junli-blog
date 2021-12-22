@@ -24,7 +24,7 @@ https://github.com/OpenGene/fastp
 
 <h4>Step 1: load fastq files and set filtering options</h4>
 <div id="options" style="font-size:90%;color:blue;">
-<label for="fastq">Fastq files to filter (choose 1 file for single end (SE) sequencing or 2 files for paired end (PE) sequencing or 1 file for interleaved PE)</label><br>
+<label for="fastq">Fastq files to filter (REMEMBER to check file suffix above)</label><br>
 <input id="fastq" type="file" multiple><br>
 <p id="demoFq" style="display:none;"></p>
 
