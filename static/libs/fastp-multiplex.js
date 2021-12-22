@@ -60,7 +60,7 @@ async function makeAll(){
 // run fastp on one pair of fastq(.gz) files
 async function filter(read1, read2=""){
     let input = "";
-    let output = "";
+    let output = "-j " + "fastp-" + read1 + ".json " + " -h " + "fastp-" + read1 + ".html ";
     if (read2) {// paired end
         input = "-i " + read1 + " -I " + read2;
         output = "-o filtered_" + read1 + " -O filtered_" + read2;
