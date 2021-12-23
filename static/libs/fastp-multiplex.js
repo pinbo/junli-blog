@@ -39,7 +39,7 @@ async function makeAll(){
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
     // document.getElementById("download-btn").style.visibility = "visible"; // in case promise.all did not finish
     document.getElementById("download-btn").style.display = "block";
-    fastp.setwd("/data") // set working directory
+    fastp.setwd("/data"); // set working directory
     let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
@@ -63,7 +63,7 @@ async function makeAll(){
 async function filter(read1, read2=""){
     let input = "";
     let output = "";
-    let reportfile = "-j " + "fastp-" + read1 + ".json " + " -h " + "fastp-" + read1 + ".html";
+    let reportfile = "-j " + "fastp_" + read1 + ".json " + " -h " + "fastp_" + read1 + ".html";
     if (read2) {// paired end
         input = "-i " + read1 + " -I " + read2;
         output = "-o filtered_" + read1 + " -O filtered_" + read2;
@@ -106,11 +106,11 @@ async function filter(read1, read2=""){
     console.log("input is", cmd);
     document.getElementById("stdout").innerHTML = "Filtering " + read1;
     let dd = await fastp.exec(cmd);
-    await delay(100); // mount did not really await
+    // await delay(100); // mount did not really await
     // document.getElementById("stdout").innerHTML += dd.stderr;
     document.getElementById("stderr").value += "================= Filtering " + read1 + " =================\n" + dd.stderr + "\n\n";
     // document.getElementById("download-btn").style.display = "block";
-    return 0;
+    // return 0;
 }
 
 // download all the bams as a zip file
