@@ -39,17 +39,19 @@ async function makeAll(){
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
     // document.getElementById("download-btn").style.visibility = "visible"; // in case promise.all did not finish
     document.getElementById("download-btn").style.display = "block";
+    fastp.setwd("/data") // set working directory
     let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
-        if (ff && document.getElementById("interleaved").checked){ // in case blank filenames
-            promises.push(filter(ff)) // only R1
-        } else {
-            if (ff.includes(suffix1)) {
-                let prefix = ff.replace(suffix1, "");
-                let R2 = prefix + suffix2;
-                if (!(filenames.includes(R2))) R2="";
-                promises.push(filter(ff, R2));
+        if (ff){// if not empty string
+            if (document.getElementById("interleaved").checked){ // in case blank filenames
+                promises.push(filter(ff, "")); // only R1
+            } else {
+                if (ff.includes(suffix1)) {
+                    let R2 = ff.replace(suffix1, suffix2);
+                    if (!(filenames.includes(R2))) R2="";
+                    promises.push(filter(ff, R2));
+                }
             }
         }
     }
@@ -100,13 +102,14 @@ async function filter(read1, read2=""){
     // let cmd = [input, interleaved, adapterTim, baseQuality, addopt, output].join(" ").replace(/  +/g, ' ');
     let cmd = [input, interleaved, baseQuality, addopt, output, reportfile].join(" ").replace(/  +/g, ' ');
 
-    fastp.setwd("/data") // set working directory
+    // fastp.setwd("/data") // set working directory
     console.log("input is", cmd);
     document.getElementById("stdout").innerHTML = "Filtering " + read1;
     let dd = await fastp.exec(cmd);
     // document.getElementById("stdout").innerHTML += dd.stderr;
     document.getElementById("stderr").value += "================= Filtering " + read1 + " =================\n" + dd.stderr + "\n\n";
     // document.getElementById("download-btn").style.display = "block";
+    return 0;
 }
 
 // download all the bams as a zip file
