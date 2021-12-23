@@ -106,6 +106,7 @@ async function filter(read1, read2=""){
     console.log("input is", cmd);
     document.getElementById("stdout").innerHTML = "Filtering " + read1;
     let dd = await fastp.exec(cmd);
+    await delay(100); // mount did not really await
     // document.getElementById("stdout").innerHTML += dd.stderr;
     document.getElementById("stderr").value += "================= Filtering " + read1 + " =================\n" + dd.stderr + "\n\n";
     // document.getElementById("download-btn").style.display = "block";
