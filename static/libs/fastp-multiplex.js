@@ -125,7 +125,7 @@ async function download(){
     zip.file("fastp-running-log.txt", blob)
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
-        if (f.includes("filtered_") || f.includes("fastp.")) {
+        if (f.includes("filtered_") || f.includes("fastp_")) {
             console.log("Prepare downloading ", f);
             let aa = fastp.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file(f, d));
             promises.push(aa);
