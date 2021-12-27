@@ -32,10 +32,13 @@ https://github.com/OpenGene/fastp
 <label for="basequality">The minimum base quality</label>
 
 <input type="checkbox" id="interleaved" name="interleaved" value="--interleaved_in">
-<label for="interleaved">Interleaved PE? (Read1 and read2 are in one fastq file)</label>
+<label for="interleaved">Interleaved paired-end (PE)? (Read1 and read2 are in one fastq file)</label>
 
 <input type="checkbox" id="merge" name="merge" value="-m">
 <label for="merge">Merge read1 and read2 if there are overlaps? (3 output: merged, non-merged-R1, non-merged-R2)</label>
+
+<input type="checkbox" id="SingleEnd" name="SingleEnd" value="false">
+<label for="SingleEnd">Are all fastq files single-end (SE)? (leave it unchecked for mix of PE and SE)</label>
 
 <label for="addopt">Additional filtering options. Click the help button below to see a list of options</label><br>
 <textarea id="addopt" name="addopt" rows="3" cols="60" placeholder="Additional Options for the tool: -g -x etc"></textarea><br>
