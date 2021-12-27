@@ -101,9 +101,11 @@ async function filter(read1, read2=""){
     if (read2) {// paired end
         input = "-i " + read1 + " -I " + read2;
         output = "-o filtered_" + read1 + " -O filtered_" + read2;
-    } else {
+    } else { // single end: there is a bug: cannot trim adapters for .gz file (okay for non-gz file), so disable it
         input = "-i " + read1;
-        output = "-o filtered_" + read1;
+        // a bug: gz file cannot be processed with adapter trimming, so disable it
+        if (read1.endsWith(".gz")) output = "-A -o filtered_" + read1; // disable adapter trimming
+        else output = "-o filtered_" + read1; // okay for non-gz files
     }
     // let adapterTim = "-A";
     // if (document.getElementById("trimAdapter").checked){adapterTim = ""}
