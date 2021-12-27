@@ -51,6 +51,7 @@ async function transferFiltered(){
 }
 // make all bams
 async function makeAll(){
+    document.getElementById("error").innerHTML = "";
     document.getElementById("stderr").value = "";
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
     let suffix2 =  document.getElementById("suffix2").value; // R2 suffix
@@ -61,10 +62,12 @@ async function makeAll(){
     // fastp2.init();
     // fastp2.setwd("/data"); // set working directory
     // let promises = [];
+    let cc = 0; // count processed files
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
         if (ff){// if not empty string
-            if (document.getElementById("interleaved").checked){ // in case blank filenames
+            if (document.getElementById("interleaved").checked || document.getElementById("SingleEnd").checked){ // in case blank filenames
+                cc += 1;
                 await fastp2.init();
                 fastp2.setwd("/data");
                 await transferFile(ff, fastp, fastp2);
@@ -73,7 +76,8 @@ async function makeAll(){
                 await transferFiltered();
                 fastp2.worker.terminate();
             } else {
-                if (ff.includes(suffix1)) {
+                if (ff.endsWith(suffix1)) {
+                    cc += 1;
                     await fastp2.init();
                     fastp2.setwd("/data");
                     await transferFile(ff, fastp, fastp2);
@@ -85,12 +89,22 @@ async function makeAll(){
                     await filter(ff, R2);
                     await transferFiltered();
                     fastp2.worker.terminate();
+                } else if (ff.endsWith(suffix2)) { // R2
+                    let R1 = ff.replace(suffix2, suffix1);
+                    if (!(filenames.includes(R1))) { // if R1 not in there, treat as single end
+                        cc += 1;
+                        await fastp2.init();
+                        fastp2.setwd("/data");
+                        await transferFile(ff, fastp, fastp2);
+                        await filter(ff, "");
+                    }
                 }
             }
         }
     }
     // await Promise.all(promises);
     document.getElementById("stdout").innerHTML = "All the files have been processed!";
+    if (cc == 0) document.getElementById("error").innerHTML = "Warning: No files were processed. Please upload files OR check your input file suffix";
 }
 
 // run fastp on one pair of fastq(.gz) files
