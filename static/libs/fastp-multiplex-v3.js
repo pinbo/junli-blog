@@ -1,3 +1,5 @@
+// This version terminate a worker after processing each file to release memory
+
 // fastp worker to load data and store results
 let fastp = new Aioli("fastp/0.20.1");
 // Initialize fastp and output the version
@@ -36,18 +38,20 @@ function loadFq(event)
 }
 // transfer file from
 async function transferFile(ff, from, to){//ff is file name
-    Aioli.transfer("/data/"+ff, "/data/"+ff, from, to); 
-    await delay(5);
+    await Aioli.transfer("/data/"+ff, "/data/"+ff, from, to); 
+    // await delay(1000);
 }
 // transfer filtered files back
 async function transferFiltered(){
     let files = await fastp2.ls("/data"); // an array of files
+    let promises = [];
     for (var i = 0, f; f = files[i]; i++) {
         if (f.includes("filtered_")){
-            Aioli.transfer("/data/" + f, "/data/" + f, fastp2, fastp);
+            promises.push(Aioli.transfer("/data/" + f, "/data/" + f, fastp2, fastp));
         }
     }
-    await delay(10);
+    // await delay(100);
+    await Promise.all(promises);
 }
 // make all bams
 async function makeAll(){
