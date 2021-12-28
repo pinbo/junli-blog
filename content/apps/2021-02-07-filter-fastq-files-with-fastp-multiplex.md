@@ -40,6 +40,9 @@ https://github.com/OpenGene/fastp
 <input type="checkbox" id="SingleEnd" name="SingleEnd" value="false">
 <label for="SingleEnd">Are all fastq files single-end (SE)? (leave it unchecked for mix of PE and SE)</label>
 
+<input type="checkbox" id="downloadHtml" name="downloadHtml" value="false">
+<label for="downloadHtml">Create html report? (uncheck to save memory and to avoid potential unsuccessful downloading when too many files)</label>
+
 <label for="addopt">Additional filtering options. Click the help button below to see a list of options</label><br>
 <textarea id="addopt" name="addopt" rows="3" cols="60" placeholder="Additional Options for the tool: -g -x etc"></textarea><br>
 

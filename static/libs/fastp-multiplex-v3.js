@@ -46,7 +46,7 @@ async function transferFiltered(){
     let files = await fastp2.ls("/data"); // an array of files
     let promises = [];
     for (var i = 0, f; f = files[i]; i++) {
-        if (f.includes("filtered_")){
+        if (f.startsWith("filtered_") || (f.startsWith("fastp_") && document.getElementById("downloadHtml").checked)){
             promises.push(Aioli.transfer("/data/" + f, "/data/" + f, fastp2, fastp));
         }
     }
@@ -179,7 +179,7 @@ async function download(){
     zip.file("fastp-running-log.txt", blob)
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
-        if (f.includes("filtered_")) {
+        if (f.startsWith("filtered_") || f.startsWith("fastp_")) {
             console.log("Prepare downloading ", f);
             let aa = fastp.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file(f, d));
             promises.push(aa);
