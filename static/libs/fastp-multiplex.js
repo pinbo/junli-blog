@@ -33,6 +33,7 @@ function loadFq(event)
 
 // make all bams
 async function makeAll(){
+    document.getElementById("error").innerHTML = "";
     document.getElementById("stderr").value = "";
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
     let suffix2 =  document.getElementById("suffix2").value; // R2 suffix
@@ -41,22 +42,32 @@ async function makeAll(){
     document.getElementById("download-btn").style.display = "block";
     fastp.setwd("/data"); // set working directory
     let promises = [];
+    let cc = 0; // count processed files
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
         if (ff){// if not empty string
-            if (document.getElementById("interleaved").checked){ // in case blank filenames
+            if (document.getElementById("interleaved").checked || document.getElementById("SingleEnd").checked){ // in case blank filenames
+                cc += 1;
                 promises.push(filter(ff, "")); // only R1
             } else {
-                if (ff.includes(suffix1)) {
+                if (ff.endsWith(suffix1)) {
+                    cc += 1;
                     let R2 = ff.replace(suffix1, suffix2);
                     if (!(filenames.includes(R2))) R2="";
                     promises.push(filter(ff, R2));
+                } else if (ff.endsWith(suffix2)) { // R2
+                    let R1 = ff.replace(suffix2, suffix1);
+                    if (!(filenames.includes(R1))) { // if R1 not in there, treat as single end
+                        cc += 1;
+                        promises.push(filter(ff, ""));
+                    }
                 }
             }
         }
     }
     await Promise.all(promises);
     document.getElementById("stdout").innerHTML = "All the files have been processed!";
+    if (cc == 0) document.getElementById("error").innerHTML = "Warning: No files were processed. Please upload files OR check your input file suffix";
 }
 
 // run fastp on one pair of fastq(.gz) files
@@ -67,9 +78,11 @@ async function filter(read1, read2=""){
     if (read2) {// paired end
         input = "-i " + read1 + " -I " + read2;
         output = "-o filtered_" + read1 + " -O filtered_" + read2;
-    } else {
+    } else { // single end: there is a bug: cannot trim adapters for .gz file (okay for non-gz file), so disable it
         input = "-i " + read1;
-        output = "-o filtered_" + read1;
+        // a bug: gz file cannot be processed with adapter trimming, so disable it
+        if (read1.endsWith(".gz")) output = "-A -o filtered_" + read1; // disable adapter trimming
+        else output = "-o filtered_" + read1; // okay for non-gz files
     }
     // let adapterTim = "-A";
     // if (document.getElementById("trimAdapter").checked){adapterTim = ""}
@@ -125,7 +138,7 @@ async function download(){
     zip.file("fastp-running-log.txt", blob)
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
-        if (f.includes("filtered_") || f.includes("fastp_")) {
+        if (f.startsWith("filtered_") || (f.startsWith("fastp_") && document.getElementById("downloadHtml").checked)) {
             console.log("Prepare downloading ", f);
             let aa = fastp.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file(f, d));
             promises.push(aa);
