@@ -1,16 +1,27 @@
+// v2 uses https://cdn.biowasm.com/v2/aioli/latest/aioli.js
+// aioli is quite different from v1, so several changes are made in this script
+
 // let CLI = await new Aioli("fastp/0.20.1");
+
 // let CLI = await new Aioli("fastp/0.20.1", {
-//     urlAioli: "/libs/aioli.worker-v2.4.0.js",  // Optional: custom path to aioli.js and aioli.worker.js; for local Aioli development (default=biowasm CDN)
+//     urlAioli: "/tools/aioli/v2.4.0/aioli.worker.js",  // Optional: custom path to aioli.js and aioli.worker.js; for local Aioli development (default=biowasm CDN)
 //     printInterleaved: true,                 // Optional: whether `exec()` returns interleaved stdout/stderr; if false, returns object with stdout/stderr keys (default=true)
 //     debug: false,                           // Optional: set to true to see console log messages for debugging (default=false)
 // });
+// let temp = await CLI.exec("fastp -i /fastp/testdata/R1.fq -o filtered-R1.fq.gz");
+// console.log(temp);
+
 let CLI = await new Aioli({
     tool: "fastp",
-    version: "0.20.1",
-    program: "fastp",              // Optional: custom program to run within the tool; not needed for most tools (default=same as "tool" name)
-    urlPrefix: "http://localhost:4321/tools/fastp/0.20.1",     // Optional: custom path to .js/.wasm files; for local biowasm development (default=biowasm CDN)
-    loading: "lazy",                        // Optional: if set to "lazy", only downloads WebAssembly modules when needed, instead of at initialization (default=eager)
-})
+    version: "0.20.1-v2",
+    // urlPrefix: "/tools/fastp/0.20.1-v2",
+    // urlPrefix: `${window.location.origin}/tools/fastp/0.20.1-v2`,
+    // reinit: true, // even true did not release the worker memory
+},{
+    urlAioli: "/tools/aioli/v2.4.0/aioli.worker.js",  // Optional: custom path to aioli.js and aioli.worker.js; for local Aioli 
+});
+
+
 
 // load fastq files
 document.getElementById("fastq").addEventListener("change", loadFq, false);
@@ -141,7 +152,7 @@ async function download(){
             console.log("Prepare downloading ", f);
             // let blob = new Blob([ await CLI.cat(f) ]);
             // let blob = await CLI.downloadBinary(f);
-            let blob = await CLI.downloadBinary(f).then(d => d.arrayBuffer());
+            let blob = await CLI.download(f).then(d => d.arrayBuffer());
             zip.file(f, blob);
             // promises.push(aa);
         }
