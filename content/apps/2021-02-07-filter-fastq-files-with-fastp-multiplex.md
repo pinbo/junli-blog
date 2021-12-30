@@ -75,4 +75,4 @@ https://github.com/OpenGene/fastp
 <script src="/libs/FileSaver.min.js"></script>
 <script src="/libs/jszip.min.js"></script>
 <script src="/libs/pako_deflate.min.js"></script>
-<script src="/libs/fastp-multiplex-v3.js"></script>
+<script src="/libs/fastp-multiplex.js"></script>
