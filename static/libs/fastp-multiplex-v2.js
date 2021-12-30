@@ -1,8 +1,10 @@
 // v2 uses https://cdn.biowasm.com/v2/aioli/latest/aioli.js
 // aioli is quite different from v1, so several changes are made in this script
 
+// method 1: use cdn.biowasm.com tools
 // let CLI = await new Aioli("fastp/0.20.1");
 
+// Method 2: use cdn.biowasm.com tool but local aioli.worker.js
 // let CLI = await new Aioli("fastp/0.20.1", {
 //     urlAioli: "/tools/aioli/v2.4.0/aioli.worker.js",  // Optional: custom path to aioli.js and aioli.worker.js; for local Aioli development (default=biowasm CDN)
 //     printInterleaved: true,                 // Optional: whether `exec()` returns interleaved stdout/stderr; if false, returns object with stdout/stderr keys (default=true)
@@ -11,6 +13,7 @@
 // let temp = await CLI.exec("fastp -i /fastp/testdata/R1.fq -o filtered-R1.fq.gz");
 // console.log(temp);
 
+// method 3: use local tool and local worker
 let CLI = await new Aioli({
     tool: "fastp",
     version: "0.20.1-v2",
