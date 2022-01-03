@@ -45,33 +45,42 @@ class PrimerPair {
         this.left = new Primer();
         this.right = new Primer();
         this.product_size = "";
+        this.snp1 = ""; // the 1st SNP
         this.snp2 = ""; // the 2nd SNP
     }
 }
+
 // prepare input file from user's csv file
+let inputFileContent = ""; // global variable for later use
 async function prepareInput(evt) {
 	var files = evt.target.files; // FileList object
 	if(files.length==0) return;
     // Aioli.mount(files[0], null, null, primer3);// only to worker fastp
-    let fileContent = await readTextFileAsync(files[0]);
-    let primer3input = await csv2primer3(fileContent);
-    const p3input = new Newfile("/data/p3input", primer3input);
-    await primer3.write(p3input);
-    console.log(await primer3.ls("/data"));
-    // await designPrimer();
+    inputFileContent = await readTextFileAsync(files[0]);
     return 0;
 }
 
 
+
+
 // process the output of primer3 
 async function designPrimer() {
+    // first, prepaire primer3 input file
+    console.log("prepare primer3 input");
+    let primer3input = await csv2primer3(inputFileContent);
+    const p3input = new Newfile("/data/p3input", primer3input);
+    console.log("writing primer3 input");
+    primer3.write(p3input);
+    console.log(await primer3.ls("/data"));
+    // start processing
     document.getElementById("download-btn").style.display = "block";
     let dd = await primer3.exec("/data/p3input");
     if (dd.stdout) { // if successful run
         await parse_primer3output(dd.stdout);
         console.log("success!!!");
     } else {
-        console.log("Error");
+        console.log(dd.stderr);
+        document.getElementById("error").innerHTML = "Failed to design primers. Please check your input file format and refresh the window to try again.";
     }
     return 0;
 }
@@ -88,7 +97,7 @@ async function parse_primer3output(primer3output) {
         let line = lines[i];
         if (line.startsWith("SEQUENCE_ID")) {
             console.log("sequence_ID is ", line);
-            [seqID, direction, snp2] = line.split("=")[1].split("__");
+            [seqID, direction, snp1, snp2] = line.split("=")[1].split("__");
         } else if (line.match("^PRIMER_.*_SEQUENCE")) {
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
@@ -96,6 +105,7 @@ async function parse_primer3output(primer3output) {
             let primerpairID = seqID + "-" + direction + "-" + ppn;
             console.log("init primerpairID is", primerpairID);
             if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
+            primerpairs[primerpairID].snp1 = snp1;
             primerpairs[primerpairID].snp2 = snp2;
             if (LR == "LEFT") primerpairs[primerpairID].left.seq = line.split("=")[1];
             else primerpairs[primerpairID].right.seq = line.split("=")[1];
@@ -124,13 +134,13 @@ async function parse_primer3output(primer3output) {
             if (LR == "LEFT") primerpairs[primerpairID].left.hairpin = line.split("=")[1];
             else primerpairs[primerpairID].right.hairpin = line.split("=")[1];
         } else if (line.match("[0-5]=")) { // start, length: PRIMER_LEFT_0=29,23
-            console.log(line);
+            // console.log(line);
             let fields = line.split("_");
             let ppn = fields[2].split("=")[0]; // primer pair number
             let LR = fields[1]; // left or right
             let primerpairID = seqID + "-" + direction + "-" + ppn;
             // if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
-            console.log("primerpairID is", primerpairID);
+            // console.log("primerpairID is", primerpairID);
             if (LR == "LEFT") {
                 primerpairs[primerpairID].left.start = line.split("=")[1].split(",")[0];
                 primerpairs[primerpairID].left.length = line.split("=")[1].split(",")[1];
@@ -149,13 +159,22 @@ async function parse_primer3output(primer3output) {
     }
     // print
     console.log("start printing");
+    const FAM = "GAAGGTGACCAAGTTCATGCT";
+    const VIC = "GAAGGTCGGAGTCAACGGATT";
     let out = "snpID,Direction,product_size,start,length,GC%,Tm,Hairpin,Seq,ReverseComplement\n";
     for (const [key, value] of Object.entries(primerpairs)) {
         // console.log(key, value);
-        leftSeqSNP1 = value.left.seq;
-        leftSeqSNP2 = leftSeqSNP1.substring(0, leftSeqSNP1.length-1) + value.snp2;
-        out += [key, "SNP1", value.product_size, value.left.start, value.left.length, value.left.gc, value.left.tm, value.left.hairpin, leftSeqSNP1, reverse_complement(leftSeqSNP1)].join(",") + "\n";
-        out += [key, "SNP2", value.product_size, value.left.start, value.left.length, value.left.gc, value.left.tm, value.left.hairpin, leftSeqSNP2, reverse_complement(leftSeqSNP2)].join(",") + "\n";
+        let leftSeq = value.left.seq;
+        let leftSeqSNP1 = leftSeq.substring(0, leftSeq.length-1) + value.snp1.toUpperCase();
+        let leftSeqSNP2 = leftSeq.substring(0, leftSeq.length-1) + value.snp2.toUpperCase();
+        let leftSeqSNP1rc = reverse_complement(leftSeqSNP1);
+        let leftSeqSNP2rc = reverse_complement(leftSeqSNP2);
+        if (document.getElementById("addTail").checked) {
+            leftSeqSNP1 = FAM + leftSeqSNP1;
+            leftSeqSNP2 = VIC + leftSeqSNP2;
+        }
+        out += [key, "SNP1", value.product_size, value.left.start, value.left.length, value.left.gc, value.left.tm, value.left.hairpin, leftSeqSNP1, leftSeqSNP1rc].join(",") + "\n";
+        out += [key, "SNP2", value.product_size, value.left.start, value.left.length, value.left.gc, value.left.tm, value.left.hairpin, leftSeqSNP2, leftSeqSNP2rc].join(",") + "\n";
         out += [key, "Common", value.product_size, value.right.start, value.right.length, value.right.gc, value.right.tm, value.right.hairpin, value.right.seq, reverse_complement(value.right.seq)].join(",") + "\n";
       }
       document.getElementById("stdout").innerHTML = out;
@@ -187,7 +206,7 @@ async function csv2primer3 (fileContent) {
             let info = line.split(",");
             let snpID = info[0];
             // let chrom = info[1];
-            let seq = info[2]; // AAAAAAAAAAA[T/C]GGGGGGGGGGG
+            let seq = info[2].toLowerCase(); // AAAAAAAAAAA[T/C]GGGGGGGGGGG
             let forwardSetting = await parseSNP(snpID, "forward", seq);
             let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq));
             // prepare primer3 input
@@ -226,7 +245,7 @@ async function parseSNP(snpID, direction, seq){ // seq is AAAAAAAAAAA[T/C]GGGGGG
             }
         }
     }
-    let settings = "SEQUENCE_ID=" + snpID + "__" + direction + "__" + snp2 + "\n" +
+    let settings = "SEQUENCE_ID=" + snpID + "__" + direction + "__" + snp1 + "__" + snp2 + "\n" +
     "SEQUENCE_TEMPLATE=" + template + "\n" + 
     "SEQUENCE_FORCE_LEFT_END=" + snpPos.toString() + "\n" + 
     "SEQUENCE_TARGET=" + seqTarget + "\n=\n";
