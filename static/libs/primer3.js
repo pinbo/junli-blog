@@ -205,20 +205,21 @@ async function parse_primer3output(primer3output) {
 // function to format fasta to fixed length
 async function csv2primer3 (fileContent) {
     let lines = fileContent.trim().split(/\r?\n/);
-    let optTm = document.getElementById("optTm").value;
-    let primerNum = document.getElementById("primerNum").value;
+
     let pickAnyway = "0";
-    if (document.getElementById("pickAnyway").checked) pickAnyway = "1";
+    if (document.getElementById("PRIMER_PICK_ANYWAY").checked) pickAnyway = "1";
     let settings_common = "PRIMER_TASK=generic" + "\n" + 
-                "PRIMER_PRODUCT_SIZE_RANGE=40-150" + "\n" + 
-                "PRIMER_MAX_SIZE=23" + "\n" + 
-                "PRIMER_MIN_TM=57.0" + "\n" + 
-                "PRIMER_OPT_TM=" + optTm + "\n" + 
-                "PRIMER_MAX_TM=63.0" + "\n" + 
-                "PRIMER_PAIR_MAX_DIFF_TM=6.0" + "\n" + 
+                "PRIMER_PRODUCT_SIZE_RANGE=" + document.getElementById("PRIMER_PRODUCT_SIZE_RANGE").value + "\n" + 
+                "PRIMER_MIN_SIZE=" + document.getElementById("PRIMER_MIN_SIZE").value + "\n" + 
+                "PRIMER_OPT_SIZE=" + document.getElementById("PRIMER_OPT_SIZE").value + "\n" + 
+                "PRIMER_MAX_SIZE=" + document.getElementById("PRIMER_MAX_SIZE").value + "\n" + 
+                "PRIMER_MIN_TM=" + document.getElementById("PRIMER_MIN_TM").value + "\n" + 
+                "PRIMER_OPT_TM=" + document.getElementById("PRIMER_OPT_TM").value + "\n" + 
+                "PRIMER_MAX_TM=" + document.getElementById("PRIMER_MAX_TM").value + "\n" + 
+                "PRIMER_PAIR_MAX_DIFF_TM=" + document.getElementById("PRIMER_PAIR_MAX_DIFF_TM").value + "\n" + 
                 "PRIMER_FIRST_BASE_INDEX=1" + "\n" + 
                 "PRIMER_LIBERAL_BASE=1" + "\n" + 
-                "PRIMER_NUM_RETURN=" + primerNum + "\n" + 
+                "PRIMER_NUM_RETURN=" + document.getElementById("PRIMER_NUM_RETURN").value + "\n" + 
                 "PRIMER_EXPLAIN_FLAG=1"  + "\n" + 
                 "PRIMER_PICK_ANYWAY=" + pickAnyway + "\n";
     let newContent = "";
