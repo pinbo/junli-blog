@@ -33,8 +33,8 @@ class Primer {
         this.start = "";
         this.tm = "";
         this.gc = "";
-        this.any = "";
-        this.three = "";
+        this.anyTH = "";
+        this.endTH = "";
         this.hairpin = "";
         this.seq = "";
       }
@@ -47,6 +47,8 @@ class PrimerPair {
         this.product_size = "";
         this.snp1 = ""; // the 1st SNP
         this.snp2 = ""; // the 2nd SNP
+        this.pairAnyTH = "";
+        this.pairEndTH = "";
     }
 }
 
@@ -114,15 +116,13 @@ async function parse_primer3output(primer3output) {
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
             let primerpairID = seqID + "-" + direction + "-" + ppn;
-            // if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
             if (LR == "LEFT") primerpairs[primerpairID].left.gc = line.split("=")[1];
             else primerpairs[primerpairID].right.gc = line.split("=")[1];
-        } else if (line.match("[0-5]_TM")) {
+        } else if (line.match("[0-9]+_TM")) {
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
             let primerpairID = seqID + "-" + direction + "-" + ppn;
-            // if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
             if (LR == "LEFT") primerpairs[primerpairID].left.tm = line.split("=")[1];
             else primerpairs[primerpairID].right.tm = line.split("=")[1];
         } else if (line.match("HAIRPIN")) {
@@ -130,17 +130,28 @@ async function parse_primer3output(primer3output) {
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
             let primerpairID = seqID + "-" + direction + "-" + ppn;
-            // if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
             if (LR == "LEFT") primerpairs[primerpairID].left.hairpin = line.split("=")[1];
             else primerpairs[primerpairID].right.hairpin = line.split("=")[1];
-        } else if (line.match("[0-5]=")) { // start, length: PRIMER_LEFT_0=29,23
+        } else if (line.match("SELF_ANY_TH")) { // PRIMER_LEFT_0_SELF_ANY_TH=0.00
+            let fields = line.split("_");
+            let ppn = fields[2]; // primer pair number
+            let LR = fields[1]; // left or right
+            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            if (LR == "LEFT") primerpairs[primerpairID].left.anyTH = line.split("=")[1];
+            else primerpairs[primerpairID].right.anyTH = line.split("=")[1];
+        } else if (line.match("SELF_END_TH")) { // PRIMER_LEFT_0_SELF_END_TH=0.00
+            let fields = line.split("_");
+            let ppn = fields[2]; // primer pair number
+            let LR = fields[1]; // left or right
+            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            if (LR == "LEFT") primerpairs[primerpairID].left.endTH = line.split("=")[1];
+            else primerpairs[primerpairID].right.endTH = line.split("=")[1];
+        } else if (line.match("[0-9]+=")) { // start, length: PRIMER_LEFT_0=29,23
             // console.log(line);
             let fields = line.split("_");
             let ppn = fields[2].split("=")[0]; // primer pair number
             let LR = fields[1]; // left or right
             let primerpairID = seqID + "-" + direction + "-" + ppn;
-            // if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
-            // console.log("primerpairID is", primerpairID);
             if (LR == "LEFT") {
                 primerpairs[primerpairID].left.start = line.split("=")[1].split(",")[0];
                 primerpairs[primerpairID].left.length = line.split("=")[1].split(",")[1];
@@ -153,15 +164,26 @@ async function parse_primer3output(primer3output) {
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let primerpairID = seqID + "-" + direction + "-" + ppn;
-            // if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
             primerpairs[primerpairID].product_size = line.split("=")[1];
+        } else if (line.match("COMPL_ANY_TH")) { // PRIMER_PAIR_0_COMPL_ANY_TH=0.00
+            // console.log(line);
+            let fields = line.split("_");
+            let ppn = fields[2]; // primer pair number
+            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            primerpairs[primerpairID].pairAnyTH = line.split("=")[1];
+        } else if (line.match("COMPL_END_TH")) { // PRIMER_PAIR_0_COMPL_END_TH=0.00
+            // console.log(line);
+            let fields = line.split("_");
+            let ppn = fields[2]; // primer pair number
+            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            primerpairs[primerpairID].pairEndTH = line.split("=")[1];
         }
     }
     // print
     console.log("start printing");
     const FAM = "GAAGGTGACCAAGTTCATGCT";
     const VIC = "GAAGGTCGGAGTCAACGGATT";
-    let out = "snpID,Direction,product_size,start,length,GC%,Tm,Hairpin,Seq,ReverseComplement\n";
+    let out = "snpID,Direction,product_size,start,length,Tm,GC%,SELF_ANY_TH,SELF_END_TH,Hairpin,Seq,ReverseComplement,PAIR_COMPL_ANY_TH,PAIR_COMPL_END_TH\n";
     for (const [key, value] of Object.entries(primerpairs)) {
         // console.log(key, value);
         let leftSeq = value.left.seq;
@@ -173,9 +195,9 @@ async function parse_primer3output(primer3output) {
             leftSeqSNP1 = FAM + leftSeqSNP1;
             leftSeqSNP2 = VIC + leftSeqSNP2;
         }
-        out += [key, "SNP1", value.product_size, value.left.start, value.left.length, value.left.gc, value.left.tm, value.left.hairpin, leftSeqSNP1, leftSeqSNP1rc].join(",") + "\n";
-        out += [key, "SNP2", value.product_size, value.left.start, value.left.length, value.left.gc, value.left.tm, value.left.hairpin, leftSeqSNP2, leftSeqSNP2rc].join(",") + "\n";
-        out += [key, "Common", value.product_size, value.right.start, value.right.length, value.right.gc, value.right.tm, value.right.hairpin, value.right.seq, reverse_complement(value.right.seq)].join(",") + "\n";
+        out += [key, "SNP1", value.product_size, value.left.start, value.left.length, value.left.tm, value.left.gc, value.left.anyTH, value.left.endTH, value.left.hairpin, leftSeqSNP1, leftSeqSNP1rc, value.pairAnyTH, value.pairEndTH].join(",") + "\n";
+        out += [key, "SNP2", value.product_size, value.left.start, value.left.length, value.left.tm, value.left.gc, value.left.anyTH, value.left.endTH, value.left.hairpin, leftSeqSNP2, leftSeqSNP2rc].join(",") + "\n";
+        out += [key, "Common", value.product_size, value.right.start, value.right.length, value.right.tm, value.right.gc, value.right.hairpin, value.right.anyTH, value.right.endTH, value.right.seq, reverse_complement(value.right.seq)].join(",") + "\n";
       }
       document.getElementById("stdout").innerHTML = out;
 }
