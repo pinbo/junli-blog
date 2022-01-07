@@ -1,9 +1,9 @@
 let primer3 = new Aioli("primer3_core/2.5.0");
 // Initialize primer3 and output the version
 primer3
-.init()
-.then(() => primer3.exec("-a"))
-.then(d => console.log(d.stdout, "ERRRRR", d.stderr));
+.init();
+// .then(() => primer3.exec("-a"))
+// .then(d => console.log(d.stdout, "ERRRRR", d.stderr));
 
 // function to read a text file async, for loadRef
 function readTextFileAsync(file) {
@@ -80,6 +80,7 @@ async function designPrimer() {
     if (dd.stdout) { // if successful run
         await parse_primer3output(dd.stdout);
         console.log("success!!!");
+        console.log("success!!! but with err: ", dd.stderr);
     } else {
         console.log(dd.stderr);
         document.getElementById("error").innerHTML = "Failed to design primers. Please check your input file format and refresh the window to try again.";
@@ -263,7 +264,8 @@ async function parseSNP(snpID, direction, seq){ // seq is AAAAAAAAAAA[T/C]GGGGGG
                 snp1 = longSeq[j];
                 snp2 = shortSeq[j];
                 template = ll + longSeq;
-                seqTarget = (snpPos+1).toString() + "," + (longSeq.length - shortSeq.length).toString();
+                if (longSeq.length - shortSeq.length - j - 1 <= 0) seqTarget = (snpPos+1).toString() + ",1";
+                else seqTarget = (snpPos+1).toString() + "," + (longSeq.length - shortSeq.length - j - 1).toString();
                 break;
             }
         }
