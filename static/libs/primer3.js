@@ -126,7 +126,7 @@ async function parse_primer3output(primer3output) {
             let primerpairID = seqID + "-" + direction + "-" + ppn;
             if (LR == "LEFT") primerpairs[primerpairID].left.tm = line.split("=")[1];
             else primerpairs[primerpairID].right.tm = line.split("=")[1];
-        } else if (line.match("HAIRPIN")) {
+        } else if (line.match("[0-9]+_HAIRPIN")) { // PRIMER_LEFT_0_HAIRPIN_TH=0.00
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
@@ -218,6 +218,7 @@ async function csv2primer3 (fileContent) {
                 "PRIMER_OPT_TM=" + document.getElementById("PRIMER_OPT_TM").value + "\n" + 
                 "PRIMER_MAX_TM=" + document.getElementById("PRIMER_MAX_TM").value + "\n" + 
                 "PRIMER_PAIR_MAX_DIFF_TM=" + document.getElementById("PRIMER_PAIR_MAX_DIFF_TM").value + "\n" + 
+                "PRIMER_MAX_HAIRPIN_TH=" + document.getElementById("PRIMER_MAX_HAIRPIN_TH").value + "\n" + 
                 "PRIMER_FIRST_BASE_INDEX=1" + "\n" + 
                 "PRIMER_LIBERAL_BASE=1" + "\n" + 
                 "PRIMER_NUM_RETURN=" + document.getElementById("PRIMER_NUM_RETURN").value + "\n" + 
