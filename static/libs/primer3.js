@@ -107,12 +107,12 @@ async function parse_primer3output(primer3output) {
         let line = lines[i];
         if (line.startsWith("SEQUENCE_ID")) {
             console.log("sequence_ID is ", line);
-            [seqID, direction, snp1, snp2] = line.split("=")[1].split("__");
+            [seqID, direction, snp1, snp2, rightEnd] = line.split("=")[1].split("__");
         } else if (line.match("^PRIMER_.*_SEQUENCE")) {
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             console.log("init primerpairID is", primerpairID);
             if (!(primerpairID in primerpairs)) primerpairs[primerpairID] = new PrimerPair();
             primerpairs[primerpairID].snp1 = snp1;
@@ -123,35 +123,35 @@ async function parse_primer3output(primer3output) {
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             if (LR == "LEFT") primerpairs[primerpairID].left.gc = line.split("=")[1];
             else primerpairs[primerpairID].right.gc = line.split("=")[1];
         } else if (line.match("[0-9]+_TM")) {
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             if (LR == "LEFT") primerpairs[primerpairID].left.tm = line.split("=")[1];
             else primerpairs[primerpairID].right.tm = line.split("=")[1];
         } else if (line.match("[0-9]+_HAIRPIN")) { // PRIMER_LEFT_0_HAIRPIN_TH=0.00
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             if (LR == "LEFT") primerpairs[primerpairID].left.hairpin = line.split("=")[1];
             else primerpairs[primerpairID].right.hairpin = line.split("=")[1];
         } else if (line.match("SELF_ANY_TH")) { // PRIMER_LEFT_0_SELF_ANY_TH=0.00
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             if (LR == "LEFT") primerpairs[primerpairID].left.anyTH = line.split("=")[1];
             else primerpairs[primerpairID].right.anyTH = line.split("=")[1];
         } else if (line.match("SELF_END_TH")) { // PRIMER_LEFT_0_SELF_END_TH=0.00
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
             let LR = fields[1]; // left or right
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             if (LR == "LEFT") primerpairs[primerpairID].left.endTH = line.split("=")[1];
             else primerpairs[primerpairID].right.endTH = line.split("=")[1];
         } else if (line.match("[0-9]+=")) { // start, length: PRIMER_LEFT_0=29,23
@@ -159,7 +159,7 @@ async function parse_primer3output(primer3output) {
             let fields = line.split("_");
             let ppn = fields[2].split("=")[0]; // primer pair number
             let LR = fields[1]; // left or right
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             if (LR == "LEFT") {
                 primerpairs[primerpairID].left.start = line.split("=")[1].split(",")[0];
                 primerpairs[primerpairID].left.length = line.split("=")[1].split(",")[1];
@@ -171,19 +171,19 @@ async function parse_primer3output(primer3output) {
             // console.log(line);
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             primerpairs[primerpairID].product_size = line.split("=")[1];
         } else if (line.match("COMPL_ANY_TH")) { // PRIMER_PAIR_0_COMPL_ANY_TH=0.00
             // console.log(line);
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             primerpairs[primerpairID].pairAnyTH = line.split("=")[1];
         } else if (line.match("COMPL_END_TH")) { // PRIMER_PAIR_0_COMPL_END_TH=0.00
             // console.log(line);
             let fields = line.split("_");
             let ppn = fields[2]; // primer pair number
-            let primerpairID = seqID + "-" + direction + "-" + ppn;
+            let primerpairID = seqID + "-" + direction + "-" + rightEnd + "-" + ppn;
             primerpairs[primerpairID].pairEndTH = line.split("=")[1];
         }
     }
@@ -208,6 +208,15 @@ async function parse_primer3output(primer3output) {
         out += [key, "Common", value.product_size, value.right.start, value.right.length, value.right.tm, value.right.gc, value.right.hairpin, value.right.anyTH, value.right.endTH, value.right.seq, reverse_complement(value.right.seq)].join(",") + "\n";
       }
       document.getElementById("stdout").innerHTML = out;
+}
+
+// find all indexes of a character in string
+function indicesOf(str, substr){
+    let indices = [];
+    for(let i=0; i<str.length;i++) {
+        if (str[i] === substr) indices.push(i);
+    }
+    return indices;
 }
 
 // function to format fasta to fixed length
@@ -237,22 +246,33 @@ async function csv2primer3 (fileContent) {
         if (line){
             let info = line.split(/ +|\t/); // spaces or tab delimited
             let snpID = info[0];
-            // let chrom = info[1];
             let seq = info[1].toLowerCase(); // AAAAAAAAAAA[T/C]GGGGGGGGGGG
             let forwardSetting = await parseSNP(snpID, "forward", seq);
             let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq));
             // prepare primer3 input
-            newContent += settings_common + forwardSetting;
-            newContent += settings_common + reverseSetting;
+            if (forwardSetting.length){
+                for (let i = 0; i < forwardSetting.length; i++){
+                    newContent += settings_common + forwardSetting[i];
+                }
+            }
+            if (reverseSetting.length){
+                for (let i = 0; i < reverseSetting.length; i++){
+                    newContent += settings_common + reverseSetting[i];
+                }
+            }
+            // newContent += settings_common + forwardSetting;
+            // newContent += settings_common + reverseSetting;
         }
 
     }
     return newContent.trim();
 }
 
-// funciton to process each line
+// function to process each line
 async function parseSNP(snpID, direction, seq){ // seq is AAAAAAAAAAA[T/C]GGGGGGGGGGG
-    let [ll, snps, rr] = seq.split(/\[|\]/); // left flanking, [A/G], right flanking
+    let [ll0, snps, rr0] = seq.split(/\[|\]/); // left flanking, [A/G], right flanking
+    let ll = ll0.replaceAll(/<|>/g, '');
+    let rr = rr0.replaceAll(/<|>/g, '');
     let [snp1, snp2] = snps.split("/");
     let template = ll + snp1 + rr;
     let snpPos = ll.length + 1; // default for SNPs
@@ -278,11 +298,46 @@ async function parseSNP(snpID, direction, seq){ // seq is AAAAAAAAAAA[T/C]GGGGGG
             }
         }
     }
-    let settings = "SEQUENCE_ID=" + snpID + "__" + direction + "__" + snp1 + "__" + snp2 + "\n" +
+    // check whether there are user-anchoring point "<>"
+    let forceRightEnd = [];
+    let snpMaxLen = 1;
+    if (snp1.length > snp2.length) snpMaxLen = snp1.length;
+    else snpMaxLen = snp2.length;
+    // console.log("rr0 is", rr0);
+    if (rr0.includes("<")) { // need to use anchoring points as 3' end
+        let brackLeftPos = indicesOf(rr0, "<"); // pos of <
+        let brackRightPos = indicesOf(rr0, ">"); // pos of >
+        for (let i = 0; i < brackLeftPos.length; i++){
+            let a = brackLeftPos[i];
+            let b = brackRightPos[i];
+            console.log("a and b are", a, b);
+            for (let j = a+1; j < b; j++){ // 1-based for primer3
+                forceRightEnd.push(j-2*i + ll.length + snpMaxLen);
+            }
+        } 
+    } else if (ll0.includes("<")) return 0; // need to use ll0 as common primer
+
+    // check whether there are 
+    let settingList = [];
+
+    let settings = "SEQUENCE_ID=" + snpID + "__" + direction + "__" + snp1 + "__" + snp2 + "__\n" +
     "SEQUENCE_TEMPLATE=" + template + "\n" + 
     "SEQUENCE_FORCE_LEFT_END=" + snpPos.toString() + "\n" + 
     "SEQUENCE_TARGET=" + seqTarget + "\n=\n";
-    return settings;
+    // console.log("snp setting is", settings);
+    // console.log("force right end is", forceRightEnd, "for snp", snpID);
+    if (forceRightEnd.length){
+        for (let i = 0; i < forceRightEnd.length; i++){
+            let settings = "SEQUENCE_ID=" + snpID + "__" + direction + "__" + snp1 + "__" + snp2 + "__" + forceRightEnd[i].toString() + "\n" +
+            "SEQUENCE_TEMPLATE=" + template + "\n" + 
+            "SEQUENCE_FORCE_LEFT_END=" + snpPos.toString() + "\n" + 
+            "SEQUENCE_FORCE_RIGHT_END=" + forceRightEnd[i].toString() + "\n" + 
+            "SEQUENCE_TARGET=" + seqTarget + "\n=\n";
+            settingList.push(settings);
+        }
+    } else settingList.push(settings);
+    // console.log("settings return for snp", snpID, settingList);
+    return settingList;
 }
 
 // download
@@ -329,7 +384,9 @@ var ipuac = {
     "-":"-",
     "[":"]",
     "]":"[",
-    "/":"/"
+    "/":"/",
+    "<":">",
+    ">":"<",
 }
 // to convert one sequence
 function reverse_complement (seq, method = "RC"){
