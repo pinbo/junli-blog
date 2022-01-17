@@ -62,14 +62,21 @@ async function prepareInput(evt) {
     return 0;
 }
 
-
-
+// load the SNP file
+document.getElementById("snpfile").addEventListener("change", prepareInput, false);
 
 // process the output of primer3 
 async function designPrimer() {
+    document.getElementById("error").innerHTML = ""; // clear err message
     // first, prepaire primer3 input file
     console.log("prepare primer3 input");
-    let primer3input = await csv2primer3(inputFileContent);
+    let primer3input = "";
+    if (inputFileContent) primer3input = await csv2primer3(inputFileContent);
+    else if (document.getElementById("paste").value) primer3input = await csv2primer3(document.getElementById("paste").value);
+    else {
+        document.getElementById("error").innerHTML = "No input found; please refresh the window to try again.";
+        return 0;
+    }
     const p3input = new Newfile("/data/p3input", primer3input);
     console.log("writing primer3 input");
     primer3.write(p3input);
@@ -228,10 +235,10 @@ async function csv2primer3 (fileContent) {
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i].trim();
         if (line){
-            let info = line.split(",");
+            let info = line.split(/ +|\t/); // spaces or tab delimited
             let snpID = info[0];
             // let chrom = info[1];
-            let seq = info[2].toLowerCase(); // AAAAAAAAAAA[T/C]GGGGGGGGGGG
+            let seq = info[1].toLowerCase(); // AAAAAAAAAAA[T/C]GGGGGGGGGGG
             let forwardSetting = await parseSNP(snpID, "forward", seq);
             let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq));
             // prepare primer3 input
@@ -277,11 +284,6 @@ async function parseSNP(snpID, direction, seq){ // seq is AAAAAAAAAAA[T/C]GGGGGG
     "SEQUENCE_TARGET=" + seqTarget + "\n=\n";
     return settings;
 }
-
-
-// load the SNP file
-document.getElementById("snpfile").addEventListener("change", prepareInput, false);
-
 
 // download
 async function download(){
