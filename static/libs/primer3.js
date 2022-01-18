@@ -247,8 +247,16 @@ async function csv2primer3 (fileContent) {
             let info = line.split(/ +|\t/); // spaces or tab delimited
             let snpID = info[0];
             let seq = info[1].toLowerCase(); // AAAAAAAAAAA[T/C]GGGGGGGGGGG
-            let forwardSetting = await parseSNP(snpID, "forward", seq);
-            let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq));
+            let anchorPoints = []; // only for SNPs
+            let anchorPointsRC = [];
+            if (info[2]) { // info[2] is optional anchoring points, sep by ,
+                anchorPoints = info[2].split(',').map( Number );
+                anchorPointsRC = anchorPoints.map(x => seq.length - 4 - x + 1);
+                console.log("anchorPoints is", anchorPoints);
+                console.log("anchorPointsRC is", anchorPointsRC);
+            }
+            let forwardSetting = await parseSNP(snpID, "forward", seq, anchorPoints);
+            let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq), anchorPointsRC);
             // prepare primer3 input
             if (forwardSetting.length){
                 for (let i = 0; i < forwardSetting.length; i++){
@@ -269,7 +277,7 @@ async function csv2primer3 (fileContent) {
 }
 
 // function to process each line
-async function parseSNP(snpID, direction, seq){ // seq is AAAAAAAAAAA[T/C]GGGGGGGGGGG
+async function parseSNP(snpID, direction, seq, anchorPoints){ // seq is AAAAAAAAAAA[T/C]GGGGGGGGGGG
     let [ll0, snps, rr0] = seq.split(/\[|\]/); // left flanking, [A/G], right flanking
     let ll = ll0.replaceAll(/<|>/g, '');
     let rr = rr0.replaceAll(/<|>/g, '');
@@ -316,6 +324,13 @@ async function parseSNP(snpID, direction, seq){ // seq is AAAAAAAAAAA[T/C]GGGGGG
             }
         } 
     } else if (ll0.includes("<")) return 0; // need to use ll0 as common primer
+    // check whether user provide anchoring points at the 3rd column
+    if (anchorPoints.length){
+        for (let i = 0; i < anchorPoints.length; i++){
+            if (anchorPoints[i] > snpPos) forceRightEnd.push(anchorPoints[i]);
+        }
+        if (forceRightEnd.length === 0) return 0; // all points are on the left, no need to design
+    }
 
     // check whether there are 
     let settingList = [];
