@@ -247,11 +247,30 @@ async function csv2primer3 (fileContent) {
             let info = line.split(/ +|\t/); // spaces or tab delimited
             let snpID = info[0];
             let seq = info[1].toLowerCase(); // AAAAAAAAAAA[T/C]GGGGGGGGGGG
+            let [ll0, snps, rr0] = seq.split(/\[|\]/); // left flanking, T/C, right flanking
+            let ll = ll0.replaceAll(/<|>/g, '');
+            let rr = rr0.replaceAll(/<|>/g, '');
+            let [snp1, snp2] = snps.replace("-","").split("/");
+            let template = "";
+            let snpMaxLen = 1;
+            if (snp1.length > snp2.length) {
+                template = ll + snp1 + rr;
+                snpMaxLen = snp1.length;
+            } else {
+                template = ll + snp2 + rr;
+                snpMaxLen = snp2.length;
+            }
             let anchorPoints = []; // only for SNPs
             let anchorPointsRC = [];
             if (info[2]) { // info[2] is optional anchoring points, sep by ,
                 anchorPoints = info[2].split(',').map( Number );
-                anchorPointsRC = anchorPoints.map(x => seq.length - 4 - x + 1);
+                // consider indels too: now the anchor points are for reference sequence (the left snp/indel in '[ref/alt]')
+                if (snp1.length != snp2.length){ // SNP or equal replacement AG/TC
+                    for (let i = 0; i < anchorPoints.length; i++) {
+                        if (anchorPoints[i] > ll.length) anchorPoints[i] += snpMaxLen - snp1.length;
+                    }
+                }
+                anchorPointsRC = anchorPoints.map(x => template.length - x + 1);
                 console.log("anchorPoints is", anchorPoints);
                 console.log("anchorPointsRC is", anchorPointsRC);
             }
@@ -281,11 +300,15 @@ async function parseSNP(snpID, direction, seq, anchorPoints){ // seq is AAAAAAAA
     let [ll0, snps, rr0] = seq.split(/\[|\]/); // left flanking, [A/G], right flanking
     let ll = ll0.replaceAll(/<|>/g, '');
     let rr = rr0.replaceAll(/<|>/g, '');
-    let [snp1, snp2] = snps.split("/");
+    let [snp1, snp2] = snps.replace("-","").split("/");
+    let snpMaxLen = 1;
+    if (snp1.length > snp2.length) snpMaxLen = snp1.length;
+    else snpMaxLen = snp2.length;
+    console.log("snpMaxLen =", snpMaxLen);
     let template = ll + snp1 + rr;
     let snpPos = ll.length + 1; // default for SNPs
     let seqTarget = (snpPos+1).toString() + ",1"; // SEQUENCE_TARGET: <start>,<length>
-    if (snp1.length != snp2.length) { // indels, look for the 1st difference to simplify the procedure
+    if (snp1.length != snp2.length || snp1.length > 1) { // indels, look for the 1st difference to simplify the procedure
         let ss1 = (snp1 + rr).replace("-","");
         let ss2 = (snp2 + rr).replace("-","");
         let longSeq = ss1;
@@ -308,9 +331,6 @@ async function parseSNP(snpID, direction, seq, anchorPoints){ // seq is AAAAAAAA
     }
     // check whether there are user-anchoring point "<>"
     let forceRightEnd = [];
-    let snpMaxLen = 1;
-    if (snp1.length > snp2.length) snpMaxLen = snp1.length;
-    else snpMaxLen = snp2.length;
     // console.log("rr0 is", rr0);
     if (rr0.includes("<")) { // need to use anchoring points as 3' end
         let brackLeftPos = indicesOf(rr0, "<"); // pos of <
@@ -416,3 +436,9 @@ function reverse_complement (seq, method = "RC"){
     if (method == "C") return o.join('');
     else return o.reverse().join('');
 }
+
+// test example
+// snp1 GAACGCAAGAGGGTATGGTCGACAT<G>TTAGGA<ATA>ATGTTAGCAGGGGTA[C/G]ACTGGCTGCTTTTG<T>ATTCAAATGATTTAGAA<T>TAAGGCCAGCTAAACTA
+// snp2 GAACGCAAGAGGGTATGGTCGACATgTTAGGAataATGTTAGCAGGGGTA[C/G]ACTGGCTGCTTTTGtATTCAAATGATTTAGAAtTAAGGCCAGCTAAACTA 26,33,34,35,66,84
+// snp3 GAACGCAAGAGGGTATGGTCGACAT<G>TTAGGA<ATA>ATGTTAGCAGGGGTA[C/GAAA]ACTGGCTGCTTTTG<T>ATTCAAATGATTTAGAA<T>TAAGGCCAGCTAAACTA
+// snp4 GAACGCAAGAGGGTATGGTCGACATgTTAGGAataATGTTAGCAGGGGTA[C/GAAA]ACTGGCTGCTTTTGtATTCAAATGATTTAGAAtTAAGGCCAGCTAAACTA 26,33,34,35,66,84
