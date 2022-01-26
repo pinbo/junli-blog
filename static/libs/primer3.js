@@ -253,12 +253,16 @@ async function csv2primer3 (fileContent) {
             let [snp1, snp2] = snps.replace("-","").split("/");
             let template = "";
             let snpMaxLen = 1;
-            if (snp1.length > snp2.length) {
+            let snpLong = snp1;
+            let snpShort = snp2;
+            if (snp1.length >= snp2.length) {
                 template = ll + snp1 + rr;
                 snpMaxLen = snp1.length;
             } else {
                 template = ll + snp2 + rr;
                 snpMaxLen = snp2.length;
+                snpLong = snp2;
+                snpShort = snp1;
             }
             let anchorPoints = []; // only for SNPs
             let anchorPointsRC = [];
@@ -274,8 +278,10 @@ async function csv2primer3 (fileContent) {
                 console.log("anchorPoints is", anchorPoints);
                 console.log("anchorPointsRC is", anchorPointsRC);
             }
-            let forwardSetting = await parseSNP(snpID, "forward", seq, anchorPoints);
-            let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq), anchorPointsRC);
+            // let forwardSetting = await parseSNP(snpID, "forward", seq, anchorPoints);
+            // let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq), anchorPointsRC);
+            let forwardSetting = await parseSNP2(snpID + "__forward", ll0, rr0, ll, rr, snpLong, snpShort, snpMaxLen, template, anchorPoints);
+            let reverseSetting = await parseSNP2(snpID + "__reverse", reverse_complement(rr0), reverse_complement(ll0), reverse_complement(rr), reverse_complement(ll), reverse_complement(snpLong), reverse_complement(snpShort), snpMaxLen, reverse_complement(template), anchorPointsRC);
             // prepare primer3 input
             if (forwardSetting.length){
                 for (let i = 0; i < forwardSetting.length; i++){
@@ -293,6 +299,73 @@ async function csv2primer3 (fileContent) {
 
     }
     return newContent.trim();
+}
+
+// function to process each line
+async function parseSNP2(snpID, ll0, rr0, ll, rr, snpLong, snpShort, snpMaxLen, template, anchorPoints){ // seq is AAAAAAAAAAA[T/C]GGGGGGGGGGG
+    let snpPos = ll.length + 1; // default for SNPs
+    let seqTarget = (snpPos+1).toString() + ",1"; // SEQUENCE_TARGET: <start>,<length>
+    let snp1 = snpLong;
+    let snp2 = snpShort;
+    if (snpLong.length != snpShort.length || snpLong.length > 1) { // indels, look for the 1st difference to simplify the procedure
+        let longSeq = snpLong + rr;
+        let shortSeq = snpShort + rr;
+        for (let j=0; j < shortSeq.length; j++){
+            if (longSeq[j] != shortSeq[j]) {
+                snpPos += j;
+                snp1 = longSeq[j];
+                snp2 = shortSeq[j];
+                template = ll + longSeq;
+                if (longSeq.length - shortSeq.length - j - 1 <= 0) seqTarget = (snpPos+1).toString() + ",1";
+                else seqTarget = (snpPos+1).toString() + "," + (longSeq.length - shortSeq.length - j - 1).toString();
+                break;
+            }
+        }
+    }
+    // check whether there are user-anchoring point "<>"
+    let forceRightEnd = [];
+    // console.log("rr0 is", rr0);
+    if (rr0.includes("<")) { // need to use anchoring points as 3' end
+        let brackLeftPos = indicesOf(rr0, "<"); // pos of <
+        let brackRightPos = indicesOf(rr0, ">"); // pos of >
+        for (let i = 0; i < brackLeftPos.length; i++){
+            let a = brackLeftPos[i];
+            let b = brackRightPos[i];
+            console.log("a and b are", a, b);
+            for (let j = a+1; j < b; j++){ // 1-based for primer3
+                forceRightEnd.push(j-2*i + ll.length + snpMaxLen);
+            }
+        } 
+    } else if (ll0.includes("<")) return 0; // need to use ll0 as common primer
+    // check whether user provide anchoring points at the 3rd column
+    if (anchorPoints.length){
+        for (let i = 0; i < anchorPoints.length; i++){
+            if (anchorPoints[i] > snpPos) forceRightEnd.push(anchorPoints[i]);
+        }
+        if (forceRightEnd.length === 0) return 0; // all points are on the left, no need to design
+    }
+
+    // check whether there are 
+    let settingList = [];
+
+    let settings = "SEQUENCE_ID=" + snpID + "__" + snp1 + "__" + snp2 + "__\n" +
+    "SEQUENCE_TEMPLATE=" + template + "\n" + 
+    "SEQUENCE_FORCE_LEFT_END=" + snpPos.toString() + "\n" + 
+    "SEQUENCE_TARGET=" + seqTarget + "\n=\n";
+    // console.log("snp setting is", settings);
+    // console.log("force right end is", forceRightEnd, "for snp", snpID);
+    if (forceRightEnd.length){
+        for (let i = 0; i < forceRightEnd.length; i++){
+            let settings = "SEQUENCE_ID=" + snpID + "__" + snp1 + "__" + snp2 + "__" + forceRightEnd[i].toString() + "\n" +
+            "SEQUENCE_TEMPLATE=" + template + "\n" + 
+            "SEQUENCE_FORCE_LEFT_END=" + snpPos.toString() + "\n" + 
+            "SEQUENCE_FORCE_RIGHT_END=" + forceRightEnd[i].toString() + "\n" + 
+            "SEQUENCE_TARGET=" + seqTarget + "\n=\n";
+            settingList.push(settings);
+        }
+    } else settingList.push(settings);
+    // console.log("settings return for snp", snpID, settingList);
+    return settingList;
 }
 
 // function to process each line
