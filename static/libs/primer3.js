@@ -255,6 +255,7 @@ async function csv2primer3 (fileContent) {
             let snpMaxLen = 1;
             let snpLong = snp1;
             let snpShort = snp2;
+            let whoIsLong = 1; // ref=1 and alt=2, just to make sure ref is SNP1 for indels
             if (snp1.length >= snp2.length) {
                 template = ll + snp1 + rr;
                 snpMaxLen = snp1.length;
@@ -263,6 +264,7 @@ async function csv2primer3 (fileContent) {
                 snpMaxLen = snp2.length;
                 snpLong = snp2;
                 snpShort = snp1;
+                whoIsLong = 2;
             }
             let anchorPoints = []; // only for SNPs
             let anchorPointsRC = [];
@@ -280,8 +282,8 @@ async function csv2primer3 (fileContent) {
             }
             // let forwardSetting = await parseSNP(snpID, "forward", seq, anchorPoints);
             // let reverseSetting = await parseSNP(snpID, "reverse", reverse_complement(seq), anchorPointsRC);
-            let forwardSetting = await parseSNP2(snpID + "__forward", ll0, rr0, ll, rr, snpLong, snpShort, snpMaxLen, template, anchorPoints);
-            let reverseSetting = await parseSNP2(snpID + "__reverse", reverse_complement(rr0), reverse_complement(ll0), reverse_complement(rr), reverse_complement(ll), reverse_complement(snpLong), reverse_complement(snpShort), snpMaxLen, reverse_complement(template), anchorPointsRC);
+            let forwardSetting = await parseSNP2(snpID + "__forward", ll0, rr0, ll, rr, snpLong, snpShort, snpMaxLen, template, anchorPoints, whoIsLong);
+            let reverseSetting = await parseSNP2(snpID + "__reverse", reverse_complement(rr0), reverse_complement(ll0), reverse_complement(rr), reverse_complement(ll), reverse_complement(snpLong), reverse_complement(snpShort), snpMaxLen, reverse_complement(template), anchorPointsRC, whoIsLong);
             // prepare primer3 input
             if (forwardSetting.length){
                 for (let i = 0; i < forwardSetting.length; i++){
@@ -302,7 +304,7 @@ async function csv2primer3 (fileContent) {
 }
 
 // function to process each line
-async function parseSNP2(snpID, ll0, rr0, ll, rr, snpLong, snpShort, snpMaxLen, template, anchorPoints){ // seq is AAAAAAAAAAA[T/C]GGGGGGGGGGG
+async function parseSNP2(snpID, ll0, rr0, ll, rr, snpLong, snpShort, snpMaxLen, template, anchorPoints, whoIsLong){ // seq is AAAAAAAAAAA[T/C]GGGGGGGGGGG
     let snpPos = ll.length + 1; // default for SNPs
     let seqTarget = (snpPos+1).toString() + ",1"; // SEQUENCE_TARGET: <start>,<length>
     let snp1 = snpLong;
@@ -313,8 +315,13 @@ async function parseSNP2(snpID, ll0, rr0, ll, rr, snpLong, snpShort, snpMaxLen, 
         for (let j=0; j < shortSeq.length; j++){
             if (longSeq[j] != shortSeq[j]) {
                 snpPos += j;
-                snp1 = longSeq[j];
-                snp2 = shortSeq[j];
+                if (whoIsLong == 1){
+                    snp1 = longSeq[j];
+                    snp2 = shortSeq[j];
+                } else {
+                    snp2 = longSeq[j];
+                    snp1 = shortSeq[j];
+                }
                 template = ll + longSeq;
                 if (longSeq.length - shortSeq.length - j - 1 <= 0) seqTarget = (snpPos+1).toString() + ",1";
                 else seqTarget = (snpPos+1).toString() + "," + (longSeq.length - shortSeq.length - j - 1).toString();
@@ -515,3 +522,11 @@ function reverse_complement (seq, method = "RC"){
 // snp2 GAACGCAAGAGGGTATGGTCGACATgTTAGGAataATGTTAGCAGGGGTA[C/G]ACTGGCTGCTTTTGtATTCAAATGATTTAGAAtTAAGGCCAGCTAAACTA 26,33,34,35,66,84
 // snp3 GAACGCAAGAGGGTATGGTCGACAT<G>TTAGGA<ATA>ATGTTAGCAGGGGTA[C/GAAA]ACTGGCTGCTTTTG<T>ATTCAAATGATTTAGAA<T>TAAGGCCAGCTAAACTA
 // snp4 GAACGCAAGAGGGTATGGTCGACATgTTAGGAataATGTTAGCAGGGGTA[C/GAAA]ACTGGCTGCTTTTGtATTCAAATGATTTAGAAtTAAGGCCAGCTAAACTA 26,33,34,35,66,84
+
+// snp1 GAACGCAAGAGGGTATGGTCGACATGTTAGGAATAATGTTAGCAGGGGTA[C/G]ACTGGCTGCTTTTGTATTCAAATGATTTAGAATTAAGGCCAGCTAAACTA
+// snp2 GAACGCAAGAGGGTATGGTCGACAT<G>TTAGGAATAATGTTAGCAGGGGTA[C/G]ACTGGCTGCTTTTGTATTCAAATGATTTAGAATTAAGGCCAGCTAAACTA
+// snp3 GAACGCAAGAGGGTATGGTCGACATGTTAGGAATAATGTTAGCAGGGGTA[C/G]ACTGGCTGCTTTTGTA<T>TCAAATGATTTAGAATTAAGGCCAGCTAAACTA
+// snp4 GAACGCAAGAGGGTATGGTCGACAT<G>TTAGGAATAATGTTAGCAGGGGTA[C/G]ACTGGCTGCTTTTG<T>ATTCAAATGATTTAGAATTAAGGCCAGCTAAACTA
+// snp5 GAACGCAAGAGGGTATGGTCGACATGTTAGGAATAATGTTAGCAGGGGTA[-/G]ACTGGCTGCTTTTGTATTCAAATGATTTAGAATTAAGGCCAGCTAAACTA
+// snp6 GAACGCAAGAGGGTATGGTCGACATGTTAGGAATAATGTTAGCAGGGGTA[-/G]ACTGGCTGCTTTTGTATTCAAATGATTTAGAATTAAGGCCAGCTAAACTA 26,66
+// snp7 GAACGCAAGAGGGTATGGTCGACATGTTAGGAATAATGTTAGCAGGGGTA[G/]ACTGGCTGCTTTTGTATTCAAATGATTTAGAATTAAGGCCAGCTAAACTA 26,66
