@@ -57,7 +57,7 @@ let inputFileContent = ""; // global variable for later use
 async function prepareInput(evt) {
 	var files = evt.target.files; // FileList object
 	if(files.length==0) return;
-    // Aioli.mount(files[0], null, null, primer3);// only to worker fastp
+    Aioli.mount(files[0], null, null, primer3);// only to worker fastp
     inputFileContent = await readTextFileAsync(files[0]);
     return 0;
 }
