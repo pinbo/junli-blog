@@ -49,10 +49,13 @@ async function process(){
     let dna = "";
     let ruler = "";
     let consensus = "";
+    let seqnum = "";
     let fraction = "-thr=" + document.getElementById("fraction").value;
+    let outlen = "-outlen=" + document.getElementById("outlen").value;
     if (document.getElementById("dna").checked) dna = "-dna";
     if (document.getElementById("ruler").checked) ruler = "-ruler";
     if (document.getElementById("consensus").checked) consensus = "-cons";
+    if (document.getElementById("seqnum").checked) seqnum = "-seqnum";
     let sel1 = document.getElementById("box1"); 
     let inputtype = sel1.options[sel1.selectedIndex].value;
     if (inputtype == "guess") inputtype = "";
@@ -63,7 +66,7 @@ async function process(){
     else if (outformat == "-dev=2") fileExt = ".eps";
     outfile += fileExt;
 
-    let cmd = ["-in=/data/" + infile, "-out=" + outfile, dna, ruler, consensus, fraction, inputtype, outformat, "-def"].join(" ").replace(/  +/g, ' ');
+    let cmd = ["-in=/data/" + infile, "-out=" + outfile, dna, ruler, consensus, fraction, inputtype, outformat, outlen, seqnum,"-def"].join(" ").replace(/  +/g, ' ');
 
     // fastp.setwd("/data") // set working directory
     console.log("input is", cmd);
