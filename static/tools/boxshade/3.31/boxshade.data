@@ -1,3 +1,33 @@
+This file is a Amino-acid similarity file for use with BOX.
+Is resembles the GCG  simplify.txt, but similarities contained
+in this file are not automatically set-forming. This means:
+The line 
+I LVM     means that I is similar to L,V and M and also that
+                     L,V,M are similar to I.
+          It does not imply that L is similar to V or to M.
+For achieving this, more lines (the next ones) are necessary.
+Although is seems weird, this feature has been chosen DELIBERATELY
+because I think it could be helpful in some cases.
+Other format requirements are the same as for SIMPLIFY.TXT in the 
+GCG-package.
+..
+F YW
+Y WF
+W YF
+I LVM
+L VMI
+V MVI
+R KH
+K HR
+H RK
+G A
+A GS
+T S
+S TA
+D EN
+E DQ
+N QD
+Q NE
 This is a file of default parameters for use with BOXSHADE
 there are several sections, one for GENERAL parameters and one for each
 output device.
@@ -21,7 +51,7 @@ When editing, one has to regard:
 N                                         consensus to single sequence?
 60                                        sequence chars per line
 Y                                         sequence names to be printed?
-Y                                         sequence numbers to be printed?
+N                                         sequence numbers to be printed?
 1                                         No of empty lines between blocks
 Y                                         special shading for similar residues
 N                                         special shading for conserved residues
@@ -116,6 +146,23 @@ T                                         shade only ?
 n                                         landscape mode
 
 
+This file is a Amino-acid grouping file for use with NEWBOX.
+Each line contains a set of amino acids which are considered
+'similar' when calculating the consensus.
+This table was taken from ClustalX v1.3b:
+STRONG groups:
+  These are all the positively scoring groups that occur in
+  the Gonnet Pam250 matrix with score >0.5
+..
+STA
+NEQK
+NHQK
+NDEQ
+QHRK
+MILV
+MILF
+HY
+FYW
 This is a file of default parameters for use with BOXSHADE
 there are several sections, one for GENERAL parameters and one for each
 output device.
@@ -236,6 +283,25 @@ B
 E
 
 This file is a Amino-acid grouping file for use with NEWBOX.
+Each line contains a set of amino acids which are considered
+'similar' when calculating the consensus. The .SIM file is different
+and is used in colouring residues that are "similar" to a single
+consensus residue.
+This table was taken from ClustalW v1.60
+Other format requirements are the same as for SIMPLIFY.TXT in the
+GCG-package.
+..
+ACST
+NT
+EQ
+NQ
+ED
+KRQH
+GN
+NH
+FY
+IVLM
+This file is a Amino-acid grouping file for use with NEWBOX.
 Each line contains a set of amino acids which are considered 
 'similar' when calculating the consensus. The .SIM file is different 
 and is used in colouring residues that are "similar" to a single 
@@ -282,6 +348,26 @@ This file is a Nucleic-acid group file for use with BOXSHADE.
 ..
 AGR
 CTY
+This file is a Amino-acid grouping file for use with NEWBOX.
+Each line contains a set of amino acids which are considered
+'similar' when calculating the consensus.
+This table was taken from ClustalX v1.3b:
+WEAK groups:
+  These are all the positively scoring groups that occur in
+  the Gonnet Pam250 matrix.
+..
+FYW
+CSA
+ATV
+SAG
+STNK
+STPA
+SGND
+SNDEQK
+NDEQHK
+NEQHRK
+FVLIM
+HFY
 This file is a Amino-acid similarity file for use with BOX.
 Is resembles the GCG  simplify.txt, but similarities contained
 in this file are not automatically set-forming. This means:
@@ -307,6 +393,76 @@ D E
 G A
 T S
 N Q
+This file is a Amino-acid similarity file for use with BOX.
+
+This file is used in colouring residues that are "similar"
+to a single consensus residue.
+
+Similarities contained in this file are not automatically
+set-forming. This means:
+The line
+I LVM     means that I is similar to L,V and M and also that
+		     L,V,M are similar to I.
+	  It does not imply that L is similar to V or to M.
+For achieving this, more lines (the next ones) are necessary.
+Although is seems weird, this feature has been chosen DELIBERATELY
+because I think it could be helpful in some cases.
+
+This table was taken from ClustalX v1.3b:
+WEAK groups:
+  These are all the positively scoring groups that occur in
+  the Gonnet Pam250 matrix
+..
+F YW
+Y WF
+W FY
+C SA
+S AC
+A CS
+A TV
+T VA
+V AT
+S AG
+A GS
+G SA
+S TNK
+T NKS
+N KST
+K STN
+S TPA
+T PAS
+P AST
+A STP
+S GND
+G NDS
+N DSG
+D SGN
+S NDEQK
+N DEQKS
+D EQKSN
+E QKSND
+Q KSNDE
+K SNDEQ
+N DEQHK
+D EQHKN
+E QHKND
+Q HKNDE
+H KNDEQ
+K NDEQH
+N EQHRK
+E QHRKN
+Q HRKNE
+H RKNEQ
+R KNEQH
+K NEQHR
+F VLIM
+V LIMF
+L IMFV
+I MFVL
+M FVLI
+H FY
+F YH
+Y HF
 This file is a Nucleic-acid similarity file for use with BOXSHADE.
 Is resembles the GCG  simplify.txt, but similarities contained
 in this file are not automatically set-forming. This means:
@@ -326,3 +482,54 @@ R AG
 C TY
 T CY
 Y CT
+This file is a Amino-acid similarity file for use with BOX.
+
+This file is used in colouring residues that are "similar"
+to a single consensus residue.
+
+Similarities contained in this file are not automatically
+set-forming. This means:
+The line
+I LVM     means that I is similar to L,V and M and also that
+		     L,V,M are similar to I.
+	  It does not imply that L is similar to V or to M.
+For achieving this, more lines (the next ones) are necessary.
+Although is seems weird, this feature has been chosen DELIBERATELY
+because I think it could be helpful in some cases.
+
+This table was taken from ClustalX v1.3b:
+STRONG groups:
+  These are all the positively scoring groups that occur in
+  the Gonnet Pam250 matrix with score >0.5
+..
+S TA
+T AS
+A ST
+N EQK
+E QKN
+Q KNE
+K NEQ
+N HQK
+H QKN
+Q KNH
+K NHQ
+N DEQ
+D EQN
+E QND
+Q NDE
+Q HRK
+H RKQ
+R KQH
+K QHR
+M ILV
+I LVM
+L VMI
+V MIL
+M ILF
+I LFM
+L FMI
+F MIL
+H Y
+F YW
+Y WF
+W FY
