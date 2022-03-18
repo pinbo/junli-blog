@@ -61,9 +61,11 @@ async function process(){
     if (inputtype == "guess") inputtype = "";
     let sel2 = document.getElementById("box2"); 
     let outformat = sel2.options[sel2.selectedIndex].value;
-    let fileExt = ".rtf";
+    let fileExt = "";
     if (outformat == "-dev=1") fileExt = ".ps";
     else if (outformat == "-dev=2") fileExt = ".eps";
+    else if (outformat == "-dev=4") fileExt = ".rtf";
+    else if (outformat == "-dev=e") fileExt = ".html";
     outfile += fileExt;
 
     let cmd = ["-in=/data/" + infile, "-out=" + outfile, dna, ruler, consensus, fraction, inputtype, outformat, outlen, seqnum,"-def"].join(" ").replace(/  +/g, ' ');
