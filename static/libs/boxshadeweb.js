@@ -1,4 +1,4 @@
-let boxshade = new Aioli("boxshade/3.31");
+let boxshade = new Aioli("boxshade/3.3.2");
 // Initialize boxshade and output the version
 boxshade.init()
 .then(() => boxshade.exec("-help"))
@@ -74,6 +74,7 @@ async function process(){
     console.log("input is", cmd);
     document.getElementById("stdout").innerHTML = "Filtering ...";
     let dd = await boxshade.exec(cmd);
+    console.log(dd.stdout);
     document.getElementById("stdout").innerHTML = dd.stderr;
 
     document.getElementById("download-btn").style.display = "block";
