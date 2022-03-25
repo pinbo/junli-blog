@@ -6,6 +6,8 @@ boxshade.init()
 
 
 let infile = "input.fa"
+let outfile = "/data/output.rtf";
+
 async function prepareInput(evt) {
 	var files = evt.target.files; // FileList object
 	if(files.length==0) return;
@@ -20,7 +22,6 @@ document.getElementById("snpfile").addEventListener("change", prepareInput, fals
 
 // loop through all fastq.gz files
 async function process(){
-    let outfile = "/data/output.rtf";
     // if (document.getElementById("output").value) outfile = "/data/" + document.getElementById("output").value;
     let ruler = "";
     let consensus = "";
