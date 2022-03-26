@@ -1,4 +1,4 @@
-let boxshade = new Aioli("nimBoxshadeMini/1.0");
+let boxshade = new Aioli("nimBoxshadeMini/1.1");
 // Initialize boxshade and output the version
 boxshade.init()
 .then(() => boxshade.exec("-h"))
@@ -26,12 +26,14 @@ async function process(){
     let ruler = "";
     let consensus = "";
     let seqnum = "";
+    let dna = "";
     let fraction = "-t=" + document.getElementById("fraction").value;
     let outlen = "-w=" + document.getElementById("outlen").value;
     if (document.getElementById("ruler").checked) ruler = "-r";
     if (document.getElementById("consensus").checked) consensus = "-c";
     if (document.getElementById("seqnum").checked) seqnum = "-n";
-    let cmd = ["/data/" + infile, "-o=" + outfile, ruler, consensus, fraction, outlen, seqnum].join(" ").replace(/  +/g, ' ');
+    if (document.getElementById("dna").checked) dna = "-d";
+    let cmd = ["/data/" + infile, "-o=" + outfile, ruler, consensus, fraction, outlen, seqnum, dna].join(" ").replace(/  +/g, ' ');
 
     // fastp.setwd("/data") // set working directory
     console.log("input is", cmd);

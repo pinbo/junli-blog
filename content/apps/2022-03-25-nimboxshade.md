@@ -12,7 +12,7 @@ tags:
 draft: false
 ---
 
-This is a duplicate to the app [boxshade page](/apps/boxshade/). It is just my testing of [Nim language](https://nim-lang.org/). It uses [nimBoxshade](https://github.com/pinbo/nimBoxshade) to create good looking printouts from multiple-aligned **protein** sequences using the amino acid similarity matrix from [this paper](https://doi.org/10.1186/1471-2105-10-394).
+This is a duplicate to the app [boxshade page](/apps/boxshade/). It is just my testing of [Nim language](https://nim-lang.org/). It uses [nimBoxshade](https://github.com/pinbo/nimBoxshade) to create good looking printouts from multiple-aligned protein and DNA sequences.
 
 <h4>Step 1: load alignment file (fasta format)</h4>
 <div id="options" style="font-size:90%;color:blue;">
@@ -28,7 +28,7 @@ This is a duplicate to the app [boxshade page](/apps/boxshade/). It is just my t
 <input type="checkbox" id="ruler" value="1" checked> add ruler to the alignment?  
 <input type="checkbox" id="seqnum" value="1" checked> add sequence position number?  
 <input type="checkbox" id="consensus" value="1"> create consensus line?  
-<!-- <input type="checkbox" id="dna" value="1"> input is aligned DNA sequences?   -->
+<input type="checkbox" id="dna" value="1"> input is aligned DNA sequences?  
 <input size="2" id="fraction" value="0.5" type="text"> the fraction of sequences that must agree for a consensus (0-1)  
 <input size="2" id="outlen" value="60" type="text"> output width
 
@@ -50,6 +50,8 @@ This is a duplicate to the app [boxshade page](/apps/boxshade/). It is just my t
 
 nimBoxshade now only support aligned fasta file as the input file and output a RTF file that can be opened with Word.
 Please see the github page for more information: https://github.com/pinbo/nimboxshade
+
+The amino acid similarity matrix is from [this paper](https://doi.org/10.1186/1471-2105-10-394).
 
 <!-- <script src="https://cdn.biowasm.com/v2/aioli/latest/aioli.js"></script> -->
 <script src="/tools/aioli/latest/aioli.js"></script>
