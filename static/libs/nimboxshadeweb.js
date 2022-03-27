@@ -33,7 +33,7 @@ async function process(){
     if (document.getElementById("consensus").checked) consensus = "-c";
     if (document.getElementById("seqnum").checked) seqnum = "-n";
     if (document.getElementById("dna").checked) dna = "-d";
-    let cmd = ["/data/" + infile, "-o=" + outfile, ruler, consensus, fraction, outlen, seqnum, dna].join(" ").replace(/  +/g, ' ');
+    let cmd = ["/data/" + infile, ruler, consensus, fraction, outlen, seqnum, dna, "-o=" + outfile].join(" ").replace(/  +/g, ' ');
 
     // fastp.setwd("/data") // set working directory
     console.log("input is", cmd);
