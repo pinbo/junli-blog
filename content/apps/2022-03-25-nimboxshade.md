@@ -12,6 +12,12 @@ tags:
 draft: false
 ---
 
+<style>
+  .regColor { color:black; background-color:white; }
+  .idColor { color:white; background-color:black; }
+  .simColor { color:white; background-color:gray; 
+</style>
+
 This is a duplicate to the app [boxshade page](/apps/boxshade/). It is just my testing of [Nim language](https://nim-lang.org/). It uses [nimBoxshade](https://github.com/pinbo/nimBoxshade) to create good looking printouts from multiple-aligned protein and DNA sequences.
 
 <h4>Step 1: load alignment file (fasta format)</h4>
@@ -32,8 +38,22 @@ This is a duplicate to the app [boxshade page](/apps/boxshade/). It is just my t
 <input size="2" id="fraction" value="0.5" type="text"> the fraction of sequences that must agree for a consensus (0-1)  
 <input size="2" id="outlen" value="60" type="text"> output width
 
+<input type="color" id="ifgc" onchange="clickColor('ifgc', 'idColor', 1)" value="#ffffff"> Foreground color for identical residues  
+<input type="color" id="ibgc" onchange="clickColor('ibgc', 'idColor', 0)" value="#000000"> background color for identical residues  
+<input type="color" id="sfgc" onchange="clickColor('sfgc', 'simColor', 1)" value="#ffffff"> Foreground color for similar residues  
+<input type="color" id="sbgc" onchange="clickColor('sbgc', 'simColor', 0)" value="#969696"> background color for similar residues
+
+Example of foreground and background colors:
+<div style="font-family:monospace;color:black;font-size:130%;">
+seq1  <span class="idColor">MRDR</span>TH<span class="simColor">E</span>  
+seq2  <span class="idColor">M</span><span class="simColor">K</span><span class="idColor">DRL</span>EQ  
+seq3  <span class="idColor">MRDRL</span><span class="idColor">P</span><span class="simColor">D</span>  
+</div>
+
+
 <p id="help"></p>
 </div>
+
 <h4>Step 2: Start shading</h4>
 <button onclick="process()">Start shading</button>
 
@@ -57,3 +77,15 @@ The amino acid similarity matrix is from [this paper](https://doi.org/10.1186/14
 <script src="/tools/aioli/latest/aioli.js"></script>
 <script src="/libs/FileSaver.min.js"></script>
 <script src="/libs/nimboxshadeweb.js"></script>
+<script type="text/javascript">
+    // document.getElementById('myID').style.backgroundColor = 'green';
+    function clickColor(colID, className, fg=0) {
+        let c = document.getElementById(colID).value;
+        console.log(c);
+        let items = document.getElementsByClassName(className);
+        for (var i=0; i < items.length; i++) {
+            if (fg==0)  items[i].style.backgroundColor = c;
+            else items[i].style.color = c;
+        }
+    }
+</script>
