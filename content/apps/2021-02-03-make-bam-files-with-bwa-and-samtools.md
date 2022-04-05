@@ -68,7 +68,7 @@ Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-w
 
 BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please enable it in your web brower first (just need to do once).
 
-- chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled";
+- chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled"; **seems enabled by default since 2021.**
 
 - Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
 
