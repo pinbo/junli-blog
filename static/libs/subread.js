@@ -272,7 +272,7 @@ async function process_sv_vcf(f){//filename
                 start = ss[1];
             } else {
                 let SR = ss[7].split(";SR=")[1]; // SR
-                let size = String(parseInt(ss[1]) - parseInt(start)); // indel size
+                let size = String(parseInt(ss[1]) - parseInt(start) - 1); // indel size
                 summary += [ss[1], SR, size].join(',') + "\n";
             }
         }
