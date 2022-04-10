@@ -241,7 +241,7 @@ async function process_indel_vcf(f){//filename
 async function merge_sv(){ // structure variations and big indels > 15bp
     let files = await align.ls("/data"); // an array of files
     let promises = [];
-    let indelSummary = "Sample,Gene,Start,End,indelCoverage,indelSize\n";
+    let indelSummary = "Sample,Gene,Start,End,totalCoverage,indelCoverage,indelSize,indelPercent,Indel is between Start and End (not including)\n";
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam.breakpoints.vcf")) {
             let aa = await process_sv_vcf(f);
@@ -273,11 +273,28 @@ async function process_sv_vcf(f){//filename
             } else {
                 let SR = ss[7].split(";SR=")[1]; // SR
                 let size = String(parseInt(ss[1]) - parseInt(start) - 1); // indel size
-                summary += [ss[1], SR, size].join(',') + "\n";
+                let depth = await getDepth("/data/" + filename + ".bam", ss[0], start, ss[1]);
+                let indelPct = SR / depth * 100;
+                summary += [ss[1], depth, SR, size, indelPct].join(',') + "\n";
             }
         }
     }
     return summary;
+}
+
+// function to get the depth of nearby the indel
+async function getDepth(bamfile, gene, pos1, pos2){
+    // dd = await samtools.exec("depth -r BM1-A:232-232 /data/R04F10.bam")
+    let cmd1 = ["depth -r", gene + ":" + pos1 + "-" + pos1, bamfile].join(' ').replace(/  +/g, ' ');
+    let cmd2 = ["depth -r", gene + ":" + pos2 + "-" + pos2, bamfile].join(' ').replace(/  +/g, ' ');
+    console.log(cmd1);
+    console.log(cmd2);
+    let std1 = await samtools.exec(cmd1);
+    let std2 = await samtools.exec(cmd2);
+    let dep1 = parseInt(std1.stdout.split(/\t|\n/)[2]);
+    let dep2 = parseInt(std2.stdout.split(/\t|\n/)[2]);
+    if (dep1 > dep2) return dep1;
+    else return dep2;
 }
 
 // function to download running summary

@@ -67,6 +67,7 @@ subread-buildindex -M 1000 -o my_index <your-references.fa>
 subread-align -i my_index -r xxxx_R1_001.fastq.gz -R xxxx_R2_001.fastq.gz
               -o xxxx.bam -I 16  -sv --sortReadsByCoordinates
 ```
+Now it can detect any size of deletions but only < 17 bp of insertions.
 
 Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-web](https://github.com/pinbo/bwa-samtools-web).
 
