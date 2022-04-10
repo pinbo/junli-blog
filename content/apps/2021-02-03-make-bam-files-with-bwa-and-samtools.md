@@ -62,6 +62,8 @@ samtools index out.bam
 exactSNP -b -i out.bam -g your-reference.fa -o calledSNPs.vcf
 ```
 
+`bwa mem` can only detect small indels. For indels > 15 bp, please try [subread](http://subread.sourceforge.net/) or my web app [Make bams and indel calls with Subread](/apps/make-bams-and-indel-calls-with-subread).
+
 Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-web](https://github.com/pinbo/bwa-samtools-web).
 
 ### Enable SIMD for your browser
