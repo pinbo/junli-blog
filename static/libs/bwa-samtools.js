@@ -24,7 +24,7 @@ async function downloadBam(){
     let zip = new JSZip();
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
-        if (f.includes(".bam.bai")) {
+        if (f.includes(".bam")) {
             console.log("Prepare downloading ", f);
             let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
             // let bb = samtools.downloadBinary("/data/" + bamfile).then(d => d.arrayBuffer()).then(d => zip.file(bamfile, d));
@@ -33,14 +33,14 @@ async function downloadBam(){
         }
     }
     // bams in exactSNP worer
-    files = await exactSNP.ls("/data"); // an array of files
-    for (let i = 0, f; f = files[i]; i++) {
-        if (f.includes(".bam")) {
-            console.log("Prepare downloading ", f);
-            let aa = exactSNP.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
-            promises.push(aa);
-        }
-    }
+    // files = await exactSNP.ls("/data"); // an array of files
+    // for (let i = 0, f; f = files[i]; i++) {
+    //     if (f.includes(".bam")) {
+    //         console.log("Prepare downloading ", f);
+    //         let aa = exactSNP.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
+    //         promises.push(aa);
+    //     }
+    // }
     let cc = merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_SNPs_and_small_indels.txt", d));
     promises.push(cc);
     await Promise.all(promises);
@@ -55,7 +55,7 @@ async function downloadBam(){
 async function analyzeBam(){
     await makeSam();
     await makeBam();
-    await transferBam();
+    // await transferBam();
     await callAll();
     // document.getElementById("download-btn").style.visibility = "visible";
 }
@@ -112,8 +112,11 @@ async function transferSam(){
     for (var i = 0, f; f = files[i]; i++) {
         if (f.includes(".sam")) {
             Aioli.transfer("/data/" + f, "/data/" + f, bwa, samtools);
+            Aioli.transfer("/data/" + f, "/data/" + f, bwa, exactSNP);
         }
     }
+    let ref = document.getElementById("demoRef").innerHTML;
+    Aioli.transfer("/data/" + ref, "/data/" + ref, bwa, exactSNP);
     await delay(1000);
     console.log("Finished transfering files!");
     return 0;
@@ -217,7 +220,7 @@ async function callAll(){
     let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
-        if (ff.includes(".bam")) {
+        if (ff.includes(".sam")) {
             console.log("Processing: ", ff);
             promises.push(callVar(ff));
         }
@@ -226,16 +229,16 @@ async function callAll(){
     document.getElementById("sort").innerHTML = "All the files have been processed!";
 }
 
-// call single bam
-async function callVar (bam) {
+// call single sam
+async function callVar (sam) {
     let ref = document.getElementById("demoRef").innerHTML;
     let wd = "/data/";
     exactSNP.setwd(wd);
-    let out = bam + ".vcf";
-    let cmd = ["-b -i", bam, "-g", ref, "-o", out].join(' ');
+    let out = sam + ".vcf";
+    let cmd = ["-i", sam, "-g", ref, "-o", out].join(' ');
     console.log(cmd);
     let std = await exactSNP.exec(cmd);
-    document.getElementById("sort").innerHTML = "Finished calling SNPs for " + bam;
+    document.getElementById("sort").innerHTML = "Finished calling SNPs for " + sam;
     console.log(std.stderr);
     console.log("Finished writing ", out);
     // document.getElementById("stderr").value += std.stderr + "\n";
@@ -277,9 +280,9 @@ async function process_indel_vcf(f){//filename
                 summary += [filename, ss[0], ss[1], ss[3], ss[4], DP, SRsingle, pct, size].join('\t') + "\n";
             } else { // indels
                 let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
-                let pct = (parseInt(DP[1]) / (parseInt(DP[0])*2) * 100).toFixed(1); // percent of indels
+                let pct = (parseInt(DP[1]) / (parseInt(DP[0])) * 100).toFixed(1); // percent of indels
                 let size = String(ss[4].length - ss[3].length);
-                summary += [filename, ss[0], ss[1], ss[3], ss[4], parseInt(DP[0])*2, DP[1], pct, size].join('\t') + "\n";
+                summary += [filename, ss[0], ss[1], ss[3], ss[4], parseInt(DP[0]), DP[1], pct, size].join('\t') + "\n";
             }
         }
     }

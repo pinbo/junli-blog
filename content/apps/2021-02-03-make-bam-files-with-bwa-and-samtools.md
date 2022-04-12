@@ -58,8 +58,8 @@ bwa mem <your-references.fa> <R1.fastq.gz> <R2.fastq.gz> > out.sam
 ## make sorted bam files with samtools
 samtools sort out.sam > out.bam
 samtools index out.bam
-## call variants with subread exactSNP
-exactSNP -b -i out.bam -g your-reference.fa -o calledSNPs.vcf
+## call variants with subread exactSNP (it has bug calling from bam, so we call SNPs from sam)
+exactSNP -i out.sam -g your-reference.fa -o calledSNPs.vcf
 ```
 
 `bwa mem` can only detect small indels. For indels > 15 bp, please try [subread](http://subread.sourceforge.net/) or my web app [Make bams and indel calls with Subread](/apps/make-bams-and-indel-calls-with-subread).
