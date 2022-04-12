@@ -47,7 +47,7 @@ async function downloadBam(){
     console.log("Finished preparing downloanding bams!");
     zip.generateAsync({type:"blob"})
         .then(function(content) {
-            saveAs(content, "bams_and_variant_summary_bwamem.zip");
+            saveAs(content, "bams_and_variant_summary_strobeAlign.zip");
         });
 }
 
@@ -229,16 +229,16 @@ async function callAll(){
     document.getElementById("sort").innerHTML = "All the files have been processed!";
 }
 
-// call single bam
-async function callVar (bam) {
+// call single sam
+async function callVar (sam) {
     let ref = document.getElementById("demoRef").innerHTML;
     let wd = "/data/";
     exactSNP.setwd(wd);
-    let out = bam + ".vcf";
-    let cmd = ["-i", bam, "-g", ref, "-o", out].join(' ');
+    let out = sam + ".vcf";
+    let cmd = ["-i", sam, "-g", ref, "-o", out].join(' ');
     console.log(cmd);
     let std = await exactSNP.exec(cmd);
-    document.getElementById("sort").innerHTML = "Finished calling SNPs for " + bam;
+    document.getElementById("sort").innerHTML = "Finished calling SNPs for " + sam;
     console.log(std.stderr);
     console.log("Finished writing ", out);
     // document.getElementById("stderr").value += std.stderr + "\n";
