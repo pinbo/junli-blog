@@ -1,9 +1,9 @@
-let bwa = new Aioli("bwa2/latest");
+let bwa = new Aioli("strobealign/0.7");
 let samtools = new Aioli("samtools/latest"); // null before init
 // Initialize bwa and output the version
 bwa
 .init()
-.then(() => bwa.exec("index"))
+.then(() => bwa.exec("-h"))
 .then(d => console.log(d.stdout, "ERRRRR", d.stderr));
 // init samtools
 samtools.init()
@@ -24,7 +24,7 @@ async function downloadBam(){
     let zip = new JSZip();
     let promises = [];
     for (let i = 0, f; f = files[i]; i++) {
-        if (f.includes(".bam.bai")) {
+        if (f.includes(".bam")) {
             console.log("Prepare downloading ", f);
             let aa = samtools.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
             // let bb = samtools.downloadBinary("/data/" + bamfile).then(d => d.arrayBuffer()).then(d => zip.file(bamfile, d));
@@ -33,14 +33,14 @@ async function downloadBam(){
         }
     }
     // bams in exactSNP worer
-    files = await exactSNP.ls("/data"); // an array of files
-    for (let i = 0, f; f = files[i]; i++) {
-        if (f.includes(".bam")) {
-            console.log("Prepare downloading ", f);
-            let aa = exactSNP.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
-            promises.push(aa);
-        }
-    }
+    // files = await exactSNP.ls("/data"); // an array of files
+    // for (let i = 0, f; f = files[i]; i++) {
+    //     if (f.includes(".bam")) {
+    //         console.log("Prepare downloading ", f);
+    //         let aa = exactSNP.downloadBinary("/data/" + f).then(d => d.arrayBuffer()).then(d => zip.file("bams/"+f, d));
+    //         promises.push(aa);
+    //     }
+    // }
     let cc = merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_SNPs_and_small_indels.txt", d));
     promises.push(cc);
     await Promise.all(promises);
@@ -55,7 +55,7 @@ async function downloadBam(){
 async function analyzeBam(){
     await makeSam();
     await makeBam();
-    await transferBam();
+    // await transferBam();
     await callAll();
     // document.getElementById("download-btn").style.visibility = "visible";
 }
@@ -112,8 +112,11 @@ async function transferSam(){
     for (var i = 0, f; f = files[i]; i++) {
         if (f.includes(".sam")) {
             Aioli.transfer("/data/" + f, "/data/" + f, bwa, samtools);
+            Aioli.transfer("/data/" + f, "/data/" + f, bwa, exactSNP);
         }
     }
+    let ref = document.getElementById("demoRef").innerHTML;
+    Aioli.transfer("/data/" + ref, "/data/" + ref, bwa, exactSNP);
     await delay(1000);
     console.log("Finished transfering files!");
     return 0;
@@ -143,13 +146,13 @@ async function loadRef(event)
     .then(() => bwa.ls("/data"))
     .then(d => console.log(d));
     // index
-    await delay(1000); // mount did not really await
-    await bwa.exec("index /data/" + f.name)
-    .then(d => console.log(d.stdout, "End of stdout\n", d.stderr, "End of stderr"));
-    let ff = await bwa.ls("/data");
-    if (ff.length < 8) {
-        document.getElementById("indexErr").innerHTML = "Indexing the reference FAILED. Please refresh the page to retry!";
-    }
+    // await delay(1000); // mount did not really await
+    // await bwa.exec("index /data/" + f.name)
+    // .then(d => console.log(d.stdout, "End of stdout\n", d.stderr, "End of stderr"));
+    // let ff = await bwa.ls("/data");
+    // if (ff.length < 8) {
+    //     document.getElementById("indexErr").innerHTML = "Indexing the reference FAILED. Please refresh the page to retry!";
+    // }
 }
 
 // run bwa mem on all fastq files
@@ -187,7 +190,7 @@ async function bwamem (prefix, reference) {
     reference = reference;
     // bwa mem
     // let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
-    let cmd = ["mem -o", out, reference, R1, R2].join(' '); // I modifed fastmap.c to use the 4th arguments as output
+    let cmd = ["-A 4 -o", out, reference, R1, R2].join(' '); // I modifed fastmap.c to use the 4th arguments as output
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);
@@ -217,7 +220,7 @@ async function callAll(){
     let promises = [];
     for (i = 0; i < filenames.length; i++) {
         let ff = filenames[i];
-        if (ff.includes(".bam")) {
+        if (ff.includes(".sam")) {
             console.log("Processing: ", ff);
             promises.push(callVar(ff));
         }
@@ -232,7 +235,7 @@ async function callVar (bam) {
     let wd = "/data/";
     exactSNP.setwd(wd);
     let out = bam + ".vcf";
-    let cmd = ["-b -i", bam, "-g", ref, "-o", out].join(' ');
+    let cmd = ["-i", bam, "-g", ref, "-o", out].join(' ');
     console.log(cmd);
     let std = await exactSNP.exec(cmd);
     document.getElementById("sort").innerHTML = "Finished calling SNPs for " + bam;
@@ -277,9 +280,9 @@ async function process_indel_vcf(f){//filename
                 summary += [filename, ss[0], ss[1], ss[3], ss[4], DP, SRsingle, pct, size].join('\t') + "\n";
             } else { // indels
                 let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
-                let pct = (parseInt(DP[1]) / (parseInt(DP[0])*2) * 100).toFixed(1); // percent of indels
+                let pct = (parseInt(DP[1]) / (parseInt(DP[0])) * 100).toFixed(1); // percent of indels
                 let size = String(ss[4].length - ss[3].length);
-                summary += [filename, ss[0], ss[1], ss[3], ss[4], parseInt(DP[0])*2, DP[1], pct, size].join('\t') + "\n";
+                summary += [filename, ss[0], ss[1], ss[3], ss[4], parseInt(DP[0]), DP[1], pct, size].join('\t') + "\n";
             }
         }
     }
