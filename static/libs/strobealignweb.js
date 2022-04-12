@@ -190,7 +190,11 @@ async function bwamem (prefix, reference) {
     reference = reference;
     // bwa mem
     // let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
-    let cmd = ["-A 4 -o", out, reference, R1, R2].join(' '); // I modifed fastmap.c to use the 4th arguments as output
+    let match = "-A " + document.getElementById("match").value;
+    let mismatch = "-B " + document.getElementById("mismatch").value;
+    let gapopen = "-O " + document.getElementById("gapopen").value;
+    let gapext = "-E " + document.getElementById("gapext").value;
+    let cmd = [match, mismatch, gapopen, gapext, "-o", out, reference, R1, R2].join(' '); // I modifed fastmap.c to use the 4th arguments as output
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);

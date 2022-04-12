@@ -37,6 +37,12 @@ Please run the 3 steps below to get the indexed bams from a list of fastq files.
 <h4>III. Map reads and create bam files</h4>
 
 After loading the template fasta file and all the fastq files, now we will use `strobeAlign` and `samtools` to create indexed bam files for viewing in the software [IGV](https://software.broadinstitute.org/software/igv/download).
+<div id="options" style="font-size:90%;color:blue;">
+Alignment parameters (change unless you know what you are doing):  
+<input size="2" id="match" value="4" type="text"> matching score  
+<input size="2" id="mismatch" value="8" type="text"> mismatch penalty  
+<input size="2" id="gapopen" value="12" type="text"> gap open penalty  
+<input size="2" id="gapext" value="1" type="text"> gap extension penalty
 
 <button onclick="analyzeBam()">Map reads and Make bam files</button>
 <p id="bwa"  style="color:tomato;font-style: italic;"></p>
@@ -47,7 +53,7 @@ After loading the template fasta file and all the fastq files, now we will use `
 <script src="/libs/strobealignweb.js"></script>
 <script src="/libs/FileSaver.min.js"></script>
 <script src="/libs/jszip.min.js"></script>
-
+</div>
 ## Help
 
 This tool is a WebAssembly implementation of [strobeAlign](https://github.com/ksahlin/StrobeAlign/), [SAMTOOLS](http://www.htslib.org/) and [subread exactSNP](http://subread.sourceforge.net/). It runs commands like this:
