@@ -271,7 +271,7 @@ async function merge_indels(){
 
 // process indel vcf content for only 1 file
 async function process_indel_vcf(f){//filename
-    let filename = f.replace(".bam.vcf", "");
+    let filename = f.replace(".sam.vcf", "");
     let vcf = await exactSNP.cat("/data/" + f);
     let lines = vcf.split(/\r?\n/);
     let summary = "";
