@@ -162,6 +162,7 @@ async function makeSam(){
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
     let reference = document.getElementById("demoRef").innerHTML;
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
+    let suffix2 = document.getElementById("suffix2").value;
     console.log("FASTQ files\n", filenames);
     console.log(reference);
     let promises = [];
@@ -170,7 +171,10 @@ async function makeSam(){
         if (ff.includes(suffix1)) {
             console.log("Processing: ", ff);
             let prefix = ff.replace(suffix1, "");
-            promises.push(bwamem(prefix, reference));
+            let R1 = ff;
+            let R2 = prefix + suffix2;
+            if (!filenames.includes(R2)) R2 = "";
+            promises.push(bwamem(prefix, R1, R2, reference));
         }
     }
     await Promise.all(promises);
@@ -179,12 +183,12 @@ async function makeSam(){
 
 // make sam file with bwa mem
 // bwamem("2", "references.fa").then(d => console.log(d));
-async function bwamem (prefix, reference) {
-    let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
-    let suffix2 = document.getElementById("suffix2").value;
+async function bwamem (prefix, R1, R2, reference) {
+    // let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
+    // let suffix2 = document.getElementById("suffix2").value;
     bwa.setwd("/data/"); // set working directory
-    let R1 = prefix + suffix1;
-    let R2 = prefix + suffix2;
+    // let R1 = prefix + suffix1;
+    // let R2 = prefix + suffix2;
     let out = "out_" + prefix + ".sam";
     // let rg = "-R \@RG\\tID:" + prefix + "\\tSM:" + prefix; // read group tag
     reference = reference;
@@ -194,7 +198,7 @@ async function bwamem (prefix, reference) {
     let mismatch = "-B " + document.getElementById("mismatch").value;
     let gapopen = "-O " + document.getElementById("gapopen").value;
     let gapext = "-E " + document.getElementById("gapext").value;
-    let cmd = [match, mismatch, gapopen, gapext, "-o", out, reference, R1, R2].join(' '); // I modifed fastmap.c to use the 4th arguments as output
+    let cmd = [match, mismatch, gapopen, gapext, "-o", out, reference, R1, R2].join(' ').trim().replace(/  +/g, ' '); 
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);

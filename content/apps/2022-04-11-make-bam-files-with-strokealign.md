@@ -1,5 +1,5 @@
 ---
-title: Make bam files with Strobealign
+title: Make bam files with strobeAlign
 author: Junli Zhang
 date: '2022-04-11'
 slug: make-bam-files-with-strobealign
@@ -14,11 +14,11 @@ tags:
 
 **Before start**: Please enable [SIMD](https://v8.dev/features/simd) in your web brower [see [Help](#enable-simd-for-your-browser) below].
 
-This tool is for **paired end** fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz).  
+This tool can take paired end fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz) or single end or merged fastq files.  
 Please run the 3 steps below to get the indexed bams from a list of fastq files.
 <p id=recommend" style="color:darkviolet;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
 
-**Provide the suffix of your fastq files**:  
+**Provide the suffix of your fastq files if paired end reads**:  
 <label for="suffix1">Read 1:</label>
 <input id="suffix1" value="_R1_001.fastq.gz" size="40"><br>
 <label for="suffix2">Read 2:</label>
