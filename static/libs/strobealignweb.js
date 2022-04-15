@@ -280,7 +280,8 @@ async function process_indel_vcf(f){//filename
             let ss = line.split(/\t/);
             if (ss[7].includes("MM")){// SNPs
                 let ee = ss[7].split(/;/);
-                let DP = ee[0].replace("DP=", ""); // WT counts
+                // let DP = ee[0].replace("DP=", ""); // WT counts
+                let DP = await getDepth("/data/" + filename + ".bam", ss[0], ss[1]);
                 let SR = ee[1].replace("MMsum=", ""); // all mut alleles counts
                 let SRsingle = ee[2].replace("MM=", ""); // "3,5" for 2 alt alleles
                 let pct = (parseInt(SR) / parseInt(DP) * 100).toFixed(1); // percent of mut
@@ -288,6 +289,7 @@ async function process_indel_vcf(f){//filename
                 summary += [filename, ss[0], ss[1], ss[3], ss[4], DP, SRsingle, pct, size].join('\t') + "\n";
             } else { // indels
                 let DP = ss[7].replace("INDEL;DP=", "").split(";SR="); // DP and SR
+                DP[0] = await getDepth("/data/" + filename + ".bam", ss[0], ss[1]);
                 let pct = (parseInt(DP[1]) / (parseInt(DP[0])) * 100).toFixed(1); // percent of indels
                 let size = String(ss[4].length - ss[3].length);
                 summary += [filename, ss[0], ss[1], ss[3], ss[4], parseInt(DP[0]), DP[1], pct, size].join('\t') + "\n";
@@ -295,4 +297,14 @@ async function process_indel_vcf(f){//filename
         }
     }
     return summary;
+}
+
+// function to get the depth of nearby the indel
+async function getDepth(bamfile, gene, pos){
+    // dd = await samtools.exec("depth -r BM1-A:232-232 /data/R04F10.bam")
+    let cmd1 = ["depth -r", gene + ":" + pos + "-" + pos, bamfile].join(' ').replace(/  +/g, ' ');
+    console.log(cmd1);
+    let std1 = await samtools.exec(cmd1);
+    let dep1 = std1.stdout.split(/\t|\n/)[2];
+    return dep1;
 }
