@@ -171,10 +171,19 @@ async function makeSam(){
         if (ff.includes(suffix1)) {
             console.log("Processing: ", ff);
             let prefix = ff.replace(suffix1, "");
-            let R1 = ff;
             let R2 = prefix + suffix2;
             if (!filenames.includes(R2)) R2 = "";
-            promises.push(bwamem(prefix, R1, R2, reference));
+            promises.push(bwamem(prefix, ff, R2, reference));
+        } else if (ff.includes(suffix2)) {
+            console.log("Processing: ", ff);
+            let prefix = ff.replace(suffix2, "");
+            let R1 = prefix + suffix1;
+            if (!filenames.includes(R1)) promises.push(bwamem(prefix, ff, "", reference)); // no R1, so R2 is SE
+        } else { // did not include any suffix, treat as SE
+            if(ff){
+                console.log("Processing: ", ff);
+                promises.push(bwamem(ff, ff, "", reference));
+            }
         }
     }
     await Promise.all(promises);
