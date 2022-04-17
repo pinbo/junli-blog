@@ -252,7 +252,8 @@ async function callVar (sam) {
     let wd = "/data/";
     exactSNP.setwd(wd);
     let out = sam + ".vcf";
-    let cmd = ["-i", sam, "-g", ref, "-o", out].join(' ');
+    let toTrim = "-t " + document.getElementById("trim").value;
+    let cmd = [toTrim, "-i", sam, "-g", ref, "-o", out].join(' ').replace(/  +/g, ' ');
     console.log(cmd);
     let std = await exactSNP.exec(cmd);
     document.getElementById("sort").innerHTML = "Finished calling SNPs for " + sam;

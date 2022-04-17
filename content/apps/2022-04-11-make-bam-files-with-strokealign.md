@@ -14,7 +14,7 @@ tags:
 
 **Before start**: Please enable [SIMD](https://v8.dev/features/simd) in your web brower [see [Help](#enable-simd-for-your-browser) below].
 
-This tool can take paired end fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz) or single end or merged fastq files.  
+This tool can take paired end fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz) or single end or merged fastq files.
 Please run the 3 steps below to get the indexed bams from a list of fastq files.
 <p id=recommend" style="color:darkviolet;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
 
@@ -42,9 +42,10 @@ Alignment parameters (change unless you know what you are doing):
 <input size="2" id="match" value="4" type="text"> matching score  
 <input size="2" id="mismatch" value="8" type="text"> mismatch penalty  
 <input size="2" id="gapopen" value="12" type="text"> gap open penalty  
-<input size="2" id="gapext" value="1" type="text"> gap extension penalty
+<input size="2" id="gapext" value="1" type="text"> gap extension penalty  
+<input size="2" id="trim" value="3" type="text"> bases to be trimmed off from each end of the read when calling variants
 
-<button onclick="analyzeBam()">Map reads and Make bam files</button>
+<button onclick="analyzeBam()">Map reads and Call variants</button>
 <p id="bwa"  style="color:tomato;font-style: italic;"></p>
 <p id="sort" style="color:tomato;font-style: italic;"></p>
 <button id="download-btn" onclick="downloadBam()" style="visibility:hidden">Download indexed bam files</button>
