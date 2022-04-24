@@ -203,10 +203,22 @@ function demultiplex(fileContent){
 				if (P1 >= 0 && P4 >= 0){// # if there are still at least 5 bp on the left
 					leftbarcode = R1First30bp.substring(P1-leftBarcodeLen, P1);
 					rightbarcode = R2First30bp.substring(P4-rightBarcodeLen,P4);
+                    if (document.getElementById("trimAdapter").checked) {
+                        dictPairReads[readID].R1[1] = dictPairReads[readID].R1[1].substring(P1+leftAdapter.length);
+                        dictPairReads[readID].R2[1] = dictPairReads[readID].R2[1].substring(P4+rightAdapter.length);
+                        dictPairReads[readID].R1[3] = dictPairReads[readID].R1[3].substring(P1+leftAdapter.length);
+                        dictPairReads[readID].R2[3] = dictPairReads[readID].R2[3].substring(P4+rightAdapter.length);
+                    }
 				}
 				if (P2 >= 0 && P3 >= 0){
 					leftbarcode = R2First30bp.substring(P2-leftBarcodeLen, P2);
 					rightbarcode = R1First30bp.substring(P3-rightBarcodeLen, P3);
+                    if (document.getElementById("trimAdapter").checked) {
+                        dictPairReads[readID].R1[1] = dictPairReads[readID].R1[1].substring(P3+rightAdapter.length);
+                        dictPairReads[readID].R2[1] = dictPairReads[readID].R2[1].substring(P2+leftAdapter.length);
+                        dictPairReads[readID].R1[3] = dictPairReads[readID].R1[3].substring(P3+rightAdapter.length);
+                        dictPairReads[readID].R2[3] = dictPairReads[readID].R2[3].substring(P2+leftAdapter.length);
+                    }
 					// switch R1 and R2, so R1 always has the left adapter
 					let tmp = dictPairReads[readID].R1;
 					dictPairReads[readID].R1 = dictPairReads[readID].R2;
