@@ -17,6 +17,7 @@ tags:
 This tool is for **paired end** fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz).  
 Please run the 3 steps below to get the indexed bams from a list of fastq files.
 <p id=recommend" style="color:darkviolet;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
+<p id=recommend2" style="color:red;">No spaces are allowed in input file names!</p>
 
 **Provide the suffix of your fastq files**:  
 <label for="suffix1">Read 1:</label>

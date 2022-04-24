@@ -1,7 +1,7 @@
 ---
 title: Filter multiple fastq files with FASTP
 author: Junli Zhang
-date: '2021-12-22'
+date: '2021-02-07'
 slug: filter-multiple-fastq-files-with-fastp
 categories:
   - Research
@@ -15,6 +15,7 @@ FASTP is a tool designed to provide fast all-in-one preprocessing for FastQ file
 Please check out the fastp github page for some detailed information:  
 https://github.com/OpenGene/fastp
 <p id=recommend" style="color:darkviolet;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
+<p id=recommend2" style="color:red;">No spaces are allowed in input file names!</p>
 
 **Provide the suffix of your paired fastq files**:  
 <label for="suffix1">Read 1:</label>

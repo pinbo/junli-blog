@@ -15,6 +15,7 @@ tags:
 
 This tool is for indexing small bam files with `samtools index`. All the operations are within your memory.
 <p id=recommend" style="color:darkviolet;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
+<p id=recommend2" style="color:red;">No spaces are allowed in input file names!</p>
 
 <h4>I. Load bam files</h4>
 <input id="fastq" type="file" multiple>
