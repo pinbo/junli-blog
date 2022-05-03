@@ -31,7 +31,7 @@ In the end, you will get a summary file of called indels and all the bam files t
 
 <input id="reference" type="file">
 
-<h4>II. Load demultiplexed fastq(.gz) files</h4>
+<h4>II. Load demultiplexed fastq(.gz) files (adapters need to be trimmed)</h4>
 <input id="fastq" type="file" multiple>
 
 <p id="indexErr" style="color:red;"></p>
@@ -67,8 +67,10 @@ This tool is a WebAssembly implementation of [hisat2](http://daehwankimlab.githu
 ## index the references
 hisat2-build-s <your-references.fa> my_index
 ## make sam files and big indels will be treated as splice
-hisat2-align-s -x my_index -1 xxx_R1_001.fastq -2 xxx_R2_001.fastq -S out.sam
+hisat2-align-s -x my_index -1 xxx_R1_001.fastq -2 xxx_R2_001.fastq -S out.sam --pen-noncansplice 0
 ```
+
+Although hisat2 can soft clip unmapped fragments, it seems it can map more reads when using adapter-trimmed reads. So please trim adapters when demulitiplexing your fastq files and when filtering the fastq files with fastp.
 
 Visit the GitHub page for more details: [https://github.com/pinbo/bwa-samtools-web](https://github.com/pinbo/bwa-samtools-web).
 
