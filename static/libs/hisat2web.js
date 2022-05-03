@@ -273,7 +273,7 @@ async function callVar (sam) {
     exactSNP.setwd(wd);
     let out = sam + ".vcf";
     let addPara = document.getElementById("exactSNP").value; // additional parameters
-    let cmd = ["-i", sam, "-g", ref, "-o", out, addPara].join(' ').replace(/  +/g, ' ');
+    let cmd = ["-i", sam, "-g", ref, "-o", out, addPara].join(' ').trim().replace(/  +/g, ' '); // 2022-05-03: I updated aioli.worker, so no need to trim and replace multiple spaces here
     console.log(cmd);
     let std = await exactSNP.exec(cmd);
     document.getElementById("bam").innerHTML = "Finished calling SNPs for " + sam;
