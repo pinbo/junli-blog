@@ -32,7 +32,7 @@ Strongly suggest filtering your fastq files using ["Filter fastq files with FAST
 
 <button style="display:none" onclick="readBarcode()">Read Barcodes</button>
 <button onclick="startAnalyze()">Start Demultiplex</button>
-<input type="checkbox" id="trimAdapter" value="1">
+<input type="checkbox" id="trimAdapter" value="1" checked>
 <label for="trimAdapter">trim PCR adapters</label>  
 <p id="demo1"></p>
 <p id="demo2"></p>
