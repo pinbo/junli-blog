@@ -241,7 +241,7 @@ async function process_indel_vcf(f){//filename
 async function merge_sv(){ // structure variations and big indels > 15bp
     let files = await align.ls("/data"); // an array of files
     let promises = [];
-    let indelSummary = "Sample,Gene,Start,End,totalCoverage,indelCoverage,indelSize,indelPercent,Indel is between Start and End (not including)\n";
+    let indelSummary = "Sample,Gene,Start,End,totalCoverage,indelCoverage,indelSize,indelPercent,isInversion,Indel or inversion is between Start and End (not including)\n";
     for (let i = 0, f; f = files[i]; i++) {
         if (f.includes(".bam.breakpoints.vcf")) {
             let aa = await process_sv_vcf(f);
@@ -263,6 +263,9 @@ async function process_sv_vcf(f){//filename
     let summary = "";
     let n = 0;
     let start = "";
+    let direction1 = "";
+    let direction2 = "";
+    let isInversion = "";
     for (let line of lines){
         if (line && !line.includes("#")){
             n += 1;
@@ -270,12 +273,16 @@ async function process_sv_vcf(f){//filename
             if(n % 2 == 1){
                 summary += [filename, ss[0], ss[1]].join(',') + ",";
                 start = ss[1];
+                direction1 = ss[4].replace(ss[3])[0]; // [ or ]
             } else {
                 let SR = ss[7].split(";SR=")[1]; // SR
                 let size = String(parseInt(ss[1]) - parseInt(start) - 1); // indel size
                 let depth = await getDepth("/data/" + filename + ".bam", ss[0], start, ss[1]);
                 let indelPct = SR / depth * 100;
-                summary += [ss[1], depth, SR, size, indelPct].join(',') + "\n";
+                direction2 = ss[4].replace(ss[3])[0]; // [ or ]
+                if (direction2 == direction1) isInversion = "Inversion";
+                else isInversion = "";
+                summary += [ss[1], depth, SR, size, indelPct, isInversion].join(',') + "\n";
             }
         }
     }
