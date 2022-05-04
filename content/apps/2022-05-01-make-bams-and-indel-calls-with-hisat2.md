@@ -42,8 +42,8 @@ In the end, you will get a summary file of called indels and all the bam files t
 
 After loading the template fasta file and all the fastq files, now we will use [hisat2](http://daehwankimlab.github.io/hisat2/) to map reads to your templates and use [exactSNP](http://subread.sourceforge.net/) to call variations.
 <div id="options" style="font-size:90%;color:blue;">
-Addition parameters for HISAT2 &nbsp;&nbsp;&nbsp;&nbsp;<input size="20" id="hisat2" value="" type="text">  
-Addition parameters for exactSNP <input size="20" id="exactSNP" value="" type="text">
+Addition parameters for HISAT2 &nbsp;&nbsp;&nbsp;&nbsp;<input size="40" id="hisat2" value="--rdg 6,1 --rfg 6,1" type="text">  
+Addition parameters for exactSNP <input size="40" id="exactSNP" value="" type="text">
 </div>
 <button onclick="makeAll()">Map reads and Make bam files</button>
 <p id="bam" style="color:Tomato;font-style: italic;"></p>
