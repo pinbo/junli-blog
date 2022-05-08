@@ -77,6 +77,11 @@ BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please en
 
 - Other browers do not seem to support this yet.
 
+## updates
+
+- 2022-05-08: add `editcall` to call indels and inversions from `bwa mem` sam file.
+
 ## Acknowledgement
 
-Thank [Robert Aboukhalil](https://github.com/robertaboukhalil) for his development of [aioli and biowasm](https://github.com/biowasm). I successfully compiled **bwa**, **samtools** and **Subread** by learning the patch and compiling scripts from [biowasm](https://github.com/biowasm/biowasm).
+- Thank the authors of **bwa**, **samtools** and **Subread**.
+- Thank [Robert Aboukhalil](https://github.com/robertaboukhalil) for his development of [aioli and biowasm](https://github.com/biowasm). I successfully compiled **bwa**, **samtools** and **Subread** by learning the patch and compiling scripts from [biowasm](https://github.com/biowasm/biowasm).
