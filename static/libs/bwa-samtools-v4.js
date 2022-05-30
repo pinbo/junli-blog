@@ -231,7 +231,7 @@ async function callVar (sam) {
     let wd = "/data/";
     bwa.setwd(wd);
     let out = sam + ".out.txt";
-    let cmd = ["editcall", "-b -f", ref, "-o", out, sam].join(' ');
+    let cmd = ["editcall", "-b -c 2 -f", ref, "-o", out, sam].join(' ');
     console.log(cmd);
     let std = await bwa.exec(cmd);
     document.getElementById("sort").innerHTML = "Finished calling SNPs for " + sam + "with exactSNP";
