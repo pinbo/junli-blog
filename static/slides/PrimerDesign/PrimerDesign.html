@@ -454,6 +454,23 @@ I checked KASP primers designed by LGC and 3crbio (PACE) with primer3 default se
 - Product length: 39 - 93 bp, average 57 bp.
 - Primer length: 15 to 33 bp
 
+---
+### Summary for using the Galaxy pipeline
+1. **SNP Position to Polymarker Input**: make sure to use the correct genome version (1.0 or 2.0). If you are not sure, ask the person or company about the commands that are used to call SNPs, and versions of the wheat genome and all software used. You will need this for your paper later.
+
+2. **SNP Primer Design**: it does NOT matter which version of the genome to use. You can use the latest version.
+
+2. For the output of the primers: your SNP is at **501** on the target template.
+
+2. For all primers: specificity is the most important and all others can be ignored (such as length, hairpin, Tm etc).
+
+---
+### Summary for using the Galaxy pipeline (cont.)
+3. For CAPS: 1) specificity: at least 2 nucleotides (nt) difference in the 3' end for at least 1 primer; if not, introduce one in the 3rd nt. 2) Product size can be < 500 bp to reduce PCR time; 3) check the size difference after digestion, at least >50bp
+
+4. For dCAPS: 1) the primer with introduced mutation is at around 500bp position (primer A); check the specificity of the other primer because you cannot do anything about primer A. 2) product size < 300bp; 3) add a FAM tail to the 5' end of the primer A to make the size difference to about 40 bp after the cut; 4) since primer A has an introduced mutation, use 55 C for annealing temperature.
+
+5. For KASP: 1) common primer decides the specificity of your marker, just make sure the 3' end is specific to your template. Based on my experience, this is enough, no need to introduce mutation. 2) small product size, ideally <100 bp. You can set "Pick primer anyway?" to Yes to get all possible common primers, so you have more choices.
 
 ---
 ### Links
