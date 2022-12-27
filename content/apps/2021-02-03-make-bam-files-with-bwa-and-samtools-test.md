@@ -12,9 +12,7 @@ tags:
   - samtools
 ---
 
-**Before start**: Please enable [SIMD](https://v8.dev/features/simd) in your web brower [see [Help](#enable-simd-for-your-browser) below].
-
-This tool is for **paired end** fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz).  
+This tool supports both paired end fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz) and single end fastq files (please make sure they have suffix1 below).  
 Please run the 3 steps below to get the indexed bams from a list of fastq files.
 <p id=recommend" style="color:darkviolet;">Recommend using private browser windows to avoid troubles caused by cookies and caches (open from the menu at the topright corner)</p>
 <p id=recommend2" style="color:red;">No spaces are allowed in input file names!</p>
@@ -51,7 +49,7 @@ After loading the template fasta file and all the fastq files, now we will use `
 
 ## Help
 
-This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/), [SAMTOOLS](http://www.htslib.org/) and [subread exactSNP](http://subread.sourceforge.net/). It runs commands like this:
+This tool is a WebAssembly implementation of [BWA](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). It runs commands like this:
 ```sh
 ## map reads to the templates with bwa
 bwa index <your-references.fa>
@@ -71,15 +69,16 @@ BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please en
 
 - chromium based browsers (Google Chrome and new Microsoft Edge): go to URL [chrome://flags/](chrome://flags/), search `WebAssembly SIMD support`, and select "Enabled"; **seems enabled by default since 2021.**
 
-- Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`;
+- Firefox: go to URL [about:config](about:config), search `javascript.options.wasm_simd`, then choose `true`; **seems enabled by default since 2022.**
 
-- Other browers do not seem to support this yet.
+- Other browers were not checked.
 
 ## updates
 
 - 2022-05-08: add `editcall` [nim version](https://github.com/pinbo/editcall) to call indels and inversions from `bwa mem` sam file.
 - 2022-05-30: add `editcall` [c version](https://github.com/pinbo/practice_c) to call SNPs, indels and inversions from `bwa mem` sam file.
 - 2022-05-30: removed exactSNP results due to its wrong call of SNPs.
+- 2022-12-27: support single end reads now.
 
 ## Acknowledgement
 

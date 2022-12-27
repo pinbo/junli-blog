@@ -1,5 +1,6 @@
 // v2: 2022-05-06: add editcall to call potential indels, big deletions and inversions
 // v2: 2022-05-30: add editcall c version and deleted exactSNP (due to wrong calls for SNPs)
+// v4.1: 2022-12-27: can process single end reads too (like merged reads)
 let bwa = new Aioli("bwa2/0.7.17JZv2");
 let samtools = new Aioli("samtools/latest"); // null before init
 // Initialize bwa and output the version
@@ -103,7 +104,7 @@ async function transferSam(){
             // Aioli.transfer("/data/" + f, "/data/" + f, bwa, editcall);
         }
     }
-    let ref = document.getElementById("demoRef").innerHTML;
+    // let ref = document.getElementById("demoRef").innerHTML;
     // Aioli.transfer("/data/" + ref, "/data/" + ref, bwa, exactSNP);
     // Aioli.transfer("/data/" + ref, "/data/" + ref, bwa, editcall);
     await delay(1000);
@@ -158,6 +159,7 @@ async function makeSam(){
     let filenames = document.getElementById("demoFq").innerHTML.split("\t");
     let reference = document.getElementById("demoRef").innerHTML;
     let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
+    let suffix2 = document.getElementById("suffix2").value;
     console.log("FASTQ files\n", filenames);
     console.log(reference);
     let promises = [];
@@ -166,7 +168,9 @@ async function makeSam(){
         if (ff.includes(suffix1)) {
             console.log("Processing: ", ff);
             let prefix = ff.replace(suffix1, "");
-            promises.push(bwamem(prefix, reference));
+            let R2 = ff.replace(suffix1, suffix2);
+            if (!(filenames.includes(R2))) R2="";
+            promises.push(bwamem(prefix, ff, R2, reference));
         }
     }
     await Promise.all(promises);
@@ -175,18 +179,18 @@ async function makeSam(){
 
 // make sam file with bwa mem
 // bwamem("2", "references.fa").then(d => console.log(d));
-async function bwamem (prefix, reference) {
-    let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
-    let suffix2 = document.getElementById("suffix2").value;
+async function bwamem (prefix, R1, R2, reference) {
+    // let suffix1 =  document.getElementById("suffix1").value; // R1 suffix
+    // let suffix2 = document.getElementById("suffix2").value;
     bwa.setwd("/data/"); // set working directory
-    let R1 = prefix + suffix1;
-    let R2 = prefix + suffix2;
+    // let R1 = prefix + suffix1;
+    // let R2 = prefix + suffix2;
     let out = "out_" + prefix + ".sam";
     // let rg = "-R \@RG\\tID:" + prefix + "\\tSM:" + prefix; // read group tag
     reference = reference;
     // bwa mem
     // let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
-    let cmd = ["mem -o", out, reference, R1, R2].join(' ');
+    let cmd = ["mem -o", out, reference, R1, R2].join(' ').trim();
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);
