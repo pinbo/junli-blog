@@ -1,6 +1,7 @@
 // v2: 2022-05-06: add editcall to call potential indels, big deletions and inversions
 // v2: 2022-05-30: add editcall c version and deleted exactSNP (due to wrong calls for SNPs)
 // v4.1: 2022-12-27: can process single end reads too (like merged reads)
+// v4.2: 2023-01-03: add -q option for bwa mem to keep SA mapping quality
 let bwa = new Aioli("bwa2/0.7.17JZv2");
 let samtools = new Aioli("samtools/latest"); // null before init
 // Initialize bwa and output the version
@@ -190,7 +191,7 @@ async function bwamem (prefix, R1, R2, reference) {
     reference = reference;
     // bwa mem
     // let cmd = ["mem", reference, R1, R2, out].join(' '); // I modifed fastmap.c to use the 4th arguments as output
-    let cmd = ["mem -o", out, reference, R1, R2].join(' ').trim();
+    let cmd = ["mem -q -o", out, reference, R1, R2].join(' ').trim(); // no modify of supp alignments
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);
