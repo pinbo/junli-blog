@@ -10,7 +10,7 @@ tags:
   - NGS
   - bwa
   - samtools
-draft: true
+draft: false
 ---
 
 **Before start**: Please enable [SIMD](https://v8.dev/features/simd) in your web brower [see [Help](#enable-simd-for-your-browser) below].
