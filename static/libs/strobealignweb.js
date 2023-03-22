@@ -209,7 +209,8 @@ async function bwamem (prefix, R1, R2, reference) {
     let mismatch = "-B " + document.getElementById("mismatch").value;
     let gapopen = "-O " + document.getElementById("gapopen").value;
     let gapext = "-E " + document.getElementById("gapext").value;
-    let cmd = [match, mismatch, gapopen, gapext, "-o", out, reference, R1, R2].join(' ').trim().replace(/  +/g, ' '); 
+    let addPara = document.getElementById("addPara").value; // additional parameters
+    let cmd = [match, mismatch, gapopen, gapext, addPara, "-o", out, reference, R1, R2].join(' ').trim().replace(/  +/g, ' '); 
     console.log(cmd);
     let std = await bwa.exec(cmd);
     console.log(std.stderr);

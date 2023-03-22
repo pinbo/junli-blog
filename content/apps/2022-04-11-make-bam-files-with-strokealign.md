@@ -45,7 +45,8 @@ Alignment parameters (change unless you know what you are doing):
 <input size="2" id="mismatch" value="8" type="text"> mismatch penalty  
 <input size="2" id="gapopen" value="12" type="text"> gap open penalty  
 <input size="2" id="gapext" value="1" type="text"> gap extension penalty  
-<input size="2" id="trim" value="3" type="text"> bases to be trimmed off from each end of the read when calling variants
+<input size="2" id="trim" value="3" type="text"> bases to be trimmed off from each end of the read when calling variants  
+Addition parameters for strobeAlign &nbsp;&nbsp;&nbsp;&nbsp;<input size="40" id="addPara" value="-N 1" type="text">  
 
 <button onclick="analyzeBam()">Map reads and Call variants</button>
 <p id="bwa"  style="color:tomato;font-style: italic;"></p>
