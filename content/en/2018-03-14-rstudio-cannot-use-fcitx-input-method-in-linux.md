@@ -11,7 +11,7 @@ tags:
 
 I am currently using Rstudio Version 1.1.419, which cannot use Chinese input method with fcitx. The [official solution](https://support.rstudio.com/hc/en-us/articles/205605748-Using-RStudio-0-99-with-Fctix-on-Linux) does not work anymore. Finally I found this [blog](https://bbs.deepin.org/forum.php?mod=viewthread&tid=149730) that fixed the problem. Here is my summary on Debian stretch:
 
-```{bash}
+```bash
 wget http://ikuya.info/tmp/fcitx-qt5-rstudio.tar.gz 
 tar xf fcitx-qt5-rstudio.tar.gz 
 cd fcitx-qt5-rstudio 
