@@ -5,7 +5,7 @@
          height="{{ .Site.Params.logo.height }}"
          alt="{{ .Site.Params.logo.alt }}">
   </a>
-  {{ $.Scratch.Set "section" (replaceRE "^/([^/]+)/.*" "$1" .URL) }}
+  {{ $.Scratch.Set "section" (replaceRE "^/([^/]+)/.*" "$1" .Permalink) }}
   <ul class="nav-links">
     {{ range (default .Site.Menus.main (index .Site.Menus ($.Scratch.Get "section"))) }}
     <li><a href="{{ .URL }}">{{ .Name }}</a></li>
