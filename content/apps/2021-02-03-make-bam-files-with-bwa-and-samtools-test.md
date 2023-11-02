@@ -1,5 +1,5 @@
 ---
-title: CRISPR editing check with BWA and SAMTOOLS v2 beta
+title: CRISPR editing check with BWA and SAMTOOLS v2
 author: Junli Zhang
 date: '2022-05-30'
 slug: make-bam-files-with-bwa-and-samtools-test
@@ -79,6 +79,7 @@ BWA needs [SIMD](https://v8.dev/features/simd) for vector calculation. Please en
 - 2022-05-30: add `editcall` [c version](https://github.com/pinbo/practice_c) to call SNPs, indels and inversions from `bwa mem` sam file.
 - 2022-05-30: removed exactSNP results due to its wrong call of SNPs.
 - 2022-12-27: support single end reads now.
+- 2023-11-02: bwa-mem now put the reads with mapq=0 (multi-map) in the same chromosome as its mate if its mate has mapq > 0.
 
 ## Acknowledgement
 
