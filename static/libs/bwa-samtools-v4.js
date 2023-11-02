@@ -2,7 +2,7 @@
 // v2: 2022-05-30: add editcall c version and deleted exactSNP (due to wrong calls for SNPs)
 // v4.1: 2022-12-27: can process single end reads too (like merged reads)
 // v4.2: 2023-01-03: add -q option for bwa mem to keep SA mapping quality
-let bwa = new Aioli("bwa2/0.7.17JZv2");
+let bwa = new Aioli("bwa2/latest");
 let samtools = new Aioli("samtools/latest"); // null before init
 // Initialize bwa and output the version
 bwa
