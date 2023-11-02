@@ -17,6 +17,6 @@ The results are fastq files and you can analyze by the following steps:
 
 1. Check quality and filtering with fastp [here](/apps/filter-fastq-files-with-fastp/).
 2. Demultiplex the filtered fastq files [here](/apps/demultiplex-a-fastq-file/).
-3. Map reads to your PCR template and get SNP and small indel calls [here](/apps/make-bam-files-with-bwa-and-samtools/) with [BWA-MEM](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/).
+3. Map reads to your PCR template and get SNP and small indel calls [here](/apps/make-bam-files-with-bwa-and-samtools-test/) with [BWA-MEM](http://bio-bwa.sourceforge.net/) and [SAMTOOLS](http://www.htslib.org/). You can also try other read mappers like [strobeAlign](/apps/make-bam-files-with-strobealign/) and [HISAT2](/apps/make-bams-and-indel-calls-with-hisat2/), but the results should be very similar.
 4. Check large indels (>15bp) and structure variations [here](/apps/make-bams-and-indel-calls-with-subread/) with [Subread](http://subread.sourceforge.net/).
 5. View the downloaded bam files with [**IGV**](https://software.broadinstitute.org/software/igv/download). You need to install **IGV** first. The web version does not work well.
