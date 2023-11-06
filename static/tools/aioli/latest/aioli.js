@@ -206,6 +206,13 @@ class Aioli
     {
         return this.send("setwd", path);
     }
+    mkdir(path) {
+        return this.send("mkdir", path);
+    }
+    pwd(){
+        return this.send("pwd");
+    }
+    
 
     // Custom file system operations. For example:
     //   FS.readFile("/file.txt", { encoding: "utf8" });

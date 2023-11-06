@@ -82,7 +82,10 @@ API = {
     ls: (id, path) => {
         return FS.readdir(path);
     },
-
+    mkdir: (id, path) => {
+        FS.mkdir(path);
+        return 0;
+    },
     cat: (id, path) => {
         return FS.readFile(path, { encoding: "utf8" });
     },
@@ -141,6 +144,10 @@ API = {
     setwd: (id, path) => {
         return FS.chdir(path);
     },
+    pwd: (id) => {
+        return FS.cwd();
+    },
+
 
     // -------------------------------------------------------------------------
     // Call main function with custom command
