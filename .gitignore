@@ -14,3 +14,7 @@ $RECYCLE.BIN/
 
 # OSX
 .DS_Store
+
+# more
+.hugo_build.lock
+**/tmp*/

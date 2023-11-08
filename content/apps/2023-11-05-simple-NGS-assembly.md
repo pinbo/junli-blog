@@ -1,5 +1,5 @@
 ---
-title: Simple NGS assembly with velvet
+title: Simple NGS assembly with Velvet
 author: Junli Zhang
 date: '2023-11-05'
 slug: simple-NGS-assembly-with-velvet
@@ -9,6 +9,7 @@ tags:
   - assembly
   - NGS
   - velvet
+draft: true
 ---
 
 <!--<script src="https://biowasm.com/cdn/v3/aioli.js"></script>
@@ -57,7 +58,7 @@ tags:
 <label for="expCov">Expected region coverage (just a guess)</label>
 
 <input id="hashLength" name="hashLength" value="31" size="2">
-<label for="hashLength">Hash length (an odd integer <= 31 OR m,M,s where m and M are odd integers <= 31 and s is a step (even number))</label>
+<label for="hashLength">Hash length (an odd integer <= 31)</label>
 
 <textarea id="addopt1" name="addopt2" rows="1" cols="60" placeholder="Additional Options for program velveth"></textarea><br>
 
