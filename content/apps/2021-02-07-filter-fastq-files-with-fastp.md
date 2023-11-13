@@ -24,7 +24,10 @@ https://github.com/OpenGene/fastp
 <p id="demoFq" style="display:none;"></p>
 
 <input id="basequality" name="basequality" value="15" size="2">
-<label for="basequality">The minimum base quality</label>
+<label for="basequality">the minimum base quality</label>
+
+<input id="minLength" name="minLength" value="35" size="2">
+<label for="minLength">the minimum read length (bp)</label>
 
 <input type="checkbox" id="interleaved" name="interleaved" value="--interleaved_in">
 <label for="interleaved">Interleaved PE? (Read1 and read2 are in one fastq file)</label>
@@ -34,6 +37,9 @@ https://github.com/OpenGene/fastp
 
 <input type="checkbox" id="merge" name="merge" value="-m">
 <label for="merge">Merge read1 and read2 if there are overlaps? (3 output: merged, non-merged-R1, non-merged-R2)</label>
+
+<input id="minOverlap" name="minOverlap" value="30" size="2">
+<label for="minOverlap">the minimum overlap length (bp)</label>
 
 <label for="addopt">Additional filtering options. Click the help button below to see a list of options</label><br>
 <textarea id="addopt" name="addopt" rows="3" cols="60" placeholder="Additional Options for the tool: -g -x etc"></textarea><br>

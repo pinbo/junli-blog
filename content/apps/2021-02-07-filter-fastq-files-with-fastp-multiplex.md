@@ -32,11 +32,17 @@ https://github.com/OpenGene/fastp
 <input id="basequality" name="basequality" value="15" size="2">
 <label for="basequality">The minimum base quality</label>
 
+<input id="minLength" name="minLength" value="35" size="2">
+<label for="minLength">the minimum read length (bp)</label>
+
 <input type="checkbox" id="interleaved" name="interleaved" value="--interleaved_in">
 <label for="interleaved">Interleaved paired-end (PE)? (Read1 and read2 are in one fastq file)</label>
 
 <input type="checkbox" id="merge" name="merge" value="-m">
 <label for="merge">Merge read1 and read2 if there are overlaps? (3 output: merged, non-merged-R1, non-merged-R2)</label>
+
+<input id="minOverlap" name="minOverlap" value="30" size="2">
+<label for="minOverlap">the minimum overlap length (bp)</label>
 
 <input type="checkbox" id="SingleEnd" name="SingleEnd" value="false">
 <label for="SingleEnd">Are all fastq files single-end (SE)? (leave it unchecked for mix of PE and SE)</label>

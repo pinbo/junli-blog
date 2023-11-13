@@ -111,9 +111,11 @@ async function filter(read1, read2=""){
         }
     }
     let baseQuality = "-q " + document.getElementById("basequality").value;
+    let minLength = "-l " + document.getElementById("minLength").value;
+    let minOverlap = "--overlap_len_require " + document.getElementById("minOverlap").value;
     let addopt = document.getElementById("addopt").value.replace(/(?:\r\n|\r|\n)/g, " ");
     // let cmd = [input, interleaved, adapterTim, baseQuality, addopt, output].join(" ").replace(/  +/g, ' ');
-    let cmd = [input, interleaved, baseQuality, addopt, output, reportfile].join(" ").replace(/  +/g, ' ');
+    let cmd = [input, interleaved, baseQuality, minLength, minOverlap, addopt, output, reportfile].join(" ").replace(/  +/g, ' ');
 
     // fastp.setwd("/data") // set working directory
     console.log("input is", cmd);
