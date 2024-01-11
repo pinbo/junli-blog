@@ -12,6 +12,8 @@ tags:
   - samtools
 ---
 
+**!! Please use an updated version 2 [here](https://junli.netlify.app/apps/make-bam-files-with-bwa-and-samtools-test/) !!**
+
 **Before start**: Please enable [SIMD](https://v8.dev/features/simd) in your web brower [see [Help](#enable-simd-for-your-browser) below].
 
 This tool is for **paired end** fastq files (for example, xxx_R1_001.fastq.gz and xxx_R2_001.fastq.gz).  
