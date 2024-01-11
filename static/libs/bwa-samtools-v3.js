@@ -27,8 +27,8 @@ async function downloadBam(){
     }
     let bb = bwa.downloadBinary("/data/formattedReferences.fa").then(d => d.arrayBuffer()).then(d => zip.file("formattedReferences.fa", d));
     promises.push(bb);
-    let cc = merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_SNPs_and_small_indels_exactSNP.txt", d));
-    promises.push(cc);
+    // let cc = merge_indels().then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_SNPs_and_small_indels_exactSNP.txt", d));
+    // promises.push(cc);
     let dd = bwa.downloadBinary("/data/editcall.out.txt").then(d => d.arrayBuffer()).then(d => zip.file("Summary_of_indels_and_inversions_editcall.txt", d));
     promises.push(dd);
     await Promise.all(promises);
@@ -44,7 +44,7 @@ async function analyzeBam(){
     await makeSam();
     await makeBam();
     // await transferBam();
-    await callAll();
+    // await callAll();
     await callAll2();
     // document.getElementById("download-btn").style.visibility = "visible";
 }
