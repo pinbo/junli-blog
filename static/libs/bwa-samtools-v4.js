@@ -2,7 +2,8 @@
 // v2: 2022-05-30: add editcall c version and deleted exactSNP (due to wrong calls for SNPs)
 // v4.1: 2022-12-27: can process single end reads too (like merged reads)
 // v4.2: 2023-01-03: add -q option for bwa mem to keep SA mapping quality
-let bwa = new Aioli("bwa2/latest");
+// v4.3: 2024-03-03: add -q option for bwa editcall (0.7.17JZv3.1) to filter lower mapping quality reads when calling variants
+let bwa = new Aioli("bwa2/0.7.17JZv3.1");
 let samtools = new Aioli("samtools/latest"); // null before init
 // Initialize bwa and output the version
 bwa
@@ -236,7 +237,8 @@ async function callVar (sam) {
     let wd = "/data/";
     bwa.setwd(wd);
     let out = sam + ".out.txt";
-    let cmd = ["editcall", "-b -c 2 -f", ref, "-o", out, sam].join(' ');
+    let mq = "-q " + document.getElementById("mq").value;
+    let cmd = ["editcall", "-b -c 2 -f", ref, mq, "-o", out, sam].join(' ');
     console.log(cmd);
     let std = await bwa.exec(cmd);
     document.getElementById("sort").innerHTML = "Finished calling SNPs for " + sam + "with exactSNP";
