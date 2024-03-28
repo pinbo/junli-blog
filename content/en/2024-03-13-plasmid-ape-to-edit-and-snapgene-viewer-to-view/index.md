@@ -16,6 +16,7 @@ Working on molecular cloning, I like to use [SnapGene Viewer](https://www.snapge
 1. Then you can edit to change color etc.
 1. You can also select a sequence and right-click to add a new feature.
 1. For SnapGene Viewer to correctly show the color of the features, you also need to edit the feature file. To see where the library file is located, you can check `Features -> Open Feature Library`. From there, you can find the feature location. Go to the saving folder, open the file `Default_Features.txt`, and add a "`note {color: #ff9966}`" for example.
+1. To annotate sequences, select part or the whole plasmid sequence, then go to `Features -> Annotate Features using Library` or `Ctrl + K` shortcut.
 1. After you edit and save the sequence file, open it with a text editor, and replace all the `locus_tag` with `label`.
 1. If the .gb or .gbk file is created from blank by ApE, please also add the reference keywords (author, title, and journal should have two space indent at the beginning).  
 
