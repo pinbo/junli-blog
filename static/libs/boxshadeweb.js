@@ -33,7 +33,7 @@ let outfile = "";
 async function prepareInput(evt) {
 	var files = evt.target.files; // FileList object
 	if(files.length==0) return;
-    infile = files[0].name.replace(/ |-/g, "_");
+    infile = files[0].name.replace(/[^A-Za-z0-9_\.]+/g, "_"); // need to keep the extension for gussing, so only keep alphanum and . and _ to not mess up the cmd line
     Aioli.mount(files[0], infile, null, boxshade);// only to worker fastp
     // inputFileContent = await readTextFileAsync(files[0]);
     return 0;
