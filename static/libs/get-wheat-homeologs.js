@@ -19,6 +19,10 @@ function mytrim(x) {
     return x.replace(/^\s+|\s+$/g,'');
 }
 
+
+// Create an Object
+const buffers = {}; //databases downloaded
+
 // get homeolog
 async function getHomeolog(){
     // document.getElementById("output").value = "";
@@ -29,16 +33,29 @@ async function getHomeolog(){
     let database = sel.options[sel.selectedIndex].value;
     let genePrefix = "";
     let dbURL = "";
+    let buf;
     if (database == "Kronos_cDNA_v1.0") {
         genePrefix = "TrturKRN";
         dbURL = "https://dl.dropboxusercontent.com/scl/fi/f40srzyyp8mw5kn6zaqh6/Kronos_Homeolog_with_function2.db?rlkey=pyh3t76nroonxol1uueytekwx&st=mf42zky3";
+        if ("Kronos" in buffers){
+            buf = buffers.Kronos;
+        } else {
+            buf = await fetch(dbURL).then(res => res.arrayBuffer());
+            buffers.Kronos = buf;
+        }
     }
     else if (database == "CS_cDNA_HC_v1.1") {
         genePrefix = "TraesCS";
         dbURL = "https://dl.dropboxusercontent.com/scl/fi/03yjxb83ji3gu2aijg5o2/CS_Homeolog_with_function2.db?rlkey=9sao48v8bc2uqhekqdzarrrjg&st=uy3glz84";
+        if ("CSv1HC" in buffers){
+            buf = buffers.CSv1HC;
+        } else {
+            buf = await fetch(dbURL).then(res => res.arrayBuffer());
+            buffers.CSv1HC = buf;
+        }
     }
     // load db
-    const buf = await fetch(dbURL).then(res => res.arrayBuffer());
+    // const buf = await fetch(dbURL).then(res => res.arrayBuffer());
     const db = new SQL.Database(new Uint8Array(buf));
     let sqlstr = "CREATE TABLE hello (gene char);";
     db.run(sqlstr);
@@ -110,17 +127,6 @@ function copy2clipboard() {
     // Get the text field
     let tableElement = document.getElementById("datatable");
   
-    // // Select the text field
-    // copyText.select();
-    // copyText.setSelectionRange(0, 99999); // For mobile devices
-  
-    //  // Copy the text inside the text field
-    // navigator.clipboard.writeText(copyText.value);
-  
-    // // Alert the copied text
-    // alert("Copied the text: " + copyText.value);
-
-
     // Convert the table element to an HTML string
     const tableHTMLString = tableElement.outerHTML;
 
@@ -143,6 +149,8 @@ function copy2clipboard() {
 function clearseq() {
 	document.getElementById("input").value = "";
 	// document.getElementById("output").value = "";
+    document.getElementById('tbody').innerHTML = "";
+    document.getElementById("alert").innerText = "";
 };
 
 document.getElementById("run").addEventListener("click", getHomeolog);
