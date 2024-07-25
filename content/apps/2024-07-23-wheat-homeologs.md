@@ -6,17 +6,18 @@ slug: wheat-homeolog
 categories:
   - tools
 tags:
-  - DNA
-  - samtools
+  - wheat
+  - homeolog
+  - sqlite3
 ---
 
-Find potential wheat homeologs (best hit with >90% identity and alighment >90% of the CDS length).
+Find potential wheat homeologs (best hit with >90% identity and alignment >60% of the CDS length) and their functions based on Arabidopsis and rice blast results (top 1 hit).
 
 Please paste gene IDs (e.g. TraesCS5A02G391700) below.
 
 *Each line is a gene*.
 
-**Database**:
+**Database** to search:
 <select id="box1">
   <option value="Kronos_cDNA_v1.0">Kronos cDNA v1.0</option>
   <option value="CS_cDNA_HC_v1.1">CS IWGSC cDNA v1.1 HC</option>
