@@ -94,7 +94,7 @@ ORDER BY d1.name;";
     document.getElementById('tbody').innerHTML = "";
     while(stmt.step()) { //
         const row = stmt.getAsObject();
-        console.log('Here is a row: ' + JSON.stringify(row));
+        // console.log('Here is a row: ' + JSON.stringify(row));
         let text = "";
         let k = '<tr>';
         row.c1 = genePrefix + row.c1;
