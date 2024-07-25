@@ -33,7 +33,7 @@ Please paste gene IDs (e.g. TraesCS5A02G391700) below.
 
 <!-- <textarea rows="10" cols="75" id="output" ></textarea> -->
 <!-- <br /> -->
-<p id="alert" style="color:blue;></p>
+<p id="alert" style="color:blue";></p>
 <button id="copytable">Copy to clipboard</button>
 <a download="wheat_homeolog_and_function.csv" href="#" onclick="return ExcellentExport.csv(this, 'datatable');" style="color:Tomato;">or Export to CSV</a>
 <!-- The button used to copy the text -->
