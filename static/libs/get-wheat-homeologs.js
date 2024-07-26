@@ -57,7 +57,7 @@ async function getHomeolog(){
     // load db
     // const buf = await fetch(dbURL).then(res => res.arrayBuffer());
     const db = new SQL.Database(new Uint8Array(buf));
-    let sqlstr = "CREATE TABLE hello (gene char);";
+    let sqlstr = "CREATE TABLE hello (name char);";
     db.run(sqlstr);
     // prepare input db
     for(let i = 0; i < lines.length; i++){
@@ -79,12 +79,12 @@ async function getHomeolog(){
   d4.name As c7, \
   d2.Os_ident As c8, \
   d4.description As c9 \
-From wheat_hit t \
-Join wheatID_and_hits d1 On ( d1.gene = t.gene ) \
+From hello \
+Join wheatID_and_hits d1 On ( hello.name = d1.name ) \
+join wheat_hit t on ( d1.gene = t.gene ) \
 Join wheatID_and_hits d2 On ( d2.gene = t.hit ) \
 Left Join AtOsID d3 On ( d3.gene = d2.AtID ) \
 Left Join AtOsID d4 On ( d4.gene = d2.OsID ) \
-Join hello ON hello.gene = d1.name \
 ORDER BY d1.name;";
     // const stmt = db.prepare("SELECT * FROM Kronos_Homeolog WHERE gene = $gene");
     const stmt = db.prepare(sqlstr);
