@@ -36,21 +36,21 @@ async function getHomeolog(){
     let buf;
     if (database == "Kronos_cDNA_v1.0") {
         genePrefix = "TrturKRN";
-        dbURL = "https://jzseqbucket.s3.us-east-2.amazonaws.com/Kronos_Homeolog_with_function3.db"
+        dbURL = "https://jzseqbucket.s3.us-east-2.amazonaws.com/Kronos_Homeolog_with_function3.db.gz"
         if ("Kronos" in buffers){
             buf = buffers.Kronos;
         } else {
-            buf = await fetch(dbURL).then(res => res.arrayBuffer());
+            buf = await fetch(dbURL).then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
             buffers.Kronos = buf;
         }
     }
     else if (database == "CS_cDNA_HC_v1.1") {
         genePrefix = "TraesCS";
-        dbURL = "https://jzseqbucket.s3.us-east-2.amazonaws.com/CS_Homeolog_with_function3.db";
+        dbURL = "https://jzseqbucket.s3.us-east-2.amazonaws.com/CS_Homeolog_with_function3.db.gz";
         if ("CSv1HC" in buffers){
             buf = buffers.CSv1HC;
         } else {
-            buf = await fetch(dbURL).then(res => res.arrayBuffer());
+            buf = await fetch(dbURL).then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
             buffers.CSv1HC = buf;
         }
     }
