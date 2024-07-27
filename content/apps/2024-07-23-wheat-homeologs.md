@@ -56,6 +56,6 @@ Please paste gene IDs (e.g. TraesCS5A02G391700) below.
 </table>
 
 <script src="/tools/sqljs/v1.10.3/sql-wasm.js"></script>
-<script type="module" src="/libs/get-wheat-homeologs.js"></script>
+<script type="module" src="/libs/get-wheat-homeologs-v2.js"></script>
 <script src="/libs/excellentexport.min.js"></script>
 <script src="/libs/pako_inflate.min.js"></script>
