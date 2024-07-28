@@ -11,11 +11,11 @@ tags:
   - sqlite3
 ---
 
-Find potential wheat homeologs (best hit with >90% identity and alignment >60% of the CDS length) and their functions based on Arabidopsis and rice blast results (top 1 hit).
+Find potential wheat homeologs (best hit with >90% identity and alignment >60% of the CDS length) and their functions based on Arabidopsis (At) and rice (Os) blast results (top 1 hit).
 
-Please paste gene IDs (e.g. TraesCS5A02G391700) below.
+Please paste gene IDs (e.g. TraesCS5A02G391700) below. *Each line is a gene*.
 
-*Each line is a gene*.
+To start a new job, click "**Clear**" button below, and resubmit (faster than refresh the page).
 
 **Database** to search:
 <select id="box1">
@@ -23,7 +23,7 @@ Please paste gene IDs (e.g. TraesCS5A02G391700) below.
   <option value="CS_cDNA_HC_v1.1">CS IWGSC cDNA v1.1 HC</option>
 </select>
 
-<textarea rows="10" cols="75" id="input"></textarea>
+<textarea rows="10" cols="75" id="input" placeholder="paste gene names here: one gene per line"></textarea>
 <br />
 
 <button id="run">Submit</button>
@@ -56,6 +56,7 @@ Please paste gene IDs (e.g. TraesCS5A02G391700) below.
 </table>
 
 <script src="/tools/sqljs/v1.10.3/sql-wasm.js"></script>
-<script type="module" src="/libs/get-wheat-homeologs-v2.js"></script>
+<script src="https://biowasm.com/cdn/v3/aioli.js"></script>
+<script type="module" src="/libs/get-wheat-homeologs-v3.js"></script>
 <script src="/libs/excellentexport.min.js"></script>
 <script src="/libs/pako_inflate.min.js"></script>
