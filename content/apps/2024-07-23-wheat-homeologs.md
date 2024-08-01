@@ -21,7 +21,9 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 <select id="box1">
   <option value="Kronos_cDNA_v1.0">Kronos cDNA v1.0</option>
   <option value="CS_cDNA_HC_v1.1">CS IWGSC cDNA v1.1 HC</option>
-</select>
+</select>  
+<input type="checkbox" id="check1" name="check1" />
+<label for="check1">Output At/Os best hits only</label>
 
 <textarea rows="10" cols="75" id="input" placeholder="paste gene names here: one gene per line"></textarea>
 <br />
@@ -39,7 +41,7 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 <a download="wheat_homeolog_and_function.csv" href="#" onclick="return ExcellentExport.csv(this, 'datatable');" style="color:Tomato;">or Export to CSV</a>
 <!-- The button used to copy the text -->
 <table id="datatable" style="font-size: 10px;" align="left">
-<thead>
+<thead id="thead">
     <tr>
         <th>WheatGeneID</th>
         <th>Best Wheat matches</th>
@@ -56,7 +58,7 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 </table>
 
 <script src="/tools/sqljs/v1.10.3/sql-wasm.js"></script>
-<script src="https://biowasm.com/cdn/v3/aioli.js"></script>
+<!-- <script src="/tools/sqlite3/3.46.0/sqlite3.js"></script> -->
 <script type="module" src="/libs/get-wheat-homeologs-v3.js"></script>
 <script src="/libs/excellentexport.min.js"></script>
 <script src="/libs/pako_inflate.min.js"></script>

@@ -48,6 +48,7 @@ async function getHomeolog(){
     // db.run(sqlstr);
     // prepare input db
     let whereStr = "";
+    lines = [...new Set(lines)]; // uniqe values only
     for(let i = 0; i < lines.length; i++){
 		let ll = mytrim(lines[i]);
         if (ll){
@@ -81,6 +82,29 @@ WHERE d1.name IN (" + whereStr + ") \
 ORDER BY d1.name;";
     // const stmt = db.prepare("SELECT * FROM Kronos_Homeolog WHERE gene = $gene");
     // console.log(sqlstr);
+    if (document.getElementById("check1").checked){// only output At/Os hits
+        sqlstr = "Select \
+  d2.name As c1, \
+  d3.name As c4, \
+  d2.At_ident As c5, \
+  d3.description As c6, \
+  d4.name As c7, \
+  d2.Os_ident As c8, \
+  d4.description As c9 \
+From wheatID_and_hits d2 \
+Left Join AtOsID d3 On ( d3.gene = d2.AtID ) \
+Left Join AtOsID d4 On ( d4.gene = d2.OsID ) \
+WHERE c1 IN (" + whereStr + ") \
+ORDER BY c1;";
+        // also change table title
+        document.getElementById("thead").innerHTML = "<th>WheatGeneID</th> \
+<th>Best At matches</th> \
+<th>At %identity</th> \
+<th>At description</th> \
+<th>Best Os matches</th> \
+<th>Os %identity</th> \
+<th>Os description</th>";
+    }
     const stmt = db.prepare(sqlstr);
     // stmt.bind({$gene:whereStr});
     // const row = stmt.getAsObject({});
@@ -100,7 +124,7 @@ ORDER BY d1.name;";
         // k+= '</tr>';
         // document.getElementById('tbody').innerHTML += k; // too slow
         row.c1 = genePrefix + row.c1;
-        row.c2 = genePrefix + row.c2;
+        if ('c2' in row) row.c2 = genePrefix + row.c2;
         const newRow = document.createElement("tr");
         for (let x in row) {
             const newtd = document.createElement("td");
