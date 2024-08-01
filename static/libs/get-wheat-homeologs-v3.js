@@ -82,6 +82,15 @@ WHERE d1.name IN (" + whereStr + ") \
 ORDER BY d1.name;";
     // const stmt = db.prepare("SELECT * FROM Kronos_Homeolog WHERE gene = $gene");
     // console.log(sqlstr);
+    document.getElementById("thead").innerHTML = "<th>WheatGeneID</th> \
+        <th>Best Wheat matches</th> \
+        <th>Wheat %identity</th> \
+        <th>Best At matches</th> \
+        <th>At %identity</th> \
+        <th>At description</th> \
+        <th>Best Os matches</th> \
+        <th>Os %identity</th> \
+        <th>Os description</th>";
     if (document.getElementById("check1").checked){// only output At/Os hits
         sqlstr = "Select \
   d2.name As c1, \
