@@ -86,20 +86,28 @@ ORDER BY d1.name;";
     // const row = stmt.getAsObject({});
     // console.log('Here is a row: ' + JSON.stringify(row));
     document.getElementById('tbody').innerHTML = "";
+    // let counter=0;
+    const newTable = document.getElementById("tbody");
     while(stmt.step()) { //
         const row = stmt.getAsObject();
-        // console.log('Here is a row: ' + JSON.stringify(row));
-        let text = "";
-        let k = '<tr>';
+        // console.log('Row ' + ++counter + ': ' + JSON.stringify(row));
+        // let k = '<tr>';
+        // row.c1 = genePrefix + row.c1;
+        // row.c2 = genePrefix + row.c2;
+        // for (let x in row) {
+        //     k+= '<td>' + row[x] + '</td>';
+        // }
+        // k+= '</tr>';
+        // document.getElementById('tbody').innerHTML += k; // too slow
         row.c1 = genePrefix + row.c1;
         row.c2 = genePrefix + row.c2;
+        const newRow = document.createElement("tr");
         for (let x in row) {
-            text += row[x] + "\t";
-            k+= '<td>' + row[x] + '</td>';
+            const newtd = document.createElement("td");
+            newtd.textContent = row[x];
+            newRow.appendChild(newtd);
         }
-        k+= '</tr>';
-        // document.getElementById("output").value += text + "\n";
-        document.getElementById('tbody').innerHTML += k;
+        newTable.appendChild(newRow);
     }
     stmt.free(); // free the memory used by the statement
     document.getElementById("alert").innerText = "Done!";
