@@ -152,7 +152,7 @@ ORDER BY c1;";
 function giveExamples(){
     let sel = document.getElementById("box1"); // box1 is selection of database
     let database = sel.options[sel.selectedIndex].value;
-    if (database == "Kronos_cDNA_v1.0") document.getElementById("input").value = "TrturKRN6B01G025800\nTrturKRN7A01G081900";
+    if (database == "Kronos_cDNA_v1.0") document.getElementById("input").value = "TrturKRN1A01G056670\nTrturKRN5B01G032410";
     else if (database == "CS_cDNA_HC_v1.1") document.getElementById("input").value = "TraesCS5A02G391700\nTraesCS5B02G396600";
 }
 
