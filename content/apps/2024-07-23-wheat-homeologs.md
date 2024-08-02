@@ -59,6 +59,6 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 
 <script src="/tools/sqljs/v1.10.3/sql-wasm.js"></script>
 <!-- <script src="/tools/sqlite3/3.46.0/sqlite3.js"></script> -->
-<script type="module" src="/libs/get-wheat-homeologs-v3.js"></script>
+<script type="module" src="/libs/get-wheat-homeologs-v6.js"></script>
 <script src="/libs/excellentexport.min.js"></script>
 <script src="/libs/pako_inflate.min.js"></script>
