@@ -40,7 +40,7 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 <button id="copytable">Copy to clipboard</button>
 <a download="wheat_homeolog_and_function.csv" href="#" onclick="return ExcellentExport.csv(this, 'datatable');" style="color:Tomato;">or Export to CSV</a>
 <!-- The button used to copy the text -->
-<table id="datatable" style="font-size: 10px;" align="left">
+<table id="datatable" style="font-size: 10px; margin-bottom: 200px;" align="left">
 <thead id="thead">
     <tr>
         <th>WheatGeneID</th>
@@ -56,6 +56,53 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 </thead>
     <tbody id="tbody"></tbody>
 </table>
+
+**Methods**
+
+Here are the commands I used for preparing homeologs and the best hits in Arabidopsis and rice. Arabidopsis and rice seequnces were downloaded from [Ensembl Plants](https://plants.ensembl.org/index.html). Kronos cDNAs were downloaded from [Zenodo](https://zenodo.org/records/11106422). CS IWGSC annotation v1.1 HC cDNAs were downloaded from [Wheat URGI](https://urgi.versailles.inra.fr/download/iwgsc/IWGSC_RefSeq_Annotations/v1.1/).
+
+``` sh
+## homeolog search by self blast
+### blast self
+blastn -task blastn -db ../blastdb/Kronos.v1.0.all.cds.fa -query ../blastdb/Kronos.v1.0.all.cds.fa -outfmt "6 std qlen slen" -perc_identity 90 -word_size 20 -num_threads 40 -out out_Kronos_v1.0_cdna_self_wordsize20.txt &
+blastn -task blastn -query /Users/galaxy/blastdb/IWGSC_v1.1_HC_20170706_cds.fasta -db /Users/galaxy/blastdb/IWGSC_v1.1_HC_20170706_cds.fasta -outfmt "6 std qlen slen" -perc_identity 90 -word_size 20 -num_threads 40 -out out_CS_v1.1_HC_self_wordsize20.txt &
+
+### organize results: self3, use 0.6 length as cut point, due to splice variation
+gawk '$4>$13*0.6 {split($1,aa,"."); split($2,bb,"."); qq=aa[1]; ss=bb[1]; if(!(qq"\t"ss in cc)) {cc[qq"\t"ss]++; printf("%s\t%s\t%.f\t%s\n",qq,ss,$3,$4)} }' out_CS_v1.1_HC_self_wordsize20.txt > filtered_CS_v1.1_HC_self3.txt
+gawk '$4>$13*0.6 {split($1,aa,"."); split($2,bb,"."); qq=aa[1]; ss=bb[1]; if(!(qq"\t"ss in cc)) {cc[qq"\t"ss]++; printf("%s\t%s\t%.f\t%s\n",qq,ss,$3,$4)} }' out_Kronos_v1.0_cdna_self_wordsize20.txt > filtered_Kronos_self3.txt
+
+## blast Os and At
+### Kronos
+blastp -db ../blastdb/Arabidopsis_thaliana.TAIR10.pep.all.fa -query ../blastdb/Kronos.v1.0.all.pep.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 3 -num_threads 40 -out out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt &
+blastn -task blastn -db /Users/galaxy/blastdb/Oryza_sativa.IRGSP-1.0.cds.all.fa -query ../blastdb/Kronos.v1.0.all.cds.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 15 -num_threads 40 -out out_Kronos_v1.0_against_rice_IRGSP-1.0_cdna_wordsize15.txt &
+
+gawk 'bb[$1]<1{bb[$1]=1; print}' out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt > top1hit_out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt
+sed -i 's/ gene:/\t/g;s/ gene_symbol:/\t/g;s/ description:/\t/g;s/ \[Source/\t/g' top1hit_out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt
+
+gawk 'bb[$1]<1{bb[$1]=1; print}' out_Kronos_v1.0_against_rice_IRGSP-1.0_cdna_wordsize15.txt > top1hit_out_Kronos_v1.0_against_rice_IRGSP-1.0_cdna_wordsize15.txt
+sed -i 's/ gene:/\t/g;s/ gene_biotype:/\t/g; s/ gene_symbol:/\t/g;s/ description:/\t/g' top1hit_out_Kronos_v1.0_against_rice_IRGSP-1.0_cdna_wordsize15.txt
+
+### CS
+blastp -db ../blastdb/Arabidopsis_thaliana.TAIR10.pep.all.fa -query ../blastdb/Triticum_aestivum.IWGSC.pep.all.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 3 -num_threads 40 -out out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt &
+blastn -task blastn -db /Users/galaxy/blastdb/Oryza_sativa.IRGSP-1.0.cds.all.fa -query /Users/galaxy/blastdb/IWGSC_v1.1_HC_20170706_cds.fasta -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 11 -num_threads 40 -out out_CS_v1.1_against_rice_IRGSP-1.0_cdna_wordsize11.txt &
+
+gawk 'bb[$1]<1{bb[$1]=1; print}' out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt > top1hit_out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt
+sed -i 's/ gene:/\t/g;s/ gene_symbol:/\t/g;s/ description:/\t/g;s/ \[Source/\t/g' top1hit_out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt
+
+gawk 'bb[$1]<1{bb[$1]=1; print}' out_CS_v1.1_against_rice_IRGSP-1.0_cdna_wordsize11.txt > top1hit_CS_v1.1_against_rice_IRGSP-1.0_cdna_wordsize11.txt
+sed -i 's/ gene:/\t/g; s/ gene_biotype:/\t/g; s/ gene_symbol:/\t/g; s/ description:/\t/g'  top1hit_CS_v1.1_against_rice_IRGSP-1.0_cdna_wordsize11.txt
+
+## then I prepared a sqlite3 database for the webtool
+
+```
+
+**Acknowledgment**
+
+- [IWGSC](https://www.wheatgenome.org/) for CS Refseq v1 assembly and annotation
+- [Krasileva lab](https://krasilevalab.org/) for Kronos v1 assembly and annotation
+- [Ensembl Plants](https://plants.ensembl.org/index.html) for hosting many plant genomes
+- [sqlite3](https://www.sqlite.org/) for database preparation
+- [sql.js](https://sql.js.org/) for using sqlite3 in the browser
 
 <script src="/tools/sqljs/v1.10.3/sql-wasm.js"></script>
 <!-- <script src="/tools/sqlite3/3.46.0/sqlite3.js"></script> -->
