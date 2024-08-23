@@ -40,7 +40,7 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 <button id="copytable">Copy to clipboard</button>
 <a download="wheat_homeolog_and_function.csv" href="#" onclick="return ExcellentExport.csv(this, 'datatable');" style="color:Tomato;">or Export to CSV</a>
 <!-- The button used to copy the text -->
-<table id="datatable" style="font-size: 10px; margin-bottom: 200px;" align="left">
+<table id="datatable" style="font-size: 11px;" align="left">
 <thead id="thead">
     <tr>
         <th>WheatGeneID</th>
@@ -56,6 +56,8 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 </thead>
     <tbody id="tbody"></tbody>
 </table>
+
+<div id="gap1" style="margin-top: 300px;"></div>
 
 **Methods**
 
