@@ -116,6 +116,29 @@ Left Join AtOsID d4 On ( d4.gene = d2.OsID );";
 <th>Os %identity</th> \
 <th>Os description</th>";
     }
+    if (document.getElementById("check2").checked){ // over-write sqlstr from check1 
+        sqlstr = "Select \
+d2.name As c1, \
+d3.name As c4, \
+d2.At_ident As c5, \
+d3.description As c6, \
+d4.name As c7, \
+d2.Os_ident As c8, \
+d4.description As c9 \
+From wheatID_and_hits d2 \
+Join AtOsID d3 On ( d3.gene = d2.AtID ) \
+Join AtOsID d4 On ( d4.gene = d2.OsID ) \
+WHERE c4 in (" + whereStr + ") \
+OR c7 in (" + whereStr + ");";
+    // also change table title
+    document.getElementById("thead").innerHTML = "<th>WheatGeneID</th> \
+<th>Best At matches</th> \
+<th>At %identity</th> \
+<th>At description</th> \
+<th>Best Os matches</th> \
+<th>Os %identity</th> \
+<th>Os description</th>";
+    }
     const stmt = db.prepare(sqlstr);
     document.getElementById('tbody').innerHTML = "";
     const newTable = document.getElementById("tbody");

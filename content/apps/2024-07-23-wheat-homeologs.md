@@ -23,7 +23,9 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
   <option value="CS_cDNA_HC_v1.1">CS IWGSC cDNA v1.1 HC</option>
 </select>  
 <input type="checkbox" id="check1" name="check1" />
-<label for="check1">Output At/Os best hits only</label>
+<label for="check1">Output At/Os best hits only</label>  
+<input type="checkbox" id="check2" name="check2" />
+<label for="check2">Find wheat genes that match given At/Os genes (e.g. At/Os genes -> wheat genes)</label>
 
 <textarea rows="10" cols="75" id="input" placeholder="paste gene names here: one gene per line"></textarea>
 <br />
