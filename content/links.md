@@ -31,3 +31,6 @@ date: "2017-12-15"
 
 ### Examples of Successful Applications of Jobs and Grants
 - [Ross-Ibarra Lab collections](https://github.com/RILAB/statements)
+
+### Lab methods
+- [Eleven Golden Rules of Quantitative RT-PCR](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2518243/)
