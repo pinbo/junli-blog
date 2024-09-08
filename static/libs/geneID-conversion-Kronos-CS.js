@@ -8,7 +8,7 @@ const initSqlJs = window.initSqlJs;
 const sqlPromise = initSqlJs({
 locateFile: file => `/tools/sqljs/v1.10.3/sql-wasm.wasm`
 });
-const dataPromise = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/cDNA_Kronos_v1_vs_CS_HC_v1.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
+const dataPromise = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/cDNA_Kronos_v1_vs_CS_HC_LC_v1.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
 const [SQL, buf] = await Promise.all([sqlPromise, dataPromise])
 const db = new SQL.Database(new Uint8Array(buf));
 
