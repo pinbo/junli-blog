@@ -13,8 +13,8 @@ const dbs = {}; //databases downloaded
 const sqlPromise = initSqlJs({
     locateFile: file => `/tools/sqljs/v1.10.3/sql-wasm.wasm`
 });
-const dataPromise1 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/Kronos_Homeolog_with_function4.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
-const dataPromise2 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/CS_Homeolog_with_function4.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
+const dataPromise1 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/Kronos_Homeolog_with_function5.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
+const dataPromise2 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/CS_Homeolog_with_function5.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
 const [SQL, buf1, buf2] = await Promise.all([sqlPromise, dataPromise1, dataPromise2])
 // const db = new SQL.Database(new Uint8Array(buf));
 dbs.Kronos = new SQL.Database(new Uint8Array(buf1));
