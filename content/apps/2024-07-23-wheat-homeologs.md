@@ -61,6 +61,12 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 
 <div id="gap1" style="margin-top: 300px;"></div>
 
+**Update**
+
+- 2024-09-18: modify the `blastp` method (`-seg yes`) to match Ensembl blast output (only affect some top hits of Arabidopsis).
+- 2024-09-18: add some low confidence genes that are hits of high confidence genes. For example, the B homeolog of PLATZ-A1 (TraesCS6A02G156600) is a low confidence gene.
+
+
 **Methods**
 
 Here are the commands I used for preparing homeologs and the best hits in Arabidopsis and rice. Arabidopsis and rice seequnces were downloaded from [Ensembl Plants](https://plants.ensembl.org/index.html). Kronos cDNAs were downloaded from [Zenodo](https://zenodo.org/records/11106422). CS IWGSC annotation v1.1 HC cDNAs were downloaded from [Wheat URGI](https://urgi.versailles.inra.fr/download/iwgsc/IWGSC_RefSeq_Annotations/v1.1/).
@@ -76,8 +82,9 @@ gawk '$4>$13*0.6 {split($1,aa,"."); split($2,bb,"."); qq=aa[1]; ss=bb[1]; if(!(q
 gawk '$4>$13*0.6 {split($1,aa,"."); split($2,bb,"."); qq=aa[1]; ss=bb[1]; if(!(qq"\t"ss in cc)) {cc[qq"\t"ss]++; printf("%s\t%s\t%.f\t%s\n",qq,ss,$3,$4)} }' out_Kronos_v1.0_cdna_self_wordsize20.txt > filtered_Kronos_self3.txt
 
 ## blast Os and At
+# update 2024-09-18: add '-seg yes'
 ### Kronos
-blastp -db ../blastdb/Arabidopsis_thaliana.TAIR10.pep.all.fa -query ../blastdb/Kronos.v1.0.all.pep.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 3 -num_threads 40 -out out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt &
+blastp -db ../blastdb/Arabidopsis_thaliana.TAIR10.pep.all.fa -query ../blastdb/Kronos.v1.0.all.pep.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 3 -num_threads 40 -out out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt -seg yes &
 blastn -task blastn -db /Users/galaxy/blastdb/Oryza_sativa.IRGSP-1.0.cds.all.fa -query ../blastdb/Kronos.v1.0.all.cds.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 15 -num_threads 40 -out out_Kronos_v1.0_against_rice_IRGSP-1.0_cdna_wordsize15.txt &
 
 gawk 'bb[$1]<1{bb[$1]=1; print}' out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt > top1hit_out_Kronos_v1.0_against_Arabidopsis_TAIR10_pep_wordsize3.txt
@@ -87,7 +94,7 @@ gawk 'bb[$1]<1{bb[$1]=1; print}' out_Kronos_v1.0_against_rice_IRGSP-1.0_cdna_wor
 sed -i 's/ gene:/\t/g;s/ gene_biotype:/\t/g; s/ gene_symbol:/\t/g;s/ description:/\t/g' top1hit_out_Kronos_v1.0_against_rice_IRGSP-1.0_cdna_wordsize15.txt
 
 ### CS
-blastp -db ../blastdb/Arabidopsis_thaliana.TAIR10.pep.all.fa -query ../blastdb/Triticum_aestivum.IWGSC.pep.all.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 3 -num_threads 40 -out out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt &
+blastp -db ../blastdb/Arabidopsis_thaliana.TAIR10.pep.all.fa -query ../blastdb/Triticum_aestivum.IWGSC.pep.all.fa -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 3 -num_threads 40 -out out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt -seg yes &
 blastn -task blastn -db /Users/galaxy/blastdb/Oryza_sativa.IRGSP-1.0.cds.all.fa -query /Users/galaxy/blastdb/IWGSC_v1.1_HC_20170706_cds.fasta -outfmt "6 std qlen slen stitle" -max_target_seqs 6 -word_size 11 -num_threads 40 -out out_CS_v1.1_against_rice_IRGSP-1.0_cdna_wordsize11.txt &
 
 gawk 'bb[$1]<1{bb[$1]=1; print}' out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt > top1hit_out_CS_v1.1_against_Arabidopsis_TAIR10_pep_wordsize3.txt
