@@ -52,18 +52,16 @@ async function getHomeolog(){
     // const row = stmt.getAsObject({});
     // console.log('Here is a row: ' + JSON.stringify(row));
     document.getElementById('tbody').innerHTML = "";
+    const newTable = document.getElementById("tbody");
     while(stmt.step()) { //
         const row = stmt.getAsObject();
-        console.log('Here is a row: ' + JSON.stringify(row));
-        let text = "";
-        let k = '<tr>';
+        const newRow = document.createElement("tr");
         for (let x in row) {
-            text += row[x] + "\t";
-            k+= '<td>' + row[x] + '</td>';
+            const newtd = document.createElement("td");
+            newtd.textContent = row[x];
+            newRow.appendChild(newtd);
         }
-        k+= '</tr>';
-        // document.getElementById("output").value += text + "\n";
-        document.getElementById('tbody').innerHTML += k;
+        newTable.appendChild(newRow);
     }
     stmt.free(); // free the memory used by the statement
     document.getElementById("alert").innerText = "Done!";
