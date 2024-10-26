@@ -46,10 +46,8 @@ Please paste gene IDs (e.g. TraesCS5A02G391700) below.
 <table id="datatable" style="font-size: 11px;" align="left">
 <thead>
     <tr>
-        <th>Kronos GeneID</th>
-        <th>Kronos transcript number</th>
-        <th>CS GeneID</th>
-        <th>CS transcript number</th>
+        <th>Kronos transcript ID</th>
+        <th>CS transcript ID</th>
         <th>%identity</th>
         <th>alignment length</th>
         <th>Kronos CDS length</th>
