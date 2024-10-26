@@ -45,7 +45,7 @@ async function getHomeolog(){
     }
     whereStr = whereStr.replace(/,$/, '');
     console.log(whereStr);
-    let sqlstr = "SELECT * FROM hits WHERE hits." + wheat + " IN (" + whereStr + ") ORDER BY " + wheat + ";";
+    let sqlstr = "SELECT Kronos||'.'||K_transcript as KronosT, CS||'.'||CS_transcript as CST, pctIdent, align_len, K_len, CS_len FROM hits WHERE hits." + wheat + " IN (" + whereStr + ") ORDER BY " + wheat + "T;";
     console.log(sqlstr);
     const stmt = db.prepare(sqlstr);
     // stmt.bind({$gene:whereStr});
