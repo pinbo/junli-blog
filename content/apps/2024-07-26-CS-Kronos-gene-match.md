@@ -47,7 +47,9 @@ Please paste gene IDs (e.g. TraesCS5A02G391700) below.
 <thead>
     <tr>
         <th>Kronos GeneID</th>
+        <th>Kronos transcript number</th>
         <th>CS GeneID</th>
+        <th>CS transcript number</th>
         <th>%identity</th>
         <th>alignment length</th>
         <th>Kronos CDS length</th>
