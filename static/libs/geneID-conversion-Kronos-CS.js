@@ -38,7 +38,7 @@ async function getHomeolog(){
     for(let i = 0; i < lines.length; i++){
 		let ll = mytrim(lines[i]);
         if (ll){
-            let gene = ll; //ll.replace(genePrefix, "");
+            let gene = ll.split('.')[0]; // in case of input is transcript ID abc.1 //ll.replace(genePrefix, "");
             console.log(gene);
             whereStr += "'" + gene + "',";
 	    }

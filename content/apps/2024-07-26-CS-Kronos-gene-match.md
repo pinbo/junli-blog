@@ -18,8 +18,10 @@ I did not do more filtering than that, so some genes may have multiple hits or n
 
 <p style="color:red";>Select with your own eyes based on chromosome matches and %identity.</p>
 
-Please paste gene IDs (e.g. TraesCS5A02G391700) below.
+Please paste gene IDs (e.g. TraesCS5A02G391700) or transcript IDs (TraesCS5A02G391700.1, will be converted to gene IDs by the tool) below.
 *Each line is a gene*.
+
+Output will be the best matching transcript IDs.
 
 **Gene ID conversion**:
 <select id="box1">
