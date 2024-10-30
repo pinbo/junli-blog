@@ -37,8 +37,9 @@
 	<span class="nav-next"><a href="{{ .Permalink }}">{{ .Title }} >></a></span>
 {{- end }}
 </nav>
+{{/*
 {{ partial "disqus.html" .}}
-
+*/}}
 </main>
 <textarea class="hideDontTakeUpSpace" id="source">
 {{ .RawContent }}
@@ -89,7 +90,9 @@
 		{{- end }}
 	  </nav>
 
-	  <!-- {{ partial "disqus.html" .}} -->
+	  {{/*
+{{ partial "disqus.html" .}}
+*/}}
 
 	</main>
 
