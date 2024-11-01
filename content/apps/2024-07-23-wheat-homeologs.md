@@ -67,6 +67,7 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 
 - 2024-09-18: modify the `blastp` method (`-seg yes`) to match Ensembl blast output (only affect some top hits of Arabidopsis).
 - 2024-09-18: add some low confidence genes that are hits of high confidence genes. For example, the B homeolog of PLATZ-A1 (TraesCS6A02G156600) is a low confidence gene.
+- 2024-11-01: add alignment length from BLAST for At and Os hits. Without the alignment length, we cannot tell which wheat gene is best At/Os homolog.
 
 
 **Methods**
