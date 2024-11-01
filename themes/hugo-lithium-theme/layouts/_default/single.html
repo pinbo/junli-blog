@@ -7,10 +7,6 @@
 </textarea>
 {{ partial "foot_remarkjs.html" . }}
 
-
-
-
-
 {{ else if in .Params.tags "remark" }}
 {{/* use remark.js markdown  */}}
 {{ partial "header.html" . }}
@@ -46,8 +42,7 @@
 </textarea>
 {{ partial "foot_remarkdown.html" . }}
 
-
-{{ else if eq .Section "apps" }}
+{{- else if eq .Section "apps" -}}
 {{ partial "head_apps.html" . }}
 
 {{ .Content }}
@@ -56,10 +51,7 @@
 </div>
 {{ partial "footer.html" . }}
 
-
-
-{{else}}
-
+{{- else -}}
 {{ partial "header.html" . }}
 <main class="content" role="main">
 
