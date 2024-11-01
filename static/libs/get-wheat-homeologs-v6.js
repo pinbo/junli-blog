@@ -13,8 +13,8 @@ const dbs = {}; //databases downloaded
 const sqlPromise = initSqlJs({
     locateFile: file => `/tools/sqljs/v1.10.3/sql-wasm.wasm`
 });
-const dataPromise1 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/Kronos_Homeolog_with_function5.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
-const dataPromise2 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/CS_Homeolog_with_function5.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
+const dataPromise1 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/Kronos_Homeolog_with_function6.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
+const dataPromise2 = fetch("https://jzseqbucket.s3.us-east-2.amazonaws.com/CS_Homeolog_with_function6.db.gz").then(res => res.arrayBuffer()).then(raw => pako.inflate(raw));
 const [SQL, buf1, buf2] = await Promise.all([sqlPromise, dataPromise1, dataPromise2])
 // const db = new SQL.Database(new Uint8Array(buf));
 dbs.Kronos = new SQL.Database(new Uint8Array(buf1));
@@ -72,9 +72,11 @@ async function getHomeolog(){
   t.pctIdent As c3, \
   d3.name As c4, \
   d2.At_ident As c5, \
+  d2.At_alignment, \
   d3.description As c6, \
   d4.name As c7, \
   d2.Os_ident As c8, \
+  d2.Os_alignment, \
   d4.description As c9 \
 From wheatID_and_hits d1 \
 join wheat_hit t on ( d1.gene = t.gene ) \
@@ -88,20 +90,24 @@ ORDER BY d1.name;";
     document.getElementById("thead").innerHTML = "<th>WheatGeneID</th> \
         <th>Best Wheat matches</th> \
         <th>Wheat %identity</th> \
-        <th>Best At matches</th> \
-        <th>At %identity</th> \
-        <th>At description</th> \
-        <th>Best Os matches</th> \
-        <th>Os %identity</th> \
-        <th>Os description</th>";
+	    <th>Best At matches</th> \
+	    <th>At %identity</th> \
+	    <th>At align length</th> \
+	    <th>At description</th> \
+	    <th>Best Os matches</th> \
+	    <th>Os %identity</th> \
+	    <th>Os align length</th> \
+	    <th>Os description</th>";
     if (document.getElementById("check1").checked){// only output At/Os hits
         sqlstr = "Select \
 hello.name As c1, \
 d3.name As c4, \
 d2.At_ident As c5, \
+d2.At_alignment, \
 d3.description As c6, \
 d4.name As c7, \
 d2.Os_ident As c8, \
+d2.Os_alignment, \
 d4.description As c9 \
 From hello \
 Left Join wheatID_and_hits d2 on (hello.name = d2.name) \
@@ -111,9 +117,11 @@ Left Join AtOsID d4 On ( d4.gene = d2.OsID );";
         document.getElementById("thead").innerHTML = "<th>WheatGeneID</th> \
 <th>Best At matches</th> \
 <th>At %identity</th> \
+<th>At align length</th> \
 <th>At description</th> \
 <th>Best Os matches</th> \
 <th>Os %identity</th> \
+<th>Os align length</th> \
 <th>Os description</th>";
     }
     if (document.getElementById("check2").checked){ // over-write sqlstr from check1 
@@ -121,9 +129,11 @@ Left Join AtOsID d4 On ( d4.gene = d2.OsID );";
 d2.name As c1, \
 d3.name As c4, \
 d2.At_ident As c5, \
+d2.At_alignment, \
 d3.description As c6, \
 d4.name As c7, \
 d2.Os_ident As c8, \
+d2.Os_alignment, \
 d4.description As c9 \
 From wheatID_and_hits d2 \
 Join AtOsID d3 On ( d3.gene = d2.AtID ) \
@@ -134,9 +144,11 @@ OR c7 in (" + whereStr + ");";
     document.getElementById("thead").innerHTML = "<th>WheatGeneID</th> \
 <th>Best At matches</th> \
 <th>At %identity</th> \
+<th>At align length</th> \
 <th>At description</th> \
 <th>Best Os matches</th> \
 <th>Os %identity</th> \
+<th>Os align length</th> \
 <th>Os description</th>";
     }
     const stmt = db.prepare(sqlstr);
