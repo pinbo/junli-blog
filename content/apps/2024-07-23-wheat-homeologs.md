@@ -50,9 +50,11 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
         <th>Wheat %identity</th>
         <th>Best At matches</th>
         <th>At %identity</th>
+        <th>At align length</th>
         <th>At description</th>
         <th>Best Os matches</th>
         <th>Os %identity</th>
+        <th>At align length</th>
         <th>Os description</th>
     </tr>
 </thead>
