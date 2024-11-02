@@ -10,6 +10,10 @@ tags:
   - NGS
 ---
 
+**Update**: *This post uses a whole lane for CRISPR sequencing (too much and expensive). Please see an updated protocol for a cheap Amplicon sequencing method [here](/en/check-crispr-editing-with-pcr-amplicon-ngs)*.
+
+<br>
+
 CRISPR editing is hard to predict: editing frequency varies, editing events could be multiple. So the best way to check the editing efficiency is to use next-generation sequencing (NGS). Sequencing libraries can be prepared with PCR since you know where are your targets. You just need two rounds of PCR to add barcodes and adapters to the ends of your PCR amplicons.
 
 
