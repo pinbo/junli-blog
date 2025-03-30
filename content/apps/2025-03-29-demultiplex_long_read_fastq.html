@@ -13,8 +13,8 @@ tags:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="/libs/pako.min.js"></script>
+    <script src="/libs/jszip.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -213,7 +213,7 @@ tags:
             <input type="text" id="rightAdapter" class="barcode-input" value="TTTAGCCTCCCCACCGAC">
             
             <div class="checkbox-container">
-                <input type="checkbox" id="trimAdapters" checked>
+                <input type="checkbox" id="trimAdapters">
                 <label for="trimAdapters">Trim adapter sequences from reads</label>
             </div>
             
@@ -269,6 +269,8 @@ tags:
         let barcodes = [];
         let outputFiles = {};
         let unmatchedOutput = [];
+        let uniqLeftBarcode = new Set();
+        let uniqRightBarcode = new Set();
         
         // DOM elements
         const fastqFileInput = document.getElementById('fastqFile');
@@ -362,8 +364,10 @@ tags:
                     const sampleName = parts[0].trim();
                     const index1 = parts[1].trim().toUpperCase();
                     const index2 = parts[2].trim().toUpperCase();
-                    
+
                     if (sampleName && index1 && index2) {
+                        uniqLeftBarcode.add(index1);
+                        uniqRightBarcode.add(index2);
                         newBarcodes.push({
                             sampleName,
                             index1,
@@ -386,6 +390,14 @@ tags:
                         <p><strong>Size:</strong> ${formatFileSize(file.size)}</p>
                         <p class="success">Successfully parsed ${newBarcodes.length} barcode sets</p>
                     `;
+                    let uniqIndex1 = uniqLeftBarcode.values().next().value; // first value
+                    let uniqIndex2 = uniqRightBarcode.values().next().value; // first value
+                    if (uniqLeftBarcode.size == 1) {
+                        barcodeFileInfo.innerHTML += `<p class="success">Unique left barcode found: ${uniqIndex1}. Will only use RIGHT barcodes for demultiplex</p>`;
+                    }
+                    if (uniqRightBarcode.size == 1) {
+                        barcodeFileInfo.innerHTML += `<p class="success">Unique right barcode found: ${uniqIndex2}. Will only use LEFT barcodes for demultiplex</p>`;
+                    }
                     
                     // Enable demux button if we have a FASTQ file
                     if (fastqFile) {
@@ -449,6 +461,8 @@ tags:
                 const index2 = row.querySelector('.index2-barcode')?.value.toUpperCase();
                 
                 if (sampleName && index1 && index2) {
+                    uniqLeftBarcode.add(index1);
+                    uniqRightBarcode.add(index2);
                     barcodes.push({
                         sampleName,
                         index1,
@@ -488,6 +502,14 @@ tags:
             let bestDistance = Infinity;
             const index1Length = parseInt(document.getElementById('index1Length').value);
             const index2Length = parseInt(document.getElementById('index2Length').value);
+            // let uniqIndex1 = uniqLeftBarcode.values().next().value; // first value
+            // let uniqIndex2 = uniqRightBarcode.values().next().value; // first value
+            // if (uniqLeftBarcode.size == 1) {
+            //     index1Seq = uniqIndex1.slice(-index1Length);
+            // }
+            // if (uniqRightBarcode.size == 1) {
+            //     index2Seq = uniqIndex2.slice(-index2Length);
+            // }
             
             for (const barcode of barcodes) {
                 const index1Distance = calculateHammingDistance(index1Seq, barcode.index1.slice(-index1Length), maxMismatches);
@@ -590,23 +612,36 @@ tags:
                     let structureFound = false;
                     
                     // Try Structure 1: [Index1][LeftAdapter]...[RightAdapter][Index2]
-                    const leftAdapterPos = findAdapterPosition(sequence, leftAdapter, maxMismatches, searchWindow);
-                    if (leftAdapterPos >= index1Length) {
+                    let leftAdapterPos = findAdapterPosition(sequence, leftAdapter, maxMismatches, searchWindow);
+                    if (leftAdapterPos >= index1Length || uniqLeftBarcode.size == 1) {
+                        if (leftAdapterPos < 0) { // not found
+                            leftAdapterPos = -leftAdapter.length; // so no affect trimming
+                        }
                         // Extract left barcode (Index1)
-                        index1Seq = sequence.substring(leftAdapterPos - index1Length, leftAdapterPos);
+                        if (uniqLeftBarcode.size == 1) {
+                            index1Seq = uniqLeftBarcode.values().next().value.slice(-index1Length);
+                        } else {
+                            index1Seq = sequence.substring(leftAdapterPos - index1Length, leftAdapterPos);
+                        }
                         
                         // Find right adapter (reverse complemented)
                         const rightSearchRegion = sequence.substring(Math.max(0, sequence.length - searchWindow));
                         const rightAdapterPos = rightSearchRegion.indexOf(revCompRightAdapter);
-                        if (rightAdapterPos >= 0) {
-                            const globalRightPos = sequence.length - searchWindow + rightAdapterPos;
-                            if (globalRightPos + revCompRightAdapter.length + index2Length <= sequence.length) {
+                        if (rightAdapterPos >= 0 || uniqRightBarcode.size == 1) {                           
+                            let globalRightPos = sequence.length - searchWindow + rightAdapterPos;
+                            if (rightAdapterPos < 0) {
+                                globalRightPos = sequence.length; // so no affect trimming
+                            }
+                            if (globalRightPos + revCompRightAdapter.length + index2Length <= sequence.length || uniqRightBarcode.size == 1) {
                                 // Extract right barcode (reverse complemented Index2)
-                                index2Seq = reverseComplement(sequence.substring(
-                                    globalRightPos + revCompRightAdapter.length,
-                                    globalRightPos + revCompRightAdapter.length + index2Length
-                                ));
-                                
+                                if (uniqRightBarcode.size == 1) {
+                                    index2Seq = uniqRightBarcode.values().next().value.slice(-index2Length);
+                                } else {
+                                    index2Seq = reverseComplement(sequence.substring(
+                                        globalRightPos + revCompRightAdapter.length,
+                                        globalRightPos + revCompRightAdapter.length + index2Length
+                                    ));
+                                }
                                 // Trim the sequence if requested
                                 if (shouldTrimAdapters) {
                                     trimmedSequence = sequence.substring(
@@ -622,27 +657,42 @@ tags:
                                 structureFound = true;
                                 structure1Count++;
                             }
+                            
                         }
                     }
                     
                     // If Structure 1 not found, try Structure 2: [Index2][RightAdapter]...[LeftAdapter][Index1]
                     if (!structureFound) {
-                        const rightAdapterPos = findAdapterPosition(sequence, rightAdapter, maxMismatches, searchWindow);
-                        if (rightAdapterPos >= index2Length) {
+                        let rightAdapterPos = findAdapterPosition(sequence, rightAdapter, maxMismatches, searchWindow);
+                        if (rightAdapterPos >= index2Length || uniqRightBarcode.size == 1) {
+                            if (rightAdapterPos < 0) { // not found
+                                rightAdapterPos = -rightAdapter.length; // so no affect trimming
+                            }
                             // Extract right barcode (Index2)
-                            index2Seq = sequence.substring(rightAdapterPos - index2Length, rightAdapterPos);
+                            if (uniqRightBarcode.size == 1) {
+                                index2Seq = uniqRightBarcode.values().next().value.slice(-index2Length);
+                            } else {
+                                index2Seq = sequence.substring(rightAdapterPos - index2Length, rightAdapterPos);
+                            }
                             
                             // Find left adapter (reverse complemented)
                             const leftSearchRegion = sequence.substring(Math.max(0, sequence.length - searchWindow));
                             const leftAdapterPos = leftSearchRegion.indexOf(revCompLeftAdapter);
-                            if (leftAdapterPos >= 0) {
-                                const globalLeftPos = sequence.length - searchWindow + leftAdapterPos;
-                                if (globalLeftPos + revCompLeftAdapter.length + index1Length <= sequence.length) {
+                            if (leftAdapterPos >= 0 || uniqLeftBarcode.size == 1) {
+                                let globalLeftPos = sequence.length - searchWindow + leftAdapterPos;
+                                if (leftAdapterPos < 0) {
+                                    globalLeftPos = sequence.length; // so no affect trimming
+                                }
+                                if (globalLeftPos + revCompLeftAdapter.length + index1Length <= sequence.length || uniqLeftBarcode.size == 1) {
                                     // Extract left barcode (reverse complemented Index1)
-                                    index1Seq = reverseComplement(sequence.substring(
+                                    if (uniqLeftBarcode.size == 1) {
+                                        index1Seq = uniqLeftBarcode.values().next().value.slice(-index1Length);
+                                    } else {
+                                        index1Seq = reverseComplement(sequence.substring(
                                         globalLeftPos + revCompLeftAdapter.length,
                                         globalLeftPos + revCompLeftAdapter.length + index1Length
                                     ));
+                                    }
                                     
                                     // Trim the sequence if requested
                                     if (shouldTrimAdapters) {
