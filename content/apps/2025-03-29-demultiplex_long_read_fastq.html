@@ -1,0 +1,804 @@
+---
+title: 'Demultiplex long reads FASTQ files'
+author: Junli Zhang
+date: '2025-03-29'
+slug: demultiplex-reads-with-barcodes-on-both-ends
+categories:
+  - tools
+tags:
+  - demultiplex
+  - long-reads
+---
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .file-input {
+            margin: 15px 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        table tr:nth-child(n+6) {
+            display:none;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .barcode-input {
+            margin: 5px 0;
+            padding: 5px;
+            width:60%;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .tab-button {
+            padding: 5px 15px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .tab-button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .sequence-structure {
+            background-color: #f0f8ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+        .checkbox-container {
+            margin: 10px 0;
+        }
+        .download-all-container {
+            margin: 15px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <p>This tool can be used to demultiplex a fastq file (long reads or merged paired-end reads with barcodes on both ends). It supports both gzipped and uncompressed fastq files. The tool allows users to specify the left and right adapter sequences, as well as the lengths of the barcodes. It also provides options for trimming the adapter sequences from the reads.</p>
+
+    <p>Your reads should have the following structure:</p>
+    <code>[LeftBarcode][LeftAdapter]...[RightAdapter][RightBarcode]</code>
+    <p></p>
+    <div class="container">
+        <h3>Step 1: Upload FASTQ File</h3>
+        <div class="file-input">
+            <input type="file" id="fastqFile" accept=".fastq,.fq,.fastq.gz,.fq.gz">
+            <p><small>Supports .fastq, .fq (uncompressed or gzipped)</small></p>
+        </div>
+        
+        <div id="fileInfo"></div>
+    </div>
+    
+    <div class="container">
+        <h3>Step 2: Configure Barcodes</h3>
+        
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="manual">Manual Entry</button>
+            <button class="tab-button" data-tab="upload">Upload Barcode File</button>
+        </div>
+        
+        <div id="manual" class="tab-content active">
+            <p>Enter your barcode sequences and sample names:</p>
+            
+            <table id="barcodeTable">
+                <thead>
+                    <tr>
+                        <th>Sample Name</th>
+                        <th>Index 1 Sequence</th>
+                        <th>Index 2 Sequence</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Barcode rows will be added here -->
+                </tbody>
+            </table>
+            <button id="addBarcodeBtn">Add Barcode Set</button>
+        </div>
+        
+        <div id="upload" class="tab-content">
+            <p>Upload a tab-delimited file with barcode information (sample name, index 1, index 2):</p>
+            <div class="file-input">
+                <input type="file" id="barcodeFile" accept=".txt,.tsv,.tab">
+                <p><small>Format: SampleName&lt;tab&gt;Index1&lt;tab&gt;Index2 (one per line)</small></p>
+            </div>
+            <div id="barcodeFileInfo"></div>
+            
+            <h3>Preview (only show top 5 rows):</h3>
+            <table id="uploadedBarcodeTable">
+                <thead>
+                    <tr>
+                        <th>Sample Name</th>
+                        <th>Index 1 Sequence</th>
+                        <th>Index 2 Sequence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Uploaded barcode preview will be added here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div>
+            <h3>Adapter Sequences</h3>
+            <label for="leftAdapter">Left Adapter sequence (5' side):</label><br>
+            <input type="text" id="leftAdapter" class="barcode-input" value="TCCTCTGTCACGGAAGCG"><br>
+            
+            <label for="rightAdapter">Right Adapter sequence (3' side):</label><br>
+            <input type="text" id="rightAdapter" class="barcode-input" value="TTTAGCCTCCCCACCGAC">
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="trimAdapters" checked>
+                <label for="trimAdapters">Trim adapter sequences from reads</label>
+            </div>
+            
+            <div class="sequence-structure">
+                <strong>Detection Method:</strong>
+                <p>1. Find left adapter in first 30bp → extract left barcode before it</p>
+                <p>2. Find reverse complement of right adapter in last 30bp → extract right barcode after it</p>
+                <p>3. If not found, swap adapters and repeat search</p>
+            </div>
+        </div>
+        
+        <div>
+            <h3>Barcode Settings</h3>
+            <label for="index1Length">Left barcode length (bp):</label><br>
+            <input type="number" id="index1Length" value="8" min="1" class="barcode-input"><br>
+            
+            <label for="index2Length">Right barcode length (bp):</label><br>
+            <input type="number" id="index2Length" value="8" min="1" class="barcode-input"><br>
+            
+            <label for="maxMismatches">Maximum allowed mismatches:</label><br>
+            <input type="number" id="maxMismatches" value="0" min="0" class="barcode-input"><br>
+            
+            <label for="searchWindow">Adapter search window (bp):</label><br>
+            <input type="number" id="searchWindow" value="30" min="10" class="barcode-input">
+        </div>
+    </div>
+    
+    <div class="container">
+        <h3>Step 3: Run Demultiplexing</h3>
+        <button id="demuxBtn" disabled>Demultiplex FASTQ</button>
+        
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div id="results">
+            <h3>Demultiplexing Results</h3>
+            <div id="stats"></div>
+            <div class="download-all-container">
+                <button id="downloadAllBtn" disabled>Download All as ZIP</button>
+            </div>
+            <div id="downloadArea"></div>
+        </div>
+    </div>
+
+    <div class="container">
+    <h3>Acknowledgement</h3>
+        <p>This tool was written with the assistance of <a href="https://chat.deepseek.com/" target="_blank">DeepSeek</a>.</p>
+    </div>
+    <script>
+        // Global variables
+        let fastqFile = null;
+        let barcodes = [];
+        let outputFiles = {};
+        let unmatchedOutput = [];
+        
+        // DOM elements
+        const fastqFileInput = document.getElementById('fastqFile');
+        const fileInfoDiv = document.getElementById('fileInfo');
+        const barcodeTable = document.getElementById('barcodeTable').getElementsByTagName('tbody')[0];
+        const addBarcodeBtn = document.getElementById('addBarcodeBtn');
+        const demuxBtn = document.getElementById('demuxBtn');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const statsDiv = document.getElementById('stats');
+        const downloadArea = document.getElementById('downloadArea');
+        const barcodeFileInput = document.getElementById('barcodeFile');
+        const barcodeFileInfo = document.getElementById('barcodeFileInfo');
+        const uploadedBarcodeTable = document.getElementById('uploadedBarcodeTable').getElementsByTagName('tbody')[0];
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const trimAdaptersCheckbox = document.getElementById('trimAdapters');
+        
+        // Event listeners
+        fastqFileInput.addEventListener('change', handleFileUpload);
+        addBarcodeBtn.addEventListener('click', addBarcodeRow);
+        demuxBtn.addEventListener('click', demultiplexFastq);
+        downloadAllBtn.addEventListener('click', downloadAllAsZip);
+        barcodeFileInput.addEventListener('change', handleBarcodeFileUpload);
+        
+        // Tab switching
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                
+                // Update active tab button
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Update active tab content
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Initialize with one empty barcode row
+        addBarcodeRow();
+        
+        // Functions
+        function reverseComplement(seq) {
+            const complement = {
+                'A': 'T', 'T': 'A',
+                'C': 'G', 'G': 'C',
+                'N': 'N'
+            };
+            return seq.split('').reverse().map(base => complement[base] || 'N').join('');
+        }
+        
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            fastqFile = file;
+            fileInfoDiv.innerHTML = `
+                <p><strong>Selected file:</strong> ${file.name}</p>
+                <p><strong>Size:</strong> ${formatFileSize(file.size)}</p>
+                <p><strong>Type:</strong> ${file.type || 'Unknown'}</p>
+            `;
+            
+            // Enable demux button if we have barcodes
+            if (barcodes.length > 0) {
+                demuxBtn.disabled = false;
+            }
+        }
+        
+        async function handleBarcodeFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const fileContent = await file.text();
+                const lines = fileContent.split('\n');
+                const newBarcodes = [];
+                uploadedBarcodeTable.innerHTML = ''; // Clear preview
+                
+                for (const line of lines) {
+                    if (!line.trim()) continue; // Skip empty lines
+                    
+                    const parts = line.split('\t');
+                    if (parts.length < 3) {
+                        console.warn(`Skipping malformed line: ${line}`);
+                        continue;
+                    }
+                    
+                    const sampleName = parts[0].trim();
+                    const index1 = parts[1].trim().toUpperCase();
+                    const index2 = parts[2].trim().toUpperCase();
+                    
+                    if (sampleName && index1 && index2) {
+                        newBarcodes.push({
+                            sampleName,
+                            index1,
+                            index2,
+                            count: 0
+                        });
+                        
+                        // Add to preview table
+                        const row = uploadedBarcodeTable.insertRow();
+                        row.insertCell(0).textContent = sampleName;
+                        row.insertCell(1).textContent = index1;
+                        row.insertCell(2).textContent = index2;
+                    }
+                }
+                
+                if (newBarcodes.length > 0) {
+                    barcodes = newBarcodes;
+                    barcodeFileInfo.innerHTML = `
+                        <p><strong>Selected file:</strong> ${file.name}</p>
+                        <p><strong>Size:</strong> ${formatFileSize(file.size)}</p>
+                        <p class="success">Successfully parsed ${newBarcodes.length} barcode sets</p>
+                    `;
+                    
+                    // Enable demux button if we have a FASTQ file
+                    if (fastqFile) {
+                        demuxBtn.disabled = false;
+                    }
+                } else {
+                    barcodeFileInfo.innerHTML = `
+                        <p><strong>Selected file:</strong> ${file.name}</p>
+                        <p class="error">No valid barcode sets found in file</p>
+                    `;
+                }
+            } catch (error) {
+                barcodeFileInfo.innerHTML = `
+                    <p><strong>Selected file:</strong> ${file.name}</p>
+                    <p class="error">Error parsing barcode file: ${error.message}</p>
+                `;
+                console.error(error);
+            }
+        }
+        
+        function addBarcodeRow() {
+            const row = barcodeTable.insertRow();
+            
+            const sampleCell = row.insertCell(0);
+            const index1Cell = row.insertCell(1);
+            const index2Cell = row.insertCell(2);
+            const actionCell = row.insertCell(3);
+            
+            sampleCell.innerHTML = `<input type="text" class="sample-name" placeholder="Sample1" value="Sample${barcodes.length + 1}">`;
+            index1Cell.innerHTML = `<input type="text" class="index1-barcode" placeholder="ATGCATGC">`;
+            index2Cell.innerHTML = `<input type="text" class="index2-barcode" placeholder="GCATGCAT">`;
+            actionCell.innerHTML = `<button class="remove-btn">Remove</button>`;
+            
+            // Add event listener to remove button
+            actionCell.querySelector('.remove-btn').addEventListener('click', function() {
+                barcodeTable.removeChild(row);
+                updateBarcodesArray();
+                
+                // Disable demux button if no barcodes left
+                if (barcodes.length === 0) {
+                    demuxBtn.disabled = true;
+                }
+            });
+            
+            // Add event listeners to update barcodes array when inputs change
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateBarcodesArray);
+            });
+            
+            updateBarcodesArray();
+        }
+        
+        function updateBarcodesArray() {
+            barcodes = [];
+            const rows = barcodeTable.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const sampleName = row.querySelector('.sample-name')?.value;
+                const index1 = row.querySelector('.index1-barcode')?.value.toUpperCase();
+                const index2 = row.querySelector('.index2-barcode')?.value.toUpperCase();
+                
+                if (sampleName && index1 && index2) {
+                    barcodes.push({
+                        sampleName,
+                        index1,
+                        index2,
+                        count: 0
+                    });
+                }
+            });
+            
+            // Enable demux button if we have a file and at least one valid barcode
+            demuxBtn.disabled = !(fastqFile && barcodes.length > 0);
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function calculateHammingDistance(s1, s2, maxMismatches) {
+            if (s1.length !== s2.length) return Infinity;
+            
+            let distance = 0;
+            for (let i = 0; i < s1.length; i++) {
+                if (s1[i] !== s2[i]) {
+                    distance++;
+                    if (distance > maxMismatches) break;
+                }
+            }
+            return distance;
+        }
+        
+        function findBestBarcodeMatch(index1Seq, index2Seq, maxMismatches) {
+            let bestMatch = null;
+            let bestDistance = Infinity;
+            const index1Length = parseInt(document.getElementById('index1Length').value);
+            const index2Length = parseInt(document.getElementById('index2Length').value);
+            
+            for (const barcode of barcodes) {
+                const index1Distance = calculateHammingDistance(index1Seq, barcode.index1.slice(-index1Length), maxMismatches);
+                const index2Distance = calculateHammingDistance(index2Seq, barcode.index2.slice(-index2Length), maxMismatches);
+                const totalDistance = index1Distance + index2Distance;
+                
+                if (totalDistance < bestDistance) {
+                    bestDistance = totalDistance;
+                    bestMatch = barcode;
+                }
+            }
+            
+            return bestDistance <= maxMismatches * 2 ? bestMatch : null;
+        }
+        
+        function findAdapterPosition(sequence, adapter, maxMismatches, searchWindow) {
+            const searchRegion = sequence.substring(0, Math.min(searchWindow, sequence.length));
+            for (let i = 0; i <= searchRegion.length - adapter.length; i++) {
+                let mismatches = 0;
+                for (let j = 0; j < adapter.length; j++) {
+                    if (searchRegion[i + j] !== adapter[j]) {
+                        mismatches++;
+                        if (mismatches > maxMismatches) break;
+                    }
+                }
+                if (mismatches <= maxMismatches) {
+                    return i; // Return position where adapter starts
+                }
+            }
+            return -1;
+        }
+
+        async function demultiplexFastq() {
+            if (!fastqFile || barcodes.length === 0) return;
+            
+            // Reset results
+            statsDiv.innerHTML = '';
+            downloadArea.innerHTML = '';
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            demuxBtn.disabled = true;
+            downloadAllBtn.disabled = true;
+            
+            // Get parameters
+            const index1Length = parseInt(document.getElementById('index1Length').value);
+            const index2Length = parseInt(document.getElementById('index2Length').value);
+            const maxMismatches = parseInt(document.getElementById('maxMismatches').value);
+            const searchWindow = parseInt(document.getElementById('searchWindow').value);
+            const leftAdapter = document.getElementById('leftAdapter').value.toUpperCase();
+            const rightAdapter = document.getElementById('rightAdapter').value.toUpperCase();
+            const shouldTrimAdapters = trimAdaptersCheckbox.checked;
+            const revCompRightAdapter = reverseComplement(rightAdapter);
+            const revCompLeftAdapter = reverseComplement(leftAdapter);
+            
+            // Initialize counters
+            let totalReads = 0;
+            let matchedReads = 0;
+            let unmatchedReads = 0;
+            let structure1Count = 0;
+            let structure2Count = 0;
+            const barcodeCounts = {};
+            barcodes.forEach(b => barcodeCounts[b.sampleName] = 0);
+            
+            // Create output files in memory
+            outputFiles = {};
+            barcodes.forEach(b => {
+                outputFiles[b.sampleName] = [];
+            });
+            unmatchedOutput = [];
+            
+            try {
+                // Read the file
+                let fileContent;
+                if (fastqFile.name.endsWith('.gz')) {
+                    const arrayBuffer = await fastqFile.arrayBuffer();
+                    const decompressed = pako.inflate(new Uint8Array(arrayBuffer));
+                    fileContent = new TextDecoder().decode(decompressed);
+                } else {
+                    fileContent = await fastqFile.text();
+                }
+                
+                // Process the FASTQ file
+                const lines = fileContent.split('\n');
+                const totalLines = lines.length;
+                
+                for (let i = 0; i < lines.length; i += 4) {
+                    if (i + 3 >= lines.length) break; // Incomplete record
+                    
+                    const header = lines[i];
+                    let sequence = lines[i + 1];
+                    const separator = lines[i + 2];
+                    let quality = lines[i + 3];
+                    
+                    totalReads++;
+                    
+                    let index1Seq = '';
+                    let index2Seq = '';
+                    let trimmedSequence = sequence;
+                    let trimmedQuality = quality;
+                    let structureFound = false;
+                    
+                    // Try Structure 1: [Index1][LeftAdapter]...[RightAdapter][Index2]
+                    const leftAdapterPos = findAdapterPosition(sequence, leftAdapter, maxMismatches, searchWindow);
+                    if (leftAdapterPos >= index1Length) {
+                        // Extract left barcode (Index1)
+                        index1Seq = sequence.substring(leftAdapterPos - index1Length, leftAdapterPos);
+                        
+                        // Find right adapter (reverse complemented)
+                        const rightSearchRegion = sequence.substring(Math.max(0, sequence.length - searchWindow));
+                        const rightAdapterPos = rightSearchRegion.indexOf(revCompRightAdapter);
+                        if (rightAdapterPos >= 0) {
+                            const globalRightPos = sequence.length - searchWindow + rightAdapterPos;
+                            if (globalRightPos + revCompRightAdapter.length + index2Length <= sequence.length) {
+                                // Extract right barcode (reverse complemented Index2)
+                                index2Seq = reverseComplement(sequence.substring(
+                                    globalRightPos + revCompRightAdapter.length,
+                                    globalRightPos + revCompRightAdapter.length + index2Length
+                                ));
+                                
+                                // Trim the sequence if requested
+                                if (shouldTrimAdapters) {
+                                    trimmedSequence = sequence.substring(
+                                        leftAdapterPos + leftAdapter.length,
+                                        globalRightPos
+                                    );
+                                    trimmedQuality = quality.substring(
+                                        leftAdapterPos + leftAdapter.length,
+                                        globalRightPos
+                                    );
+                                }
+                                
+                                structureFound = true;
+                                structure1Count++;
+                            }
+                        }
+                    }
+                    
+                    // If Structure 1 not found, try Structure 2: [Index2][RightAdapter]...[LeftAdapter][Index1]
+                    if (!structureFound) {
+                        const rightAdapterPos = findAdapterPosition(sequence, rightAdapter, maxMismatches, searchWindow);
+                        if (rightAdapterPos >= index2Length) {
+                            // Extract right barcode (Index2)
+                            index2Seq = sequence.substring(rightAdapterPos - index2Length, rightAdapterPos);
+                            
+                            // Find left adapter (reverse complemented)
+                            const leftSearchRegion = sequence.substring(Math.max(0, sequence.length - searchWindow));
+                            const leftAdapterPos = leftSearchRegion.indexOf(revCompLeftAdapter);
+                            if (leftAdapterPos >= 0) {
+                                const globalLeftPos = sequence.length - searchWindow + leftAdapterPos;
+                                if (globalLeftPos + revCompLeftAdapter.length + index1Length <= sequence.length) {
+                                    // Extract left barcode (reverse complemented Index1)
+                                    index1Seq = reverseComplement(sequence.substring(
+                                        globalLeftPos + revCompLeftAdapter.length,
+                                        globalLeftPos + revCompLeftAdapter.length + index1Length
+                                    ));
+                                    
+                                    // Trim the sequence if requested
+                                    if (shouldTrimAdapters) {
+                                        trimmedSequence = sequence.substring(
+                                            rightAdapterPos + rightAdapter.length,
+                                            globalLeftPos
+                                        );
+                                        trimmedQuality = quality.substring(
+                                            rightAdapterPos + rightAdapter.length,
+                                            globalLeftPos
+                                        );
+                                    }
+                                    
+                                    structureFound = true;
+                                    structure2Count++;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (structureFound) {
+                        // Find matching barcode
+                        const matchedBarcode = findBestBarcodeMatch(index1Seq, index2Seq, maxMismatches);
+                        
+                        if (matchedBarcode) {
+                            matchedReads++;
+                            barcodeCounts[matchedBarcode.sampleName]++;
+                            outputFiles[matchedBarcode.sampleName].push(header, trimmedSequence, separator, trimmedQuality);
+                        } else {
+                            unmatchedReads++;
+                            unmatchedOutput.push(header, sequence, separator, quality);
+                        }
+                    } else {
+                        unmatchedReads++;
+                        unmatchedOutput.push(header, sequence, separator, quality);
+                    }
+                    
+                    // Update progress
+                    if (totalReads % 1000 === 0) {
+                        const progress = (i / totalLines) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        await new Promise(resolve => setTimeout(resolve, 0)); // Yield to UI
+                    }
+                }
+                
+                // Complete progress bar
+                progressBar.style.width = '100%';
+                
+                // Display results
+                let statsHTML = `<p><strong>Total reads processed:</strong> ${totalReads.toLocaleString()}</p>`;
+                statsHTML += `<p><strong>Matched reads:</strong> ${matchedReads.toLocaleString()} (${((matchedReads / totalReads) * 100).toFixed(2)}%)</p>`;
+                statsHTML += `<p><strong>Unmatched reads:</strong> ${unmatchedReads.toLocaleString()} (${((unmatchedReads / totalReads) * 100).toFixed(2)}%)</p>`;
+                statsHTML += `<p><strong>Structure 1 matches:</strong> ${structure1Count} (${((structure1Count / totalReads) * 100).toFixed(2)}%)</p>`;
+                statsHTML += `<p><strong>Structure 2 matches:</strong> ${structure2Count} (${((structure2Count / totalReads) * 100).toFixed(2)}%)</p>`;
+                
+                statsHTML += `<h4>Breakdown by sample:</h4><ul>`;
+                for (const [sample, count] of Object.entries(barcodeCounts)) {
+                    if (count > 0) {
+                        statsHTML += `<li>${sample}: ${count.toLocaleString()} reads (${((count / totalReads) * 100).toFixed(2)}%)</li>`;
+                    }
+                    // statsHTML += `<li>${sample}: ${count.toLocaleString()} reads (${((count / totalReads) * 100).toFixed(2)}%)</li>`;
+                }
+                statsHTML += `</ul>`;
+                
+                statsDiv.innerHTML = statsHTML;
+                
+                // Create download links
+                downloadArea.innerHTML = '<h3>Download Demultiplexed Files</h3>';
+                
+                // Create download links for each sample
+                for (const [sample, records] of Object.entries(outputFiles)) {
+                    if (records.length > 0) {
+                        const blob = new Blob([records.join('\n')], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `${sample}.fastq`;
+                        link.textContent = `Download ${sample}.fastq (${records.length / 4} reads)`;
+                        link.style.display = 'block';
+                        link.style.margin = '5px 0';
+                        downloadArea.appendChild(link);
+                    }
+                }
+                
+                // Create download link for unmatched reads
+                if (unmatchedOutput.length > 0) {
+                    const blob = new Blob([unmatchedOutput.join('\n')], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'unmatched.fastq';
+                    link.textContent = `Download unmatched.fastq (${unmatchedOutput.length / 4} reads)`;
+                    link.style.display = 'block';
+                    link.style.margin = '5px 0';
+                    downloadArea.appendChild(link);
+                }
+                
+                // Enable download all button if we have matched reads
+                if (matchedReads > 0) {
+                    downloadAllBtn.disabled = false;
+                }
+                
+            } catch (error) {
+                statsDiv.innerHTML = `<p class="error">Error processing file: ${error.message}</p>`;
+                console.error(error);
+            } finally {
+                demuxBtn.disabled = false;
+            }
+        }
+        
+        async function downloadAllAsZip() {
+            if (!outputFiles || Object.keys(outputFiles).length === 0) return;
+            
+            try {
+                downloadAllBtn.disabled = true;
+                downloadAllBtn.textContent = 'Creating ZIP...';
+                
+                const zip = new JSZip();
+                const folder = zip.folder("demultiplexed_files");
+                
+                // Add matched samples to ZIP
+                for (const [sample, records] of Object.entries(outputFiles)) {
+                    if (records.length > 0) {
+                        folder.file(`${sample}.fastq`, records.join('\n'));
+                    }
+                }
+                
+                // Add unmatched reads to ZIP if they exist
+                if (unmatchedOutput.length > 0) {
+                    folder.file('unmatched.fastq', unmatchedOutput.join('\n'));
+                }
+                
+                // Generate the ZIP file
+                const content = await zip.generateAsync({ type: 'blob' });
+                const url = URL.createObjectURL(content);
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'demultiplexed_results.zip';
+                document.body.appendChild(link);
+                link.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error creating ZIP file:', error);
+                statsDiv.innerHTML += `<p class="error">Error creating ZIP file: ${error.message}</p>`;
+            } finally {
+                downloadAllBtn.disabled = false;
+                downloadAllBtn.textContent = 'Download All as ZIP';
+            }
+        }
+    </script>
+</body>

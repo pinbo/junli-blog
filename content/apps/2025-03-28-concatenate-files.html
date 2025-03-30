@@ -1,0 +1,495 @@
+---
+title: 'Concatenate files'
+description: 'A simple tool to concatenate multiple text files or gzipped files into a single file.'
+author: Junli Zhang
+date: '2025-03-28'
+slug: concatenate-files
+categories:
+  - tools
+tags:
+  - concatenate
+  - gzip
+---
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .drop-area {
+            border: 2px dashed #3498db;
+            border-radius: 5px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .drop-area.highlight {
+            background-color: #eaf2f8;
+            border-color: #2980b9;
+        }
+        #file-list {
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-info {
+            flex: 1;
+            /* min-width: 20%; */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding-right: 10px;
+        }
+        .remove-file {
+            color: #e74c3c;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            padding: 2px 5px;
+            flex-shrink: 5;
+            width:50px;
+        }
+        .remove-file:hover {
+            background-color: #f5d6d6;
+            border-radius: 3px;
+        }
+        .options {
+            margin: 20px 0;
+        }
+        .option-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .progress {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p>Upload multiple text files (txt, csv, fastq, etc.) or gzipped (.gz) files to concatenate them into a single file.</p>
+        
+        <div class="drop-area" id="dropArea">
+            <p>Drag & drop files here or click to select files</p>
+            <input type="file" id="fileInput" multiple>
+        </div>
+        
+        <div id="file-list">
+            <p>No files selected</p>
+        </div>
+        
+        <div class="options">
+            <div class="option-group">
+                <label for="outputFilename">Output Filename:</label>
+                <input type="text" id="outputFilename" value="concatenated.txt">
+            </div>
+            
+            <div class="option-group">
+                <label for="separator">Separator between files:</label>
+                <select id="separator">
+                    <option value="\n">New line (\n)</option>
+                    <option value="\r\n">Windows new line (\r\n)</option>
+                    <option value="">No separator</option>
+                    <option value="custom">Custom separator</option>
+                </select>
+                <input type="text" id="customSeparator" style="display: none; margin-top: 5px;" placeholder="Enter custom separator">
+            </div>
+            
+            <div class="option-group">
+                <label for="outputType">Output File Type:</label>
+                <select id="outputType">
+                    <option value="text">Plain Text</option>
+                    <option value="gzip">Gzipped (.gz)</option>
+                </select>
+            </div>
+        </div>
+        
+        <button id="concatButton" disabled>Concatenate Files</button>
+        
+        <div id="status"></div>
+    </div>
+    <div class="container">
+        <h3>Acknowledgement</h3>
+            <p>This tool was written with the assistance of <a href="https://chat.deepseek.com/" target="_blank">DeepSeek</a>.</p>
+        </div>
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script> -->
+    <script src="/libs/pako.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('file-list');
+            const concatButton = document.getElementById('concatButton');
+            const outputFilename = document.getElementById('outputFilename');
+            const separator = document.getElementById('separator');
+            const customSeparator = document.getElementById('customSeparator');
+            const outputType = document.getElementById('outputType');
+            const statusDiv = document.getElementById('status');
+            
+            let files = [];
+            
+            // Supported text file extensions (case insensitive)
+            const TEXT_FILE_EXTS = [
+                '.txt', '.csv', '.tsv', '.fastq', '.fq', 
+                '.json', '.xml', '.html', '.htm', '.log',
+                '.md', '.yml', '.yaml', '.conf', '.cfg'
+            ];
+            
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.classList.add('highlight');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('highlight');
+            }
+            
+            // Handle dropped files
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const newFiles = Array.from(dt.files);
+                addFiles(newFiles);
+            }
+            
+            // Handle clicked files
+            dropArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function() {
+                addFiles(Array.from(this.files));
+                this.value = ''; // Reset input to allow selecting same files again
+            });
+            
+            // Handle separator selection
+            separator.addEventListener('change', function() {
+                customSeparator.style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+            
+            // Check if file is text-based
+            function isTextFile(file) {
+                const fileName = file.name.toLowerCase();
+                
+                // Check for common text file extensions
+                if (TEXT_FILE_EXTS.some(ext => fileName.endsWith(ext))) {
+                    return true;
+                }
+                
+                // Check for gzipped files
+                if (fileName.endsWith('.gz')) {
+                    return true;
+                }
+                
+                // Check mime type (may be empty for some files)
+                if (file.type) {
+                    return file.type.startsWith('text/') || 
+                           file.type === 'application/json' ||
+                           file.type === 'application/xml' ||
+                           file.type === 'application/gzip' ||
+                           file.type === 'application/x-gzip';
+                }
+                
+                // If no type info, assume it's text (we'll handle errors during processing)
+                return true;
+            }
+            
+            // Add files to our collection
+            function addFiles(newFiles) {
+                const validFiles = newFiles.filter(file => isTextFile(file));
+                
+                if (validFiles.length === 0 && newFiles.length > 0) {
+                    statusDiv.className = 'error';
+                    statusDiv.textContent = 'Error: Only text-based files are supported (txt, csv, fastq, json, etc.)';
+                    return;
+                }
+                
+                files = files.concat(validFiles);
+                updateFileList();
+                concatButton.disabled = files.length === 0;
+                
+                if (validFiles.length > 0) {
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = `Added ${validFiles.length} file(s)`;
+                    setTimeout(() => statusDiv.textContent = '', 3000);
+                }
+            }
+            
+            // Update the file list display
+            function updateFileList() {
+                if (files.length === 0) {
+                    fileList.innerHTML = '<p>No files selected</p>';
+                    return;
+                }
+                
+                fileList.innerHTML = '';
+                files.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    const fileInfo = document.createElement('div');
+                    fileInfo.className = 'file-info';
+                    fileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-file';
+                    removeBtn.textContent = '✕';
+                    removeBtn.title = 'Remove file';
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeFile(index);
+                    });
+                    
+                    fileItem.appendChild(fileInfo);
+                    fileItem.appendChild(removeBtn);
+                    fileList.appendChild(fileItem);
+                });
+            }
+            
+            // Remove a file from the list
+            function removeFile(index) {
+                files.splice(index, 1);
+                updateFileList();
+                concatButton.disabled = files.length === 0;
+            }
+            
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Concatenate files
+            concatButton.addEventListener('click', async function() {
+                if (files.length === 0) return;
+                
+                concatButton.disabled = true;
+                statusDiv.className = 'progress';
+                statusDiv.textContent = 'Processing files...';
+                
+                try {
+                    // Get the separator
+                    let sep = separator.value;
+                    if (sep === 'custom') {
+                        sep = customSeparator.value;
+                    } else if (sep === '\\n') {
+                        sep = '\n';
+                    } else if (sep === '\\r\\n') {
+                        sep = '\r\n';
+                    }
+                    
+                    // Process files
+                    const outputData = await concatenateFiles(files, sep);
+                    
+                    // Create the output file
+                    const outputFileType = outputType.value;
+                    let blob, filename = outputFilename.value;
+                    
+                    if (outputFileType === 'gzip') {
+                        const compressedData = await gzipData(outputData);
+                        blob = new Blob([compressedData], { type: 'application/gzip' });
+                        if (!filename.endsWith('.gz')) {
+                            filename += '.gz';
+                        }
+                    } else {
+                        blob = new Blob([outputData], { type: 'text/plain' });
+                    }
+                    
+                    // Download the file
+                    downloadFile(blob, filename);
+                    
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = `Successfully concatenated ${files.length} files to ${filename}`;
+                } catch (error) {
+                    console.error('Error concatenating files:', error);
+                    statusDiv.className = 'error';
+                    statusDiv.textContent = `Error: ${error.message}`;
+                } finally {
+                    concatButton.disabled = false;
+                }
+            });
+            
+            // Download helper function
+            function downloadFile(blob, filename) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Concatenate files function
+            async function concatenateFiles(files, separator) {
+                let result = '';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    statusDiv.textContent = `Processing ${i+1} of ${files.length}: ${file.name}...`;
+                    
+                    let fileContent;
+                    
+                    if (file.name.endsWith('.gz') || file.type === 'application/gzip' || file.type === 'application/x-gzip') {
+                        // Decompress gzipped file
+                        fileContent = await readAndDecompressFile(file);
+                    } else {
+                        // Read plain text file
+                        fileContent = await readFileAsText(file);
+                    }
+                    
+                    result += fileContent;
+                    
+                    // Add separator if not the last file
+                    if (i < files.length - 1 && separator) {
+                        result += separator;
+                    }
+                }
+                
+                return result;
+            }
+            
+            // Read file as text
+            function readFileAsText(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+                    reader.readAsText(file);
+                });
+            }
+            
+            // Read and decompress gzipped file
+            function readAndDecompressFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        try {
+                            const arrayBuffer = reader.result;
+                            const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+                            resolve(decompressed);
+                        } catch (error) {
+                            reject(new Error(`Failed to decompress gzipped file: ${file.name}`));
+                        }
+                    };
+                    reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+            
+            // Gzip data
+            function gzipData(data) {
+                return new Promise((resolve) => {
+                    const compressed = pako.gzip(data);
+                    resolve(compressed);
+                });
+            }
+        });
+    </script>
+</body>

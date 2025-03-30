@@ -1,0 +1,317 @@
+---
+title: 'Map long reads with minimap2'
+author: Junli Zhang
+date: '2025-03-29'
+slug: map-long-reads-with-minimap2
+categories:
+  - tools
+tags:
+  - minimap2
+  - samtools
+  - long-reads
+---
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimap2 + Samtools Mapping Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .file-input {
+            margin: 10px 0;
+        }
+        .progress {
+            margin: 15px 0;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #2ecc71;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .log {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        select, input {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <p>This tool uses <a href="https://biowasm.com" target="_blank">BioWASM</a> to run minimap2 and samtools in your browser.</p>
+    <p>fastq files with long reads or short reads can be mapped to a reference by <a href="https://github.com/lh3/minimap2" target="_blank">minimap2</a> and sorted bam files will be created by <a href="https://github.com/samtools/samtools" target="_blank">samtools</a>. You can view the mapping results (bam files) with <a href="https://igv.org/" target="_blank">IGV</a>.</p>
+    
+    <div class="container">
+        <h3>1. Input Files</h3>
+        <label for="reference">Reference Genome (a .fasta or .fa file. NO SPACES in file names):</label>
+        <input type="file" id="reference" class="file-input" accept=".fasta,.fa,.fna">
+        
+        <label for="fastqFiles">FASTQ Files (NO SPACES in file names):</label>
+        <input type="file" id="fastqFiles" class="file-input" accept=".fastq,.fq,.fastq.gz,.fq.gz" multiple>
+        
+        <h3>2. Minimap2 Options</h3>
+        <label for="preset">Preset Option (-x):</label>
+        <select id="preset">
+            <option value="map-ont">map-ont (Oxford Nanopore reads)</option>
+            <option value="map-pb">map-pb (PacBio reads)</option>
+            <option value="map-hifi">map-hifi (HiFi reads)</option>
+            <option value="map-iclr">map-iclr (ICLR)</option>
+            <option value="splice">splice (long-read spliced alignment)</option>
+            <option value="splice:hq">spliced alignment for accurate long reads</option>
+            <option value="lr:hq"> accurate long reads (error rate <1%) against a reference genome</option>
+            <option value="sr">sr (short reads)</option>
+            <option value="">blank (set in extra options below without '-x')</option>
+        </select>
+        
+        <label for="extraOptions">Extra Minimap2 Options:</label>
+        <input type="text" id="extraOptions" placeholder="e.g., -k 15 -w 5">
+        
+        <h3>3. Run Analysis</h3>
+        <button id="runBtn">Run Minimap2 + Samtools</button>
+        
+        <div class="progress" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div id="status"></div>
+        
+        <h3>4. Output</h3>
+        <button id="downloadBtn" style="display: none; background-color: #27ae60;">Download Results (ZIP)</button>
+        <div class="log" id="log"></div>
+        
+    </div>
+    <div class="container">
+        <h3>Acknowledgement</h3>
+            <p>This tool was written with the assistance of <a href="https://chat.deepseek.com/" target="_blank">DeepSeek</a>.</p>
+        </div>
+    <script src="https://biowasm.com/cdn/v3/aioli.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script type="module">
+        // Initialize BioWASM
+        const CLI = await new Aioli(["samtools/1.17", "minimap2/2.22"]);
+        console.log("BioWASM modules loaded");
+        logMessage("BioWASM modules loaded and ready.");
+        
+        document.getElementById('runBtn').addEventListener('click', runAnalysis);
+        document.getElementById('downloadBtn').addEventListener('click', downloadResults);
+        
+        // let minimap2, samtools;
+        let outputFiles = {};
+        
+        function logMessage(message) {
+            const logElement = document.getElementById('log');
+            logElement.textContent += message + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percent + '%';
+            document.getElementById('progressContainer').style.display = 'block';
+        }
+        
+        async function downloadBinary (path){
+            let file = await CLI.fs.readFile(path);
+            const blob = new Blob([ file ]);
+            // return URL.createObjectURL(blob);
+            return blob;
+        }
+        
+        async function runAnalysis() {
+            const referenceFile = document.getElementById('reference').files;
+            const fastqFiles = document.getElementById('fastqFiles').files;
+            const preset = document.getElementById('preset').value;
+            const extraOptions = document.getElementById('extraOptions').value;
+            
+            if (!referenceFile || !fastqFiles || fastqFiles.length === 0) {
+                alert("Please select both a reference file and at least one FASTQ file.");
+                return;
+            }
+            
+            // Reset output files
+            outputFiles = {};
+            
+            const runBtn = document.getElementById('runBtn');
+            runBtn.disabled = true;
+            logMessage("Starting analysis...");
+            
+            try {
+                // Upload reference file
+                logMessage(`Uploading reference file: ${referenceFile.name}`);
+                // await minimap2.write(referenceFile.name, referenceFile);
+                console.log(await CLI.ls("."));
+	            const refPath = await CLI.mount(referenceFile); // reference path
+                console.log(await CLI.ls("."));
+                const paths = await CLI.mount(fastqFiles); // fastq files paths
+                console.log(await CLI.ls("."));
+                
+                // Index reference if needed (minimap2 will do this automatically)
+                
+                // Process each FASTQ file
+                for (let i = 0; i < fastqFiles.length; i++) {
+                    const fastqFile = fastqFiles[i];
+                    console.log("fastq file is: ", fastqFile);
+                    const baseName = fastqFile.name.replace(/\.[^/.]+$/, "");
+                    console.log("baseName is ", baseName);
+                    
+                    logMessage(`\nProcessing file ${i+1}/${fastqFiles.length}: ${fastqFile.name}`);
+                    updateProgress((i / fastqFiles.length) * 50);
+                    
+                    // Upload FASTQ file
+                    // await minimap2.write(fastqFile.name, fastqFile);
+                    
+                    // Run minimap2
+                    const samFile = `${baseName}.sam`;
+                    let minimap2Cmd = `minimap2 -ax ${preset} ${extraOptions} ${refPath[0]} ${paths[i]} -o ${samFile}`;
+                    minimap2Cmd = minimap2Cmd.replace(/\s+/g, ' ');
+                    
+                    logMessage(`Running minimap2: ${minimap2Cmd}`);
+                    let output = await CLI.exec(minimap2Cmd);
+                    console.log("minimap2 output: ", output);
+                    
+                    // Convert SAM to BAM and sort
+                    const bamFile = `${baseName}.sorted.bam`;
+                    logMessage(`Converting SAM to sorted BAM: ${samFile} -> ${bamFile}`);
+                    
+                    // await CLI.exec(`samtools view -b -o ${baseName}.unsorted.bam ${samFile}`);
+                    output = await CLI.exec(`samtools sort -o ${bamFile} ${samFile}`);
+                    console.log("samtools sort output: ", output);
+                    
+                    // Index BAM file
+                    logMessage(`Indexing BAM file: ${bamFile}`);
+                    await CLI.exec(`samtools index ${bamFile}`);
+                    console.log(await CLI.pwd());
+                    console.log(await CLI.ls("/shared/data"));
+                    console.log(await CLI.ls("."));
+                    console.log(await CLI.cat(bamFile));
+                    
+                    // Store output files
+                    const baiFile = `${bamFile}.bai`;
+                    // outputFiles[bamFile] = await CLI.download(bamFile); // not working, just a link
+                    // outputFiles[baiFile] = await CLI.download(baiFile); // not working, just a link
+                    // outputFiles[samFile] = await downloadBinary(samFile);
+                    outputFiles[bamFile] = await downloadBinary(bamFile); // blobs
+                    outputFiles[baiFile] = await downloadBinary(baiFile);
+                    // const url = await CLI.download("/path/to/a/file");
+                    // let bamurl = await CLI.download(bamFile);
+                    // console.log("bamurl is: ", bamurl);
+                    // let bmiurl = await CLI.download(baiFile);
+                    // outputFiles[bamFile] = await fetch(bamurl).then(r => r.blob());
+                    // outputFiles[baiFile] = await fetch(bmiurl).then(r => r.blob());
+                    
+                    // Clean up intermediate files
+                    // await minimap2.exec(`rm ${fastqFile.name}`);
+                    // await minimap2.exec(`rm ${samFile}`);
+                    // await minimap2.exec(`rm ${baseName}.unsorted.bam`);
+                    
+                    logMessage(`Completed processing for ${fastqFile.name}`);
+                    updateProgress(((i + 1) / fastqFiles.length) * 100);
+                }
+                
+                // Clean up reference
+                // await minimap2.exec(`rm ${referenceFile.name}`);
+                
+                logMessage("\nAnalysis complete!");
+                document.getElementById('downloadBtn').style.display = 'block';
+            } catch (error) {
+                logMessage(`Error: ${error.message}`);
+                console.error(error);
+            } finally {
+                runBtn.disabled = false;
+            }
+        }
+        
+        async function downloadResults() {
+            if (Object.keys(outputFiles).length === 0) {
+                alert("No output files to download.");
+                return;
+            }
+            
+            try {
+                logMessage("Preparing download...");
+                
+                // Create a zip file using JSZip
+                // const JSZip = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+                const zip = new JSZip();
+                
+                // Add each file to the zip
+                for (const [filename, fileData] of Object.entries(outputFiles)) {
+                    zip.file(filename, fileData);
+                }
+                
+                // Generate the zip file
+                const content = await zip.generateAsync({ type: 'blob' });
+                
+                // Create download link
+                const url = URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'minimap2_mapping_results.zip';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+                logMessage("Download started.");
+            } catch (error) {
+                logMessage(`Error creating zip file: ${error.message}`);
+                console.error(error);
+            }
+        }
+    </script>
+</body>
