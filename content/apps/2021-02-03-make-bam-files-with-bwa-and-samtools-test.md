@@ -50,7 +50,7 @@ Options:<br>
 <button id="download-btn" onclick="downloadBam()" style="visibility:hidden">Download indexed bam files</button>
 <p id="download" style="color:tomato;font-style: italic;"></p>
 <script src="/tools/aioli/latest/aioli.js"></script>
-<script src="/libs/bwa-samtools-v4.js"></script>
+<script src="/libs/bwa-samtools-v5.js"></script>
 <script src="/libs/FileSaver.min.js"></script>
 <script src="/libs/jszip.min.js"></script>
 
