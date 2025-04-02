@@ -17,5 +17,7 @@ Here are a few links about me:
 
 - [GitHub](https://github.com/pinbo)
 
+- [Bluesky](https://bsky.app/profile/junlizhang.bsky.social)
+
 - [Twitter](https://twitter.com/aswillow)
 
