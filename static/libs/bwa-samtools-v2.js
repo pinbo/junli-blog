@@ -1,5 +1,5 @@
 // v2: 2022-05-06: add editcall to call potential indels, big deletions and inversions
-let bwa = new Aioli("bwa2/latest");
+let bwa = new Aioli("bwa2/0.7.17JZv3.1");
 let samtools = new Aioli("samtools/latest"); // null before init
 // Initialize bwa and output the version
 bwa
