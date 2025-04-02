@@ -16,4 +16,5 @@ Here are a few links about me:
 - [Curriculum Vitae](/files/junli-cv.html)
 - [Google Scholar](https://scholar.google.com/citations?user=0ZZ8xGYAAAAJ&hl=en)
 - [GitHub](https://github.com/pinbo)
+- [Bluesky](https://bsky.app/profile/junlizhang.bsky.social)
 - [Twitter](https://twitter.com/aswillow)
