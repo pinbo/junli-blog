@@ -12,7 +12,7 @@ tags:
   - minimap2
 ---
 
-[Azanta/Genwiz](https://www.genewiz.com/) has Oxford Nanopore Technology (ONT) long-read sequencing service for plasmid ([plasmid-EZ](https://www.genewiz.com/public/services/next-generation-sequencing/whole-plasmid-sequencing-plasmid-ez)) and long PCR amplicons (>500 bp). If you want to check the variations for a long gene (>500 bp) for multiple genotypes, you can do two rounds of PCR with the same barcodes and adaptor used for the CRISPR editing check. Then mix them and sequence all the long amplicons with Genwiz PCR-EZ (or [plasmid-EZ](https://www.genewiz.com/public/services/next-generation-sequencing/whole-plasmid-sequencing-plasmid-ez)).
+[Azanta/Genwiz](https://www.genewiz.com/) has Oxford Nanopore Technology (ONT) long-read sequencing service for plasmid ([plasmid-EZ](https://www.genewiz.com/public/services/next-generation-sequencing/whole-plasmid-sequencing-plasmid-ez)) and long PCR amplicons (>500 bp, [PCR-EZ](https://web.genewiz.com/pcr-ez)). If you want to check the variations for a long gene (>500 bp) for multiple genotypes, you can do two rounds of PCR with the same barcodes and adaptor used for the CRISPR editing check. Then mix them and sequence all the long amplicons with Genwiz [PCR-EZ](https://web.genewiz.com/pcr-ez) (or [plasmid-EZ](https://www.genewiz.com/public/services/next-generation-sequencing/whole-plasmid-sequencing-plasmid-ez)).
 
 The results will be a fastq file with ONT long reads. You can do the analysis using the following steps:
 
