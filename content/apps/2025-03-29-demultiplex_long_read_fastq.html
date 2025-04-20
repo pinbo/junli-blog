@@ -13,7 +13,7 @@ tags:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/libs/pako.min.js"></script>
+    <!-- <script src="/libs/pako.min.js"></script> -->
     <script src="/libs/jszip.min.js"></script>
     <style>
         /* body {
@@ -263,6 +263,8 @@ tags:
     <h3>Acknowledgement</h3>
         <p>This tool was written with the assistance of <a href="https://chat.deepseek.com/" target="_blank">DeepSeek</a>.</p>
     </div>
+
+    <script src="/tools/aioli/latest/aioli.js"></script>
     <script>
         // Global variables
         let fastqFile = null;
@@ -271,6 +273,9 @@ tags:
         let unmatchedOutput = [];
         let uniqLeftBarcode = new Set();
         let uniqRightBarcode = new Set();
+        let gzip = new Aioli("gzip/1.12");
+        gzip.init().then(() => gzip.exec("-h"))
+        .then(d => console.log("STDOUT", d.stdout, "STDERR", d.stderr));
         
         // DOM elements
         const fastqFileInput = document.getElementById('fastqFile');
@@ -325,7 +330,7 @@ tags:
             return seq.split('').reverse().map(base => complement[base] || 'N').join('');
         }
         
-        function handleFileUpload(event) {
+        async function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
             
@@ -340,6 +345,7 @@ tags:
             if (barcodes.length > 0) {
                 demuxBtn.disabled = false;
             }
+            await Aioli.mount(fastqFile, null, null, gzip); // only to worker gzip
         }
         
         async function handleBarcodeFileUpload(event) {
@@ -584,9 +590,11 @@ tags:
                 // Read the file
                 let fileContent;
                 if (fastqFile.name.endsWith('.gz')) {
-                    const arrayBuffer = await fastqFile.arrayBuffer();
-                    const decompressed = pako.inflate(new Uint8Array(arrayBuffer));
-                    fileContent = new TextDecoder().decode(decompressed);
+                    // const arrayBuffer = await fastqFile.arrayBuffer();
+                    // fileContent = pako.inflate(arrayBuffer, { to: 'string' }); // simple way
+                    gzip.setwd("/data");
+                    let dd = await gzip.exec("-d " + fastqFile.name);
+                    fileContent= await gzip.downloadBinary(fastqFile.name.replace(/.gz$/, "")).then(d => d.text());
                 } else {
                     fileContent = await fastqFile.text();
                 }
