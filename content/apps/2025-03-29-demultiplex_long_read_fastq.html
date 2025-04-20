@@ -273,7 +273,7 @@ tags:
         let unmatchedOutput = [];
         let uniqLeftBarcode = new Set();
         let uniqRightBarcode = new Set();
-        let gzip = new Aioli("gzip/1.12");
+        let gzip = new Aioli("gzip/1.14");
         gzip.init().then(() => gzip.exec("-h"))
         .then(d => console.log("STDOUT", d.stdout, "STDERR", d.stderr));
         
@@ -595,6 +595,8 @@ tags:
                     gzip.setwd("/data");
                     let dd = await gzip.exec("-d " + fastqFile.name);
                     fileContent= await gzip.downloadBinary(fastqFile.name.replace(/.gz$/, "")).then(d => d.text());
+                    // let dd = await gzip.exec("-d -c /data/" + fastqFile.name); // directly use stdout
+                    // fileContent = dd.stdout; // directly use stdout
                 } else {
                     fileContent = await fastqFile.text();
                 }
