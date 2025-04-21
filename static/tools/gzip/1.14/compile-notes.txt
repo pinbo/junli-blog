@@ -1,0 +1,36 @@
+# ./emsdk install latest (v '4.0.7' works)
+# ./emsdk activate latest
+
+# 1. Download gzip 1.14 from here
+wget https://ftp.gnu.org/gnu/gzip/gzip-1.14.zip
+# 2. unzip and cd the folder
+unzip gzip-1.14.zip
+cd gzip-1.14
+emconfigure ./configure # --disable-year2038 # emsdk v4.0.7 has no errors without disabling year2038.
+# modify the Makefile and the gzip.c based on the patch file.
+emmake make
+
+### patches
+# Makefile
+-EXEEXT =
++EXEEXT = .js
+
+-LIBS =
++LIBS = -s EXPORTED_RUNTIME_METHODS=["callMain"] -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=1 -s INVOKE_RUN=0 -s EXIT_RUNTIME=0
+
+-BUILD_CFLAGS = -g -O2
++BUILD_CFLAGS = -O2
+
+-CFLAGS = -g -O2
++CFLAGS = -O2
+
+
+# gzip.c
+ 
+     z_suffix = Z_SUFFIX;
+     z_len = strlen(z_suffix);
++    fprintf(stderr, "optind = %d; opterr = %d; optopt = %d\n", optind, opterr, optopt); //JZ: for multiple runs
++    optind = 1; //JZ: reset to 1 every run
+     while (true) {
+         int optc;
+         int longind = -1;
