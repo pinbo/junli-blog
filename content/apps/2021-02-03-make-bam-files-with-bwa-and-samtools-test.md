@@ -40,7 +40,7 @@ After loading the template fasta file and all the fastq files, now we will use `
 <div id="options" style="font-size:90%;color:blue;">
 
 Options:<br>
-<input size="2" id="mq" value="1" type="text"> min mapping quality when calling variants  
+<input size="2" id="mq" value="0" type="text"> min mapping quality when calling variants  
 
 </div>
 
