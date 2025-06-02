@@ -1,0 +1,187 @@
+---
+title: 'Multiple sequence alignment with Kalign'
+author: Junli Zhang
+date: '2025-06-01'
+slug: msa-with-kalign
+categories:
+  - tools
+tags:
+  - msa
+  - kalign
+---
+
+<head>
+<meta name="description" content="MSA Viewer">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>MSA Viewer</title>
+</head>
+<body>
+  <script src="/libs/msa.min.JZ.js"></script>
+  <div id="inputBox" style="padding-bottom: 1em;">
+    <label for="fasta"><strong>Select a FASTA or CLUSTAL file</strong></label>:
+    <input type="file" id="fasta"/><br>
+    <label for="paste">OR Paste your sequences here in fasta format</label><br>
+    <textarea id="paste" name="paste" rows="10" cols="60" placeholder="Paste your sequences"></textarea><br>
+    <button onclick="clearseq()">Reset</button>
+    <button onclick="putExample()">Example</button><br><br>
+	<button onclick="showMSAfromPaste()" style="font-weight:bold;">View MSA directly</button><strong> OR </strong>
+    <button id="align" style="font-weight:bold;">Align then View MSA</button>
+  </div>
+  <div id="msa"></div>
+
+  <div class="container">
+    <h3>Acknowledgement</h3>
+    <p>Thanks to MSAViewer 
+      <a href="https://github.com/wilzbach/msa" target="_blank">MSAViewer</a> for HTML multiple sequence alignment viewer and 
+      <a href="https://biowasm.com/" target="_blank">biowasm</a> for <code>kalign</code> WebAssembly tool.
+    </p>
+  </div>
+<script>
+//  let fasta = ""; // input alignment content
+  document.getElementById('fasta').addEventListener('change', readFastaFile, false);
+
+// function to show MSA
+function showMSA() {
+  let fasta = document.getElementById("paste").value.trim();
+  let seq = ""; 
+  if (fasta[0] == '>') seqs = msa.io.fasta.parse(fasta);
+  else if (fasta.substr(0, 7) == "CLUSTAL") seqs = msa.io.clustal.parse(fasta);
+  let m = msa({
+  el: document.getElementById("msa"),
+  seqs: seqs,
+  colorscheme: {"scheme": "clustal2"},
+  vis: {
+    seqlogo: true,
+    // overviewbox: true,
+  },
+  });
+  // the menu is independent to the MSA container
+  var menuOpts = {
+    el: document.getElementById('menuDiv'),
+    msa: m
+  };
+  let defMenu = new msa.menu.defaultmenu(menuOpts);
+  m.addView("menu", defMenu);
+
+  m.render();
+}
+
+async function readFastaFile(evt) {
+  let files = evt.target.files; // FileList object
+  if(files.length==0) return;
+  let fasta = await readTextFileAsync(files[0]);
+//   showMSA();
+  document.getElementById("paste").value = fasta;
+}
+// function to read a text file async, for loadRef
+function readTextFileAsync(file) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = () => {
+            resolve(new TextDecoder('utf-8').decode(reader.result, {stream: true}));
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// show MSA from the paste box
+function showMSAfromPaste() {
+  let fasta = document.getElementById("paste").value.trim();
+//   document.getElementById("tmpInput").value = fasta;
+  showMSA();
+}
+
+// clear input sequences
+function clearseq() {
+  document.getElementById("paste").value = "";
+  document.getElementById("msa").innerHTML = "";
+//   div = document.getElementById("msa");
+//   div.replaceChildren();
+};
+
+// input an example
+function putExample(){
+  document.getElementById("paste").value = ">seq1\nAYTATLVTPT\n>seq2\nTYKVKFITPE"
+}
+
+// reverse complement function
+// IPUAC codes for conversion
+
+var ipuac = {
+    'A':'T',
+    'C':'G',
+    'G':'C',
+    'T':'A',
+    'a':'t',
+    'c':'g',
+    'g':'c',
+    't':'a',
+    // RNA
+    'u':'a',
+    'U':'A',
+    //IPUAC: www.bioinformatics.org/sms/iupac.html
+    "r":"y",
+    "R":"Y",
+    "y":"r",
+    "Y":"R",
+    "k":"m",
+    "K":"M",
+    "m":"k",
+    "M":"K",
+    "b":"v",
+    "B":"V",
+    "d":"h",
+    "D":"H",
+    "h":"d",
+    "H":"D",
+    "v":"b",
+    "V":"B",
+    "n":"n",
+    "N":"N"
+}
+
+// to convert one sequence
+function reverse_complement (seq, method = "RC"){
+    // method: RC = reverse complement; C = just complement; R: just reverse
+    var o = seq.split("");
+    if (method == "R") return o.reverse().join('');
+    // complement
+    for (i=0; i < seq.length; i++){
+        o[i] = ipuac[seq[i]];
+    }
+
+    if (method == "C") return o.join('');
+    else return o.reverse().join('');
+}
+</script>
+<script src="https://biowasm.com/cdn/v3/aioli.js"></script>
+<script type="module">
+const CLI = await new Aioli(["kalign/3.3.1"]);
+let dd = await CLI.exec("kalign -h");
+// console.log("stdout:\n", dd.stdout, "stderr:\n", dd.stderr);
+console.log(dd);
+async function alignAndShow() {
+  let fasta = document.getElementById("paste").value;
+  // console.log("Before alignment:\n", fasta);
+  // Create input
+  await CLI.mount({
+    name: "input.fa",
+    data: fasta
+  });
+
+  // Run kalign and fetch FASTA file output
+  let dd = await CLI.exec("kalign input.fa -f fasta -o result.fasta");
+  console.log(dd);
+  fasta = await CLI.cat("result.fasta");
+  document.getElementById("paste").value = fasta;
+  // console.log("after alignment:\n", fasta);
+  showMSA();
+}
+document.getElementById('align').addEventListener('click', alignAndShow);
+// document.getElementById("paste").value = result;
+</script>
+
+
+</body>
