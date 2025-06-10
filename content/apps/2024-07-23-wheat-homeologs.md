@@ -66,16 +66,17 @@ To start a new job, click "**Clear**" button below, and resubmit (faster than re
 **Update**
 
 - 2024-09-18: modify the `blastp` method (`-seg yes`) to match Ensembl blast output (only affect some top hits of Arabidopsis).
-- 2024-09-18: add some low confidence genes that are hits of high confidence genes. For example, the B homeolog of PLATZ-A1 (TraesCS6A02G156600) is a low confidence gene.
+- 2024-09-18: add some low confidence genes that are hits of high confidence genes. For example, the B homeolog of PLATZ-A1 (TraesCS6A02G156600) is a low-confidence gene.
 - 2024-11-01: add alignment length from BLAST for At and Os hits. Without the alignment length, we cannot tell which wheat gene is best At/Os homolog.
+- 2025-06-09: added barley (Morex v3) best hits for each wheat gene.
 
 
 **Methods**
 
-Here are the commands I used for preparing homeologs and the best hits in Arabidopsis and rice. Arabidopsis and rice seequnces were downloaded from [Ensembl Plants](https://plants.ensembl.org/index.html). Kronos cDNAs were downloaded from [Zenodo](https://zenodo.org/records/11106422). CS IWGSC annotation v1.1 HC cDNAs were downloaded from [Wheat URGI](https://urgi.versailles.inra.fr/download/iwgsc/IWGSC_RefSeq_Annotations/v1.1/).
+Here are the commands I used for preparing homeologs and the best hits in Arabidopsis and rice. Arabidopsis and rice sequences were downloaded from [Ensembl Plants](https://plants.ensembl.org/index.html). Kronos cDNAs were downloaded from [Zenodo](https://zenodo.org/records/11106422). CS IWGSC annotation v1.1 HC cDNAs were downloaded from [Wheat URGI](https://urgi.versailles.inra.fr/download/iwgsc/IWGSC_RefSeq_Annotations/v1.1/).
 
 ``` sh
-## homeolog search by self blast
+## homeolog search by self-blast
 ### blast self
 blastn -task blastn -db ../blastdb/Kronos.v1.0.all.cds.fa -query ../blastdb/Kronos.v1.0.all.cds.fa -outfmt "6 std qlen slen" -perc_identity 90 -word_size 20 -num_threads 40 -out out_Kronos_v1.0_cdna_self_wordsize20.txt &
 blastn -task blastn -query /Users/galaxy/blastdb/IWGSC_v1.1_HC_20170706_cds.fasta -db /Users/galaxy/blastdb/IWGSC_v1.1_HC_20170706_cds.fasta -outfmt "6 std qlen slen" -perc_identity 90 -word_size 20 -num_threads 40 -out out_CS_v1.1_HC_self_wordsize20.txt &
@@ -120,6 +121,6 @@ sed -i 's/ gene:/\t/g; s/ gene_biotype:/\t/g; s/ gene_symbol:/\t/g; s/ descripti
 
 <script src="/tools/sqljs/v1.10.3/sql-wasm.js"></script>
 <!-- <script src="/tools/sqlite3/3.46.0/sqlite3.js"></script> -->
-<script type="module" src="/libs/get-wheat-homeologs-v6.js"></script>
+<script type="module" src="/libs/get-wheat-homeologs-v7.js"></script>
 <script src="/libs/excellentexport.min.js"></script>
 <script src="/libs/pako_inflate.min.js"></script>
