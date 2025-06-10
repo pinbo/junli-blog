@@ -158,6 +158,7 @@ d5.Hv_alignment \
 From wheatID_and_hits d2 \
 Join AtOsID d3 On ( d3.gene = d2.AtID ) \
 Join AtOsID d4 On ( d4.gene = d2.OsID ) \
+Join HvID d5 On ( d5.gene = d2.gene ) \
 WHERE c4 in (" + whereStr + ") \
 OR c7 in (" + whereStr + ") \
 OR c10 in (" + whereStr + ") \
