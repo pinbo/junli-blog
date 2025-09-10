@@ -61,11 +61,11 @@ hasCJKLanguage = true
 
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.11.0"
-    highlightjsCDN = "//cdn.bootcss.com"
+    highlightjsCDN = "//cdnjs.cloudflare.com/ajax/libs"
     highlightjsLang = ["r", "yaml"]
     highlightjsTheme = "github"
 
-    MathJaxCDN = "//cdn.bootcss.com"
+    MathJaxCDN = "//cdnjs.cloudflare.com/ajax/libs"
     MathJaxVersion = "2.7.1"
 
     [params.logo]
