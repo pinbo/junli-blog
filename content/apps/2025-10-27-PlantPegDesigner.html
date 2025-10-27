@@ -1,0 +1,818 @@
+---
+title: 'Plant pegRNA designer'
+author: Junli Zhang
+date: '2025-10-27'
+slug: plant-pegRNA-designer
+categories:
+  - tools
+tags:
+  - prime editing
+  - pegRNA
+---
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlantPegDesigner</title>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+#header {
+    background-color: green;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+#header h1 {
+    margin: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.input-section {
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: green;
+}
+
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+button {
+    background-color: green;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: darkgreen;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#results {
+    margin-top: 30px;
+}
+
+.ccgg-message {
+    color: #c51b8a;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #fce4ec;
+    border-radius: 4px;
+}
+
+.result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.result-table th,
+.result-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.result-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.recommended {
+    color: red;
+    font-weight: bold;
+}
+
+.program-title {
+    color: red;
+}
+
+.program-title-normal {
+    color: #7A09FA;
+}
+
+.strand-title {
+    background-color: #f8f8f8;
+}
+
+.pam-sequence {
+    background-color: #8FBC8F;
+}
+
+.section-header {
+    color: blue;
+    font-weight: bold;
+}
+
+.primer-label {
+    color: #7A09FA;
+}
+
+.error-message {
+    color: red;
+    padding: 15px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+
+.no-results {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+}
+
+#footer {
+    background-color: rgba(0,100,0,0.1);
+    color: blue;
+    text-align: center;
+    padding: 15px;
+    margin-top: 30px;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+</style>
+</head>
+<body>
+
+<!-- <div id="header">
+    <h1>Plant PegRNA Designer</h1>
+</div> -->
+
+<div class="container">
+    <p>The plant pegRNA design website (<a href="http://www.plantgenomeediting.net/" target="_blank">www.plantgenomeediting.net/</a>) does not function recently, so I converted <a href="https://github.com/JinShuai001/PlantPegDesigner/blob/master/PlantPegDesigner.pl" target="_blank">the perl script underneath it</a> to a javascript-based html tool with the help of <a href="https://claude.ai/new" target="_blank">Claude AI</a>.</p><br>
+    <p><strong>Citation:</strong> pegRNAs used in this study were designed with the webtool (https://junli.netlify.app/apps/plant-pegrna-designer/), which was rewritten with javascript based on the source code of PlantPegDesigner (Lin et al. 2021).</p><br>
+    <p><em>Lin, Q., Jin, S., Zong, Y. et al. High-efficiency prime editing with optimized, paired pegRNAs in plants. Nat Biotechnol 39, 923–927 (2021). https://doi.org/10.1038/s41587-021-00868-w</em></p>
+    <div class="input-section">
+        <h2>Input Parameters</h2>
+        
+        <div class="form-group">
+            <label for="inputSeq">Input Sequence (format: leftseq(REF/ALT)rightseq):</label>
+            <!-- <input type="text" id="inputSeq" placeholder="e.g., AAAAAAAAAA(TGC/GTA)TTTTTTTTTT" value="GCAACTGGGATGATATGGAGAAGATCTGGCATCACACCTTCTACAACGAGCTCCGTGTGGCCCCG(G/A)AGGAGCACCCCGTCCTCCTCACCGAGGCTCCTCTCAACCCCAAGGCCAATCGTGAGAAGATGACCCAGATCATGTTTGAGACCTT"> -->
+
+            <textarea id="inputSeq" rows="3" placeholder="e.g., AAAAAAAAAA(TGC/GTA)TTTTTTTTTT" name="inputSeq" style="border-color: #1E9FFF;color: #495057;">GCAACTGGGATGATATGGAGAAGATCTGGCATCACACCTTCTACAACGAGCTCCGTGTGGCCCCG(G/A)AGGAGCACCCCGTCCTCCTCACCGAGGCTCCTCTCAACCCCAAGGCCAATCGTGAGAAGATGACCCAGATCATGTTTGAGACCTT</textarea>
+            <p><span1>Allele change is marked as "<span style="color:red">(a/b)</span>". "<span style="color:red">a</span>" is the original sequence and "<span style="color:red">b</span>" is the designed mutation sequence. "<span style="color:red">a</span>" or "<span style="color:red">b</span>" could be null value to represent the deletion "<span style="color:red">(a/)</span>" or insertion "<span style="color:red">(/b)</span>"<div class=""></div></span1></p>
+        </div>
+
+        <div class="two-column">
+            <div class="form-group">
+                <label for="pam">PAM Sequence:</label>
+                <input type="text" id="pam" value="NGG">
+            </div>
+            <div class="form-group">
+                <label for="cutToPam">Cut to PAM Distance:</label>
+                <input type="number" id="cutToPam" value="-3">
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="form-group">
+                <label for="onTargetLength">OnTarget Length:</label>
+                <input type="number" id="onTargetLength" value="20">
+            </div>
+            <div class="form-group">
+                <label for="onTargetGC">OnTarget GC Content (min-max %):</label>
+                <input type="text" id="onTargetGC" value="0-100" placeholder="e.g., 0-100">
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="form-group">
+                <label for="peWindow">PE Window (min-max):</label>
+                <input type="text" id="peWindow" value="1-15" placeholder="e.g., 1-15">
+            </div>
+            <div class="form-group">
+                <label for="pbsLength">PBS Length (min-max):</label>
+                <input type="text" id="pbsLength" value="7-16" placeholder="e.g., 7-16">
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="form-group">
+                <label for="pbsGC">PBS GC Content (min-max %):</label>
+                <input type="text" id="pbsGC" value="0-100" placeholder="e.g., 40-60">
+            </div>
+            <div class="form-group">
+                <label for="tmBest">Best TM (°C):</label>
+                <input type="number" id="tmBest" value="30">
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="form-group">
+                <label for="rtLength">RT Length (min-max):</label>
+                <input type="text" id="rtLength" value="7-16" placeholder="e.g., 7-16">
+            </div>
+            <div class="form-group">
+                <label for="tmModel">Use TM Model:</label>
+                <select id="tmModel">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="form-group">
+                <label for="excludeLastG">Exclude Last G in RT:</label>
+                <select id="excludeLastG">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ccnnggModel">CCNNGG Model:</label>
+                <select id="ccnnggModel">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- <div class="form-group">
+            <label for="upstreamPrimer5">Upstream Primer 5':</label>
+            <input type="text" id="upstreamPrimer5" value="TTGTGCAGATGATCCGTGGCG">
+        </div>
+
+        <div class="form-group">
+            <label for="upstreamPrimer3">Upstream Primer 3':</label>
+            <input type="text" id="upstreamPrimer3" value="GTTTTAGAGCTAGAAATA">
+        </div>
+
+        <div class="form-group">
+            <label for="downstreamPrimer5">Downstream Primer 5':</label>
+            <input type="text" id="downstreamPrimer5" value="CTATGACCATGATTACGCCAAGCTTAAAAAAA">
+        </div>
+
+        <div class="form-group">
+            <label for="downstreamPrimer3">Downstream Primer 3':</label>
+            <input type="text" id="downstreamPrimer3" value="GCACCGACTCGGTGCCAC">
+        </div> -->
+
+        <div style="margin-top: 20px;">
+            <button onclick="runAnalysis()">Run Analysis</button>
+            <button onclick="clearForm()">Clear</button>
+        </div>
+    </div>
+
+    <div id="results"></div>
+</div>
+
+<!-- <div id="footer">
+    Welcome to our website
+</div> -->
+
+<script>
+function runAnalysis() {
+    const results = document.getElementById('results');
+    results.innerHTML = '<p>Processing...</p>';
+    
+    try {
+        const input = {
+            inputSequence: document.getElementById('inputSeq').value.trim(),
+            pam: document.getElementById('pam').value.trim().toUpperCase(),
+            cutToPam: parseInt(document.getElementById('cutToPam').value),
+            onTargetLength: parseInt(document.getElementById('onTargetLength').value),
+            onTargetGC: document.getElementById('onTargetGC').value.trim(),
+            peWindow: document.getElementById('peWindow').value.trim(),
+            pbsLength: document.getElementById('pbsLength').value.trim(),
+            pbsGC: document.getElementById('pbsGC').value.trim(),
+            tmModel: document.getElementById('tmModel').value === 'true',
+            tmBest: parseFloat(document.getElementById('tmBest').value),
+            rtLength: document.getElementById('rtLength').value.trim(),
+            excludeLastG: document.getElementById('excludeLastG').value === 'true',
+            ccnnggModel: document.getElementById('ccnnggModel').value === 'true',
+            // upstreamPrimer5: document.getElementById('upstreamPrimer5').value.trim(),
+            // upstreamPrimer3: document.getElementById('upstreamPrimer3').value.trim(),
+            // downstreamPrimer5: document.getElementById('downstreamPrimer5').value.trim(),
+            // downstreamPrimer3: document.getElementById('downstreamPrimer3').value.trim()
+        };
+        
+        const output = processSequence(input);
+        results.innerHTML = output;
+    } catch (error) {
+        results.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+    }
+}
+
+function clearForm() {
+    document.getElementById('inputSeq').value = '';
+    document.getElementById('results').innerHTML = '';
+}
+
+function testSequence(seq) {
+    const parts = seq.split(/[\(\)]/);
+    if (parts.length !== 3) {
+        throw new Error('Only input one sequence with format aaa(a/t)ggg!');
+    }
+    
+    const [left, target, right] = parts;
+    
+    if (!/^[atcgATGC]*$/.test(left)) {
+        throw new Error(`Left sequence contains invalid characters!`);
+    }
+    if (!/^[atcgATGC]*$/.test(right)) {
+        throw new Error(`Right sequence contains invalid characters!`);
+    }
+    if (left.length < 20) {
+        throw new Error('Left flanking sequence is too short! (<20)');
+    }
+    if (right.length < 10) {
+        throw new Error('Right flanking sequence is too short! (<10)');
+    }
+    
+    const [ref, alt] = target.split('/');
+    if (!/^[atcgATGC]*$/.test(ref)) {
+        throw new Error(`Reference sequence contains invalid characters!`);
+    }
+    if (!/^[atcgATGC]*$/.test(alt)) {
+        throw new Error(`Alternate sequence contains invalid characters!`);
+    }
+    if (ref === alt) {
+        throw new Error('Reference and alternate sequences are identical!');
+    }
+}
+
+function testPAM(pam) {
+    if (pam === 'User_Defined' || pam === '') {
+        throw new Error('Empty PAM sequence!');
+    }
+    if (!/^[atcgATCGrymkswhbvdnRYMKSWHBVDN]*$/.test(pam)) {
+        throw new Error(`Wrong PAM sequence: ${pam}!`);
+    }
+}
+
+function parseSequence(seq) {
+    const [left, target, right] = seq.split(/[\(\)]/);
+    const [ref, alt] = target.split('/');
+    
+    const leftLower = left.toLowerCase();
+    const rightLower = right.toLowerCase();
+    const refUpper = ref.toUpperCase();
+    const altUpper = alt.toUpperCase();
+    
+    return {
+        refFull: leftLower + refUpper + rightLower,
+        altFull: leftLower + altUpper + rightLower,
+        lengthLeft: left.length,
+        lengthRight: right.length,
+        lengthRef: ref.length,
+        lengthAlt: alt.length
+    };
+}
+
+function reverseComplement(seq) {
+    const complement = {
+        'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C',
+        'a': 't', 't': 'a', 'c': 'g', 'g': 'c',
+        '(': ')', ')': '(', '/': '/'
+    };
+    
+    return seq.split('').reverse().map(c => complement[c] || c).join('');
+}
+
+function matchBase(pattern, base) {
+    const p = pattern.toLowerCase();
+    const b = base.toLowerCase();
+    
+    const matches = {
+        'a': ['a'], 't': ['t'], 'c': ['c'], 'g': ['g'],
+        'r': ['a', 'g'], 'y': ['c', 't'], 'm': ['a', 'c'],
+        'k': ['g', 't'], 's': ['g', 'c'], 'w': ['a', 't'],
+        'h': ['a', 't', 'c'], 'b': ['g', 't', 'c'],
+        'v': ['g', 'a', 'c'], 'd': ['g', 'a', 't'],
+        'n': ['a', 't', 'c', 'g']
+    };
+    
+    return matches[p] && matches[p].includes(b);
+}
+
+function findAllPAMs(refSeq, pam, onTargetLength, cutToPam) {
+    const results = [];
+    const pamChars = pam.split('');
+    const seqChars = refSeq.split('');
+    
+    for (let i = 0; i < seqChars.length - onTargetLength - pamChars.length; i++) {
+        let match = true;
+        
+        for (let j = 0; j < pamChars.length; j++) {
+            if (!matchBase(pamChars[j], seqChars[i + onTargetLength + j])) {
+                match = false;
+                break;
+            }
+        }
+        
+        if (match) {
+            const onTargetSeq = seqChars.slice(i, i + onTargetLength).join('');
+            const pamSeq = seqChars.slice(i + onTargetLength, i + onTargetLength + pamChars.length).join('');
+            const cutPosition = i + onTargetLength + cutToPam;
+            
+            results.push({
+                onTargetSeq,
+                pamSeq,
+                cutPosition
+            });
+        }
+    }
+    
+    return results;
+}
+
+function calculateGC(seq) {
+    const lower = seq.toLowerCase();
+    let gc = 0, at = 0;
+    
+    for (const c of lower) {
+        if (c === 'a' || c === 't') at++;
+        else if (c === 'c' || c === 'g') gc++;
+    }
+    
+    return gc / (gc + at);
+}
+
+function calculateTM(seq) {
+    const lower = seq.toLowerCase();
+    let tm = 0;
+    
+    for (const c of lower) {
+        if (c === 'a' || c === 't') tm += 2;
+        else if (c === 'c' || c === 'g') tm += 4;
+    }
+    
+    return tm;
+}
+
+function filterGC(pams, gcRange) {
+    const [gcMin, gcMax] = gcRange.split('-').map(Number);
+    return pams.filter(pam => {
+        const gc = calculateGC(pam.onTargetSeq) * 100;
+        return gc >= gcMin && gc <= gcMax;
+    });
+}
+
+function filterPEWindow(pams, peWindow, lengthLeft) {
+    const [peLeft, peRight] = peWindow.split('-').map(Number);
+    return pams.filter(pam => {
+        const cutPos = pam.cutPosition;
+        const leftDistToCut = lengthLeft - cutPos;
+        if (cutPos + peLeft - 1 <= lengthLeft && cutPos + peRight - 1 > lengthLeft) {
+            pam.leftDistanceToCut = leftDistToCut;
+            return true;
+        }
+        return false;
+    });
+}
+
+function processSequence(input) {
+    testSequence(input.inputSequence);
+    testPAM(input.pam);
+    
+    const finalResults = {};
+    const ccggPamCount = {};
+    let ccggModel = 0;
+    
+    for (let fr = 0; fr < 2; fr++) {
+        const strand = fr === 0 ? 'Forward Strand' : 'Reverse Strand';
+        let seq, refSeq, altSeq, lengthLeft, lengthRight, lengthRef, lengthAlt;
+        
+        if (fr === 0) {
+            const parsed = parseSequence(input.inputSequence);
+            refSeq = parsed.refFull;
+            altSeq = parsed.altFull;
+            lengthLeft = parsed.lengthLeft;
+            lengthRight = parsed.lengthRight;
+            lengthRef = parsed.lengthRef;
+            lengthAlt = parsed.lengthAlt;
+        } else {
+            const revSeq = reverseComplement(input.inputSequence);
+            const parsed = parseSequence(revSeq);
+            refSeq = parsed.altFull;
+            altSeq = parsed.refFull;
+            lengthLeft = parsed.lengthLeft;
+            lengthRight = parsed.lengthRight;
+            lengthRef = parsed.lengthAlt;
+            lengthAlt = parsed.lengthRef;
+        }
+        
+        let pams = findAllPAMs(refSeq, input.pam, input.onTargetLength, input.cutToPam);
+        pams = filterGC(pams, input.onTargetGC);
+        pams = filterPEWindow(pams, input.peWindow, lengthLeft);
+        
+        if (pams.length > 0) ccggModel++;
+        ccggPamCount[fr] = pams.length;
+        
+        for (const pam of pams) {
+            const leftDist = pam.leftDistanceToCut;
+            
+            if (!finalResults[leftDist]) finalResults[leftDist] = {};
+            if (!finalResults[leftDist][strand]) finalResults[leftDist][strand] = [];
+            
+            const result = {
+                onTargetSeq: pam.onTargetSeq,
+                pamSeq: pam.pamSeq,
+                gc: (calculateGC(pam.onTargetSeq) * 100).toFixed(1),
+                cutPosition: pam.cutPosition,
+                leftDistanceToCut: leftDist,
+                pbsList: [],
+                rtList: []
+            };
+            
+            // Calculate PBS
+            const [pbsMin, pbsMax] = input.pbsLength.split('-').map(Number);
+            const [pbsGCMin, pbsGCMax] = input.pbsGC.split('-').map(Number);
+            let bestTM = 0;
+            const pbsResults = [];
+            
+            for (let j = pbsMin; j <= pbsMax; j++) {
+                const pbsSeq = refSeq.substr(pam.cutPosition - j, j);
+                const pbsTm = calculateTM(pbsSeq);
+                const pbsGC = calculateGC(pbsSeq) * 100;
+                
+                if (pbsGC < pbsGCMin || pbsGC > pbsGCMax) continue;
+                
+                if (Math.abs(pbsTm - input.tmBest) <= Math.abs(bestTM - input.tmBest)) {
+                    bestTM = pbsTm;
+                }
+                
+                pbsResults.push({
+                    seq: pbsSeq,
+                    length: j,
+                    tm: pbsTm,
+                    gc: pbsGC.toFixed(1)
+                });
+            }
+            
+            const bestPBS = [];
+            for (const pbs of pbsResults) {
+                const isBest = input.tmModel && pbs.tm === bestTM;
+                if (isBest) bestPBS.push(pbs.seq);
+                result.pbsList.push({
+                    seq: reverseComplement(pbs.seq),
+                    length: pbs.length,
+                    tm: pbs.tm,
+                    gc: pbs.gc,
+                    best: isBest
+                });
+            }
+            
+            // Calculate RT
+            const [rtMin, rtMax] = input.rtLength.split('-').map(Number);
+            const rtLeftSeq = altSeq.substr(pam.cutPosition, lengthLeft - pam.cutPosition);
+            const rtResults = [];
+            
+            for (let j = rtMin; j <= rtMax; j++) {
+                const rtRightSeq = altSeq.substr(lengthLeft, lengthAlt + j);
+                const rtSeq = rtLeftSeq + rtRightSeq;
+                const lastBase = rtSeq[rtSeq.length - 1];
+                
+                if (input.excludeLastG && (lastBase === 'g' || lastBase === 'G')) {
+                    continue;
+                }
+                
+                rtResults.push({ seq: rtSeq, length: rtSeq.length });
+            }
+            
+            const bestRT = [];
+            const middleIdx = Math.floor((rtResults.length+1) / 2);
+            
+            for (let j = 0; j < rtResults.length; j++) {
+                const isBest = j === middleIdx - 1; // corrected by junli based on perl script
+                if (isBest) bestRT.push(rtResults[j].seq);
+                result.rtList.push({
+                    seq: reverseComplement(rtResults[j].seq),
+                    length: rtResults[j].length,
+                    best: isBest
+                });
+            }
+            
+            // // Generate primers
+            // let onTargetSeq1 = pam.onTargetSeq.replace(/^g/, '');
+            // result.upstreamPrimer = input.upstreamPrimer5 + onTargetSeq1 + input.upstreamPrimer3;
+            // result.downstreamPrimers = [];
+            
+            // for (const pbs of bestPBS) {
+            //     for (const rt of bestRT) {
+            //         result.downstreamPrimers.push(
+            //             input.downstreamPrimer5 + pbs + rt + input.downstreamPrimer3
+            //         );
+            //     }
+            // }
+            
+            // generate final pegRNA: spacer + scaffold + RT-template + PBS + 8bp-linker + tevopreQ1
+            let onTargetSeq1 = pam.onTargetSeq;
+            result.pegRNAs = [];
+            const scaffold = "GTTTAAGAGCTATGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGC";
+            const tevopreQ1 = "CGCGGTTCTATCTAGTTACGCGTTAAACCAACTAGAA"
+            for (const pbs of bestPBS) {
+                for (const rt of bestRT) {
+                    result.pegRNAs.push(
+                        // onTargetSeq1 + scaffold + reverseComplement(rt) + reverseComplement(pbs.toUpperCase()) + "xxxxxxxx" + tevopreQ1
+                        onTargetSeq1 + '<span style="color:red">' + scaffold + '</span>' + reverseComplement(rt) + reverseComplement(pbs.toUpperCase()) + "xxxxxxxx" + '<span style="color:purple">' + tevopreQ1 + '</span>'
+                    );
+                }
+            }
+
+            finalResults[leftDist][strand].push(result);
+        }
+    }
+    
+    return generateHTML(finalResults, ccggModel, ccggPamCount, input.ccnnggModel);
+}
+
+function generateHTML(finalResults, ccggModel, ccggPamCount, useCCNNGG) {
+    let html = '';
+    
+    // CCNNGG message
+    if (useCCNNGG) {
+        if (ccggModel === 2) {
+            const fwd = ccggPamCount[0];
+            const rev = ccggPamCount[1];
+            html += `<div class="ccgg-message">There are ${fwd} PAM(s) on the forward strand and ${rev} PAM(s) on the reverse strand, the dual-pegRNA model could be used!</div>`;
+        } else {
+            html += `<div class="ccgg-message">The dual-pegRNA model could not be used!</div>`;
+        }
+    }
+    
+    const sortedDists = Object.keys(finalResults).map(Number).sort((a, b) => a - b);
+    
+    if (sortedDists.length === 0) {
+        return '<div class="no-results">No PAM available.</div>';
+    }
+    
+    let count = 0;
+    let bestPam1 = 'recommended program, also could be used for NGG-pegRNA in dual-pegRNA model!';
+    let bestPam2 = 'recommended program, also could be used for CCN-pegRNA in dual-pegRNA model!';
+    let bestPam0 = 'recommended program';
+    
+    for (const dist of sortedDists) {
+        const strands = finalResults[dist];
+        const strandNames = Object.keys(strands).sort();
+        
+        for (const strandName of strandNames) {
+            const results = strands[strandName];
+            
+            for (const result of results) {
+                count++;
+                html += '<table class="result-table">';
+                
+                // Title
+                let title = '';
+                if (strandName === 'Forward Strand') {
+                    title = useCCNNGG && ccggModel === 2 ? bestPam1 : bestPam0;
+                    if (useCCNNGG && ccggModel === 2) bestPam1 = 'program';
+                    else bestPam0 = 'program';
+                } else {
+                    title = useCCNNGG && ccggModel === 2 ? bestPam2 : bestPam0;
+                    if (useCCNNGG && ccggModel === 2) bestPam2 = 'program';
+                    else bestPam0 = 'program';
+                }
+                
+                const titleClass = title.includes('recommended') ? 'program-title' : 'program-title-normal';
+                html += `<tr><th colspan="5" class="${titleClass}">No. ${count} ${title}</th></tr>`;
+                html += `<tr class="strand-title"><th colspan="5">${strandName}</th></tr>`;
+                
+                // PAM info
+                html += `<tr>
+                    <th>Spacer-PAM:</th>
+                    <td>${result.onTargetSeq}<span class="pam-sequence">${result.pamSeq}</span></td>
+                    <td>(${result.gc}% GC)</td>
+                    <td></td>
+                    <td></td>
+                </tr>`;
+                
+                // PBS header
+                html += `<tr>
+                    <th class="section-header">PBS:</th>
+                    <td class="section-header">Sequence</td>
+                    <td class="section-header">Length</td>
+                    <td class="section-header">Tm(°C)</td>
+                    <td class="section-header">GC(%)</td>
+                </tr>`;
+                
+                // PBS rows
+                for (const pbs of result.pbsList) {
+                    const bestClass = pbs.best ? 'recommended' : '';
+                    const bestText = pbs.best ? 'Recommended!' : '';
+                    html += `<tr>
+                        <td class="${bestClass}">${bestText}</td>
+                        <td class="${bestClass}">${pbs.seq}</td>
+                        <td class="${bestClass}">${pbs.length}</td>
+                        <td class="${bestClass}">${pbs.tm}</td>
+                        <td class="${bestClass}">${pbs.gc}</td>
+                    </tr>`;
+                }
+                
+                // RT header
+                html += `<tr>
+                    <th class="section-header">RT template:</th>
+                    <td class="section-header">Sequence</td>
+                    <td class="section-header">Length</td>
+                    <td></td>
+                    <td></td>
+                </tr>`;
+                
+                // RT rows
+                for (const rt of result.rtList) {
+                    const bestClass = rt.best ? 'recommended' : '';
+                    const bestText = rt.best ? 'Recommended!' : '';
+                    html += `<tr>
+                        <td class="${bestClass}">${bestText}</td>
+                        <td class="${bestClass}">${rt.seq}</td>
+                        <td class="${bestClass}">${rt.length}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>`;
+                }
+                
+                // // Primers
+                // html += `<tr><th class="section-header" colspan="5">Primers (Recommended):</th></tr>`;
+                // html += `<tr>
+                //     <td class="primer-label">Forward primer (5'-3')</td>
+                //     <td colspan="4">${result.upstreamPrimer}</td>
+                // </tr>`;
+                
+                // for (const primer of result.downstreamPrimers) {
+                //     html += `<tr>
+                //         <td class="primer-label">Reverse primer (5'-3')</td>
+                //         <td colspan="4">${primer}</td>
+                //     </tr>`;
+                // }
+                
+                html += '</table>';
+                // pegRNAs
+                html += `<p class="section-header" colspan="5">PegRNA (Recommended):</p>`;
+                html += `<p>xxxxxxxx is the linker, and can designed here: <a href="https://peglit.liugroup.us/" target="_blank">https://peglit.liugroup.us/</a></p>`
+                for (const pegRNA of result.pegRNAs) {
+                    html += `<p style="word-break: break-all; white-space: normal;"><strong>Final pegRNA = spacer + <span style="color:red">scaffold</span> + RT-template + PBS + 8bp-linker + <span style="color:purple">tevopreQ1</span>:</strong><br>${pegRNA}</p>`;
+                }
+            }
+        }
+    }
+    
+    return html;
+}
+</script>
+
+</body>
+</html>
