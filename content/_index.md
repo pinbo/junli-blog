@@ -9,7 +9,7 @@ This is Junli Zhang's blog. Hope it can bring you some pleasure and knowledge. W
 
 I am a plant scientist. I love hiking, jogging, and learning! I have learned a bunch of computer languages, such as R, Python, Perl, SQL, and Javascript. I got a lot of pleasure while learning new kinds of stuff and enjoy it more when I am using them in my research.
 
-I got my Ph.D. in Plant Science from the University of Idaho. I am currently an Assistant Project Scientist in Dr. Jorge Dubcovsky's lab at the University of California, Davis. I have been working on wheat genetics and breedings for years. I would like to share my thoughts and experiences with you.
+I am currently an assistant professor in small grains genetics at Texas A&M AgriLife Research. I got my Ph.D. in Plant Science from the University of Idaho. I got my postdoc training in Dr. Jorge Dubcovsky's lab at the University of California, Davis. I have been working on wheat genetics and breedings for years. I would like to share my thoughts and experiences with you.
 
 Here are a few links about me:
 
