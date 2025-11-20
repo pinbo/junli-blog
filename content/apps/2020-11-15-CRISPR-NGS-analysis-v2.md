@@ -26,6 +26,9 @@ tags:
 	<button onclick="putExample()">Example Input</button><br>
 	<label for="reference">Select the fastq or fastq.gz files for analyzing</label><br>
 	<input type="file" id="files" name="files[]" multiple /><br>
+	<div id="options" style="font-size:90%;color:blue;">
+		Output top <input size="4" id="topn" value="4" type="text"> mutations
+	</div>
 	<button onclick="analyze()">Start Analyze</button>
 	<select id="box1">
 		<option value="F">Forward Strand</option>

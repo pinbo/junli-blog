@@ -168,13 +168,14 @@ function checkIndel(leftSeq, rightSeq, gRNA, wtSeq, filename, fileContent){//rea
     if (matchBoth) {
         document.getElementById('output').value += [filename, matchBoth, matchGRNA, matchGRNA/matchBoth*100, nindel, nindel/matchBoth*100, matchLeft, matchRight, matchLeft/matchRight].join(",");
         // find the top2 mutations
+        let topn = document.getElementById('topn').value;
         var sortedUniqSeq = sortDict(uniqMutSeq);
         var cc = 0;
         var wtCount = 0;
         if (wtSeq in uniqMutSeq) wtCount = uniqMutSeq[wtSeq];
         document.getElementById('output').value += "," + wtCount + "," + wtCount/matchBoth*100;
         for (var mutSeq of sortedUniqSeq){
-            if (cc > 3) break;
+            if (cc > topn - 1) break;
             if (mutSeq[0] != wtSeq){
                 cc += 1
                 console.log(wtSeq)
@@ -206,10 +207,11 @@ async function analyzeFiles() {
     document.getElementById('output').value += "Intact reference sequence," + wtSeq + "\n\n";
     document.getElementById('output').value += "fastq_file,number_of_matched_reads,number_of_reads_with_intact_gRNA,%intact_gRNA,total_indel,%indel,number_of_reads_with_leftSeq,number_of_reads_with_rightSeq,nleftSeq/nrightSeq,";
     document.getElementById('output').value += "wtSeq_count,wtSeq_%,";
-    document.getElementById('output').value += "#1_mutation,#1_count,#1_%,#1_seq,#1_ref,#1_alt,#1_bp_left_of_PAM,";
-    document.getElementById('output').value += "#2_mutation,#2_count,#2_%,#2_seq,#2_ref,#2_alt,#2_bp_left_of_PAM,";
-    document.getElementById('output').value += "#3_mutation,#3_count,#3_%,#3_seq,#3_ref,#3_alt,#3_bp_left_of_PAM,";
-    document.getElementById('output').value += "#4_mutation,#4_count,#4_%,#4_seq,#4_ref,#4_alt,#4_bp_left_of_PAM\n";
+    let topn = document.getElementById('topn').value;
+    for (let i = 1; i <= topn; i++){ // top 10 output
+        document.getElementById('output').value += `#${i}_mutation,#${i}_count,#${i}_%,#${i}_seq,#${i}_ref,#${i}_alt,#${i}_bp_left_of_PAM,`;
+    }
+    document.getElementById('output').value += "\n";
     for(var i = 0, f; f = files[i]; i++) {
         // read file content
         console.log(f.name);
@@ -263,8 +265,8 @@ function align(wt, mut){//two sequences
             break;
         }
     }
-    wt2 = reverseString(wt);
-    mut2 = reverseString(mut);
+    let wt2 = reverseString(wt);
+    let mut2 = reverseString(mut);
     for (let i = 0; i < wt.length; i++) {
         if (wt2[i] != mut2[i]){
             difRight = i;
