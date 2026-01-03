@@ -1,0 +1,1341 @@
+---
+title: 'JD99 Wheat spike smFISH'
+author: Junli Zhang
+date: '2026-01-03'
+slug: JD99-wheat-spike-smFISH
+categories:
+  - tools
+tags:
+  - smFISH
+  - scRNA-seq
+  - fullHtml
+---
+
+<!-- 2025-07-18 v3: add filter -->
+<!-- 2025-06-26 v2: add selection of cells and download all transcripts -->
+<!-- 2026-01-03 v5: color-blind friendly -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheat spike smFISH spatial</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            overflow: auto;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            /* height: 90vh; */
+        }
+        #svg-wrapper {
+            border: 1px solid #ccc;
+            margin-top: 2px;
+            overflow: hidden;
+            flex-grow: 1;
+            position: relative;
+			/*min-height: 700px; /* Ensure it doesn't shrink */
+        }
+        #svg-container {
+            width: 100%;
+            /* height: 100%; */
+			/* height: 110vw; */
+			/* aspect-ratio: 12/11; */
+			height: 700px; /* Fixed height for the SVG */
+			min-height: 700px; /* Ensure it doesn't shrink */
+        }
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .gene-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        select {
+            min-width: 200px;
+            padding: 5px;
+        }
+        #web-legend {
+            /* display: flex; */
+            gap: 10px;
+            margin-top: 10px;
+			margin-right: 10px;
+        }
+        .legend-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .color-legend {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border: 1px solid #333;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+            color: #666;
+        }
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .zoom-btn {
+            width: 30px;
+            height: 30px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .zoom-btn:hover {
+            background: #f0f0f0;
+        }
+        .no-selection {
+            color: #999;
+            font-style: italic;
+        }
+        #export-controls {
+            margin-top: 10px;
+        }
+        .svg-legend {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+		.left {
+        float: left;
+        width: 20%;
+    }
+		.right {
+			float: right;
+			width: 80%;
+		}
+		div.tooltip-donut {
+			position: absolute;
+			text-align: center;
+			padding: .5rem;
+			background: #FFFFFF;
+			color: #313639;
+			border: 1px solid #313639;
+			border-radius: 8px;
+			pointer-events: none;
+			font-size: 0.8rem;
+		}
+				.button-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+		/* button {
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            width: 150px;
+        } */
+        #toggleSelection {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #toggleSelection.active {
+            background-color: #f44336;
+        }
+        #clear {
+            background-color: #2196F3;
+            color: white;
+        }
+        #logSelection {
+            background-color: #ff9800;
+            color: white;
+        }
+        #zoomIn, #zoomOut, #resetZoom {
+            background-color: #9e9e9e;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        #selectedIds {
+            /* margin-top: 10px; */
+            padding: 5px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .instructions {
+            font-size: 0.9em;
+            color: #666;
+            /* margin-bottom: 10px; */
+        }
+    </style>
+</head>
+<body>
+    <!-- <h1>JD99 wheat spike simFISH spatial transcriptomics</h1> -->
+	<div class="left">
+		<h2>Cluster Map</h2>
+		<div class="checkbox-container" id="checkboxContainer">
+			<!-- Checkboxes will be generated by JavaScript -->
+		</div>
+		<div id="web-legend">
+            <div class="legend-item">
+				<div id="fill-legend">
+                	<strong>Gene 1:</strong> <span class="no-selection">None selected</span>
+				</div>
+				<div class="slider-container">
+					<output id="value-display1">Display threshold:</output><br>
+					<input type="range" id="value-filter1" min="1" max="100" value="1" style="width:90%;">
+				</div>
+            </div>
+            <div class="legend-item">
+				<div id="stroke-legend">
+                	<strong>Gene 2:</strong> <span class="no-selection">None selected</span>
+				</div>
+				<div class="slider-container">
+					<output id="value-display2">Display threshold:</output><br>
+					<input type="range" id="value-filter2" min="1" max="100" value="1" style="width:90%;">
+				</div>
+            </div>
+			<div id="gene-controls">
+				<button id="export-svg">Download SVG image</button><br><br>
+				<button id="export-png">Download png image at quality</button>
+				<input type="number" id="png-quality" name="png-quality" value="5" size="1" max = "10" min="1"><br><br>
+				<!-- <label for="fname">Find a cell</label> -->
+				<button id="findcell" onclick="highlightCell()">Find a cell</button>
+  				<input type="text" id="highlight-cell" name="highlight-cell">
+			</div>
+        </div>
+	</div>
+    <div id="container" class="right">
+		<h2>Expression Heatmap</h2>
+        <div id="controls">
+            <div class="gene-control">
+                <label for="fill-gene-select">Gene 1 (cell color):</label>
+                <select id="fill-gene-select">
+                    <option value="">-- None --</option>
+                </select>
+                <div id="fill-loading" class="loading"></div>
+            </div>
+            <div class="gene-control">
+                <label for="stroke-gene-select">Gene 2 (cell border color):</label>
+                <select id="stroke-gene-select">
+                    <option value="">-- None --</option>
+                </select>
+                <div id="stroke-loading" class="loading"></div>
+            </div>
+        </div>
+		<div class="button-group">
+            <button id="toggleSelection" title="Toggle selection mode to select cells with freehand drawing. Disable to zoom or drag.">Enable Cell Selection</button>
+            <button id="clear" title="clear all selected cells">Clear Cell Selection</button>
+			<button id="downloadExpression">download transcripts of selected cells</button>
+        </div>
+		<div id="selectedIds" style="display: none;">Selected IDs will appear here</div>
+        <div id="svg-wrapper">
+            <div id="svg-container"></div>
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoom-in" title="zoom in">+</button>
+                <button class="zoom-btn" id="zoom-out" title="zoom out">-</button>
+                <button class="zoom-btn" id="reset-zoom" title="reset">↻</button>
+                <button class="zoom-btn" id="download-svg" title="download">↓</button>
+            </div>
+        </div>
+		<div id="gene-controls">
+			<h3>Help</h3>
+			<p>You can easily view the expression of 99 genes obtained from single-molecule fluorescence in situ hybridization (smFISH) for wheat apex at 3 stages (early transition (W1.5), late double ridge (W2.5) and floret primordia (W3.5) stages; each stage has two images). Please check the reference below for details of the smFISH experiment. Below is just a quick guide:</p>
+			<ol>
+				<li>On the left panel (Cluster Map), you can view all or a few clusters of the smFISH.</li>
+				<li>One the right panel (Expression Heatmap), you can check single gene or a pair of gene expression in each cell of the 6 smFISH images.</li>
+				<li>"Gene 1" has heatmap for the cell fill color; "Gene 2" has heatmap for the cell border color.</li>
+				<li>Select "Gene 1" or "Gene 2" will clear the cluster colors; and "Gene 1" compete the color fill colors with clusters.</li>
+				<li>Gene 2 and the clusters can be shown at the same time, but make sure to select "Gene 2" first, then select the clusters.</li>
+				<li>You can use the mouse wheel to zoom in or out; drag it to move.</li>
+				<li>You can download a SVG (Scalable Vector Graphics) format image, view it with a web browser, and edit it with <a href="https://inkscape.org/">Inkscape (free)</a> or <a href="https://svgedit.netlify.app/editor/index.html">SVG-edit (free)</a> or Adobe Illustrator (commercial).</li>
+				<li>You can also download a high-quality PNG image. Increase the quality number to get an image with higher quality.</li> 
+				<li>You can <a href="data/geneIDs.csv" download>download Kronos and Chinese spring gene IDs of the 99 genes</a>.</li>
+			</ol>
+			<h3>Reference</h3>
+			<p>Xu, X., Lin, H., Zhang, J. et al. Spatial and single-cell expression analyses reveal complex expression domains in early wheat spike development. Genome Biol 26, 352 (2025). <a href="https://doi.org/10.1186/s13059-025-03811-3" target="_blank">https://doi.org/10.1186/s13059-025-03811-3</a></p>
+			
+		</div>
+    </div>
+
+
+<script id="geneHeatMap">
+	// Global variables
+	let expressionData = null;
+	let cellIds = [];
+	let geneList = [];
+	// let fillColorScale = d3.scaleSequential(d3.interpolateYlOrRd);
+	// let strokeColorScale = d3.scaleSequential(t => d3.interpolateCool(1 - t));
+	// let strokeColorScale = d3.scaleSequential(d3.interpolateBuPu);
+	let fillColorChoice = d3.interpolatePuOr; // d3.interpolatePlasma;
+	let strokeColorChoice = d3.interpolateRdYlBu; //d3.interpolateCividis;
+	let fillColorScale = d3.scaleSequential(fillColorChoice);
+	let strokeColorScale = d3.scaleSequential(strokeColorChoice); //(t => d3.interpolateCool(1 - t)); reverse the scale
+	let zoom = d3.zoom();
+	let g = null;
+	let svgElement = null;
+	let svgNode = null;
+	let div = d3.select("body").append("div")
+     .attr("class", "tooltip-donut")
+     .style("opacity", 0); // to show cell information when mouse over
+	// slider to filer values to display
+	const slider1 = document.getElementById('value-filter1');
+	const valueDisplay1 = document.getElementById('value-display1');
+	const slider2 = document.getElementById('value-filter2');
+	const valueDisplay2 = document.getElementById('value-display2');
+	// Update display when slider moves
+	slider1.addEventListener('input', function() {
+		const threshold = this.value;
+		valueDisplay1.textContent = `Display threshold: ${threshold}`;
+		updateAllPolygons();
+	});
+	slider2.addEventListener('input', function() {
+		const threshold = this.value;
+		valueDisplay2.textContent = `Display threshold: ${threshold}`;
+		updateAllPolygons();
+	});
+
+	// Load SVG file
+	function loadSVG(svgUrl) {
+		showLoading("fill", "Loading SVG...");
+		d3.xml(svgUrl).then(function(data) {
+			hideLoading("fill");
+			svgNode = data.documentElement;
+			const container = document.getElementById('svg-container');
+			container.innerHTML = '';
+			
+			// Create a group element to hold the SVG and enable transforms
+			svgElement = d3.select(container)
+				.append('svg')
+				.attr('width', '100%')
+				.attr('height', '100%')
+				.attr('preserveAspectRatio', 'xMidYMid meet');
+				// .call(zoom.on('zoom', (event) => {
+				// 	g.attr('transform', event.transform);
+				// }))
+				// .on('dblclick.zoom', null); // Disable double-click zoom
+			
+			g = svgElement.append('g');
+			g.node().appendChild(svgNode);
+			
+			// Initialize zoom behavior
+			zoom.scaleExtent([0.1, 20]);
+			zoom.on('zoom', (event) => {
+				g.attr('transform', event.transform);
+			});
+			svg = svgElement;
+			svg.call(zoom);
+			
+			// Fit the SVG to view initially
+			resetZoom();
+
+			// mouse over to show cell id and cluster number
+			showInfo();
+			
+			// Initialize all polygons with default style
+			updateAllPolygons();
+		}).catch(error => {
+			hideLoading("fill");
+			console.error("Error loading SVG:", error);
+			alert("Error loading SVG file. See console for details.");
+		});
+	}
+
+	// highlight a cell with its name
+	function highlightCell(){
+		let cellID = document.getElementById("highlight-cell").value;
+		if (cellID == "") alert("Input a cell ID!");
+		else 
+		{
+			try {
+				svgElement.select('#' + cellID).attr('fill', "red");
+			} catch (error) {
+				alert("Cell ID not found!");
+			}
+		}
+	}
+
+	// mouse over
+	function showInfo(){
+		// add mouse over
+		svgElement.selectAll('polygon')
+		.on('mouseover', function (d) {
+			d3.select(this).transition()
+				.duration('50')
+				.attr('opacity', '.85');
+			div.transition()
+				.duration(50)
+				.style("opacity", 1);
+			// let num = (Math.round((d.value / d.data.all) * 100)).toString() + '%';
+			const cellId = this.id;
+			const fillGene = document.getElementById('fill-gene-select').value;
+			const strokeGene = document.getElementById('stroke-gene-select').value;
+			let info = this.id + "<br>" + this.getAttribute("class").replace("circle cluster-", "Cluster ");
+			if (fillGene && fillGene !== "") {
+				const value = expressionData[fillGene][cellId];
+				info += `<br>${fillGene} count: ` + value; //.toFixed(0);
+			}
+			if (strokeGene && strokeGene !== "") {
+				const value = expressionData[strokeGene][cellId];
+				info += `<br>${strokeGene} count: ` + value; //.toFixed(0);
+			}
+
+			div.html(info)
+				.style("left", (event.pageX + 10) + "px")
+				.style("top", (event.pageY - 15) + "px");
+		})
+		.on('mouseout', function (d) {
+			d3.select(this).transition()
+				.duration('50')
+				.attr('opacity', '1');
+			div.transition()
+				.duration('50')
+				.style("opacity", 0);
+		});
+	}
+
+	// Reset zoom to fit SVG
+	function resetZoom() {
+		const container = document.getElementById('svg-container');
+		const svgEl = container.querySelector('svg');
+		
+		if (!svgEl || !g) return;
+		
+		const svgRect = svgEl.getBoundingClientRect();
+		const contentRect = g.node().getBBox();
+		
+		// Calculate scale to fit
+		const scale = Math.min(
+			svgRect.width / contentRect.width,
+			svgRect.height / contentRect.height,
+			1 // Don't scale up beyond 100%
+		);
+		
+		// Calculate center position
+		const x = svgRect.width / 2 - (contentRect.x + contentRect.width / 2) * scale;
+		const y = svgRect.height / 2 - (contentRect.y + contentRect.height / 2) * scale;
+		
+		// Apply transform
+		g.attr('transform', `translate(${x},${y}) scale(${scale})`);
+		
+		// Update zoom state
+		zoom.transform(
+			d3.select('#svg-container svg'),
+			d3.zoomIdentity.translate(x, y).scale(scale)
+		);
+	}
+
+	// Load CSV file
+	async function loadCSV(filePath) {
+		showLoading("fill", "Loading gene expression matrix...");
+		try {
+			const response = await fetch(filePath);
+			if (!response.ok) {
+				throw new Error(`HTTP error! Status: ${response.status}`);
+			}
+			const csvText = await response.text();
+			// Process csvText here (e.g., parsing, displaying)
+			const csvData = d3.csvParse(csvText);
+			// Process CSV data
+			processExpressionData(csvData);
+			// Update gene dropdown
+			updateGeneDropdowns();
+			// Load SVG after CSV is processed
+			loadSVG('https://wheatsinglecell.s3.us-east-2.amazonaws.com/images/all6_simple_with_individual_groups.svg'); // Change this to your SVG file path
+		} catch (error) {
+			console.error("Error loading CSV:", error);
+			hideLoading();
+			alert("Error processing CSV file. See console for details.");
+		}
+	}
+
+	// Process expression data from CSV
+	function processExpressionData(csvData) {
+		// First row contains cell IDs (assuming first column is gene names)
+		cellIds = csvData.columns.slice(1);
+		
+		// Extract gene names and expression values
+		geneList = csvData.map(row => row[csvData.columns[0]]);
+		
+		// Convert to a more accessible structure: {gene: {cell1: value, cell2: value}}
+		expressionData = {};
+		csvData.forEach(row => {
+			const gene = row[csvData.columns[0]];
+			expressionData[gene] = {};
+			cellIds.forEach(cellId => {
+				expressionData[gene][cellId] = +row[cellId];
+			});
+		});
+	}
+
+	// Update all polygons based on current gene selections
+	function updateAllPolygons() {
+		if (!svgElement || svgElement.empty()) return;
+		
+		const fillGene = document.getElementById('fill-gene-select').value;
+		const strokeGene = document.getElementById('stroke-gene-select').value;
+		
+		svgElement.selectAll('polygon').each(function() {
+			const polygon = d3.select(this);
+			const cellId = polygon.attr('id');
+			
+			// Default styles
+			let fill = 'lightgray';
+			let stroke = '';
+			let strokeWidth = 0;
+			
+			// Apply fill color if gene is selected
+			if (fillGene && fillGene !== "" && expressionData[fillGene] && cellId && expressionData[fillGene][cellId] !== undefined) {
+				const value = expressionData[fillGene][cellId];
+				if (value > slider1.value) fill = fillColorScale(value);
+			}
+			
+			// Apply stroke color if gene is selected
+			if (strokeGene && strokeGene !== "" && expressionData[strokeGene] && cellId && expressionData[strokeGene][cellId] !== undefined) {
+				const value = expressionData[strokeGene][cellId];
+				if (value > slider2.value){
+					stroke = strokeColorScale(value);
+					strokeWidth = 1; // Make stroke more visible when used for expression
+				}
+			}
+			
+			polygon.attr('fill', fill)
+				.attr('stroke', stroke)
+				.attr('stroke-width', strokeWidth);
+		});
+		
+		// Update SVG legends
+		// updateSVGLegends();
+	}
+
+	// Update gene dropdowns
+	function updateGeneDropdowns() {
+		const fillSelect = d3.select('#fill-gene-select');
+		const strokeSelect = d3.select('#stroke-gene-select');
+		
+		// Clear existing options except first (None)
+		fillSelect.selectAll('option:not(:first-child)').remove();
+		strokeSelect.selectAll('option:not(:first-child)').remove();
+		
+		// Add new options
+		fillSelect.selectAll('option.gene')
+			.data(geneList)
+			.enter()
+			.append('option')
+			.attr('class', 'gene')
+			.text(d => d)
+			.attr('value', d => d);
+		
+		strokeSelect.selectAll('option.gene')
+			.data(geneList)
+			.enter()
+			.append('option')
+			.attr('class', 'gene')
+			.text(d => d)
+			.attr('value', d => d);
+		
+		// Add event listeners
+		fillSelect.on('change', function() {
+			const gene = this.value;
+			if (gene) {
+				updateColorScale("fill", gene);
+				updateLegend("fill", gene);
+			} else {
+				clearLegend("fill");
+			}
+			updateAllPolygons();
+		});
+		
+		strokeSelect.on('change', function() {
+			const gene = this.value;
+			if (gene) {
+				updateColorScale("stroke", gene);
+				updateLegend("stroke", gene);
+			} else {
+				clearLegend("stroke");
+			}
+			updateAllPolygons();
+		});
+	}
+
+	// Update color scale for a specific gene and type (fill/stroke)
+	function updateColorScale(type, gene) {
+		if (!expressionData || !gene) return;
+		
+		const geneData = expressionData[gene];
+		const values = Object.values(geneData).filter(v => !isNaN(v));
+		const minVal = d3.min(values);
+		const maxVal = d3.max(values);
+		
+		// if (type === "fill") {
+		// 	fillColorScale.domain([minVal, maxVal]);
+		// } else {
+		// 	strokeColorScale.domain([minVal, maxVal]);
+		// }
+		if (type === "fill") {
+			// fillGeneData = geneData;
+			fillColorScale.domain([minVal, maxVal]);
+			slider1.min = minVal;
+			slider1.max = maxVal;
+			slider1.value = minVal;
+			// slider1.value = d3.quantile(values, 0.2).toFixed(0);
+			// valueDisplay1.textContent = `Display threshold: ${d3.quantile(values, 0.25).toFixed(0)}`;
+			valueDisplay1.textContent = `Display threshold: ${slider1.value}`;
+		} else {
+			// strokeGeneData = geneData;
+			strokeColorScale.domain([minVal, maxVal]);
+			slider2.min = minVal;
+			slider2.max = maxVal;
+			slider2.value = minVal;
+			// slider2.value = d3.quantile(values, 0.2).toFixed(0);
+			// valueDisplay2.textContent = `Display threshold: ${d3.quantile(values, 0.25).toFixed(0)}`;
+			valueDisplay2.textContent = `Display threshold: ${slider2.value}`;
+		}
+	}
+
+	// Update web legend for a specific gene and type
+	function updateLegend(type, gene) {
+		if (!expressionData || !gene) return;
+		
+		const geneData = expressionData[gene];
+		const values = Object.values(geneData).filter(v => !isNaN(v));
+		const minVal = d3.min(values);
+		const maxVal = d3.max(values);
+		// const colorScale = type === "fill" ? fillColorScale : strokeColorScale;
+		// const interpolator = type === "fill" ? d3.interpolateYlOrRd : (t => d3.interpolateCool(1 - t));
+		const colorScale = type === "fill" ? fillColorScale : strokeColorScale;
+		const interpolator = type === "fill" ? fillColorChoice : strokeColorChoice; //(t => d3.interpolateCool(1 - t));
+	
+		const legend = d3.select(`#${type}-legend`);
+		legend.html('');
+		
+		// legend.append('strong').text(`${type === "fill" ? "Fill" : "Stroke"} Gene: `);
+		// legend.append('span').text(gene);
+		legend.append('div').html(
+                `<strong>${gene}</strong> (cell ${type === "fill" ? "fill" : "border"} color)`
+            );
+		
+		const legendWidth = Math.min(200, document.getElementById('web-legend').offsetWidth * 0.9);
+		const legendHeight = 20;
+		const legendSvg = legend.append('svg')
+			.attr('width', legendWidth)
+			.attr('height', legendHeight + 20);
+		
+		// Create gradient
+		const defs = legendSvg.append('defs');
+		const gradient = defs.append('linearGradient')
+			.attr('id', `${type}-gradient`)
+			.attr('x1', '0%')
+			.attr('y1', '0%')
+			.attr('x2', '100%')
+			.attr('y2', '0%');
+		
+		// Add color stops
+		const stops = [0, 0.2, 0.4, 0.6, 0.8, 1];
+		stops.forEach(stop => {
+			gradient.append('stop')
+				.attr('offset', `${stop * 100}%`)
+				.attr('stop-color', interpolator(stop));
+		});
+		
+		// Append gradient to rectangle
+		legendSvg.append('rect')
+			.attr('width', legendWidth)
+			.attr('height', legendHeight)
+			.style('fill', `url(#${type}-gradient)`);
+		
+		// Add scale labels
+		legendSvg.append('text')
+			.attr('x', 0)
+			.attr('y', legendHeight + 15)
+			.text(minVal.toFixed(0));
+		
+		legendSvg.append('text')
+			.attr('x', legendWidth)
+			.attr('y', legendHeight + 15)
+			.attr('text-anchor', 'end')
+			.text(maxVal.toFixed(0));
+	}
+
+	// Update SVG legends (added to the exported image)
+	// function updateSVGLegends() {
+	// 	if (!svgElement || svgElement.empty()) return;
+		
+	// 	// Remove existing legends if they exist
+	// 	svgElement.selectAll('.svg-legend-group').remove();
+		
+	// 	const fillGene = document.getElementById('fill-gene-select').value;
+	// 	const strokeGene = document.getElementById('stroke-gene-select').value;
+		
+	// 	// Get the bounding box of the entire SVG content
+	// 	const bbox = g.node().getBBox();
+	// 	const legendGroup = svgElement.append('g')
+	// 		.attr('class', 'svg-legend-group')
+	// 		.attr('transform', `translate(${bbox.x + bbox.width + 20}, ${bbox.y})`);
+		
+	// 	// Add fill legend if gene is selected
+	// 	if (fillGene && fillGene !== "") {
+	// 		addSVGLegend(legendGroup, "fill", fillGene, 50);
+	// 	}
+		
+	// 	// Add stroke legend if gene is selected
+	// 	if (strokeGene && strokeGene !== "") {
+	// 		addSVGLegend(legendGroup, "stroke", strokeGene, 150);
+	// 	}
+	// }
+	function updateSVGLegends() {
+		if (!svgElement || svgElement.empty()) return;
+		
+		// Remove existing legends if they exist
+		svgElement.selectAll('.svg-legend-group').remove();
+		
+		const fillGene = document.getElementById('fill-gene-select').value;
+		const strokeGene = document.getElementById('stroke-gene-select').value;
+		
+		// Get the bounding box of the entire SVG content
+		// const bbox = g.node().getBBox();
+		// const legendGroup = svgElement.append('g')
+		// 	.attr('class', 'svg-legend-group')
+		// 	.attr('transform', `translate(${bbox.x + bbox.width + 50}, ${bbox.y})`);
+		const origsvg = svgElement.selectAll('svg');
+		origsvg.append('style').html(`text {font:11pt sans-serif;} tspan {font: 7pt sans-serif;}`);
+		const legendGroup = origsvg.append('g')
+			.attr('class', 'svg-legend-group')
+			.attr('transform', `translate(850, 400)`); // move to right 850, down 400
+		// Add fill legend if gene is selected
+		if (fillGene && fillGene !== "") {
+			addSVGLegend(legendGroup, "fill", fillGene, 20);
+		}
+		
+		// Add stroke legend if gene is selected
+		if (strokeGene && strokeGene !== "") {
+			addSVGLegend(legendGroup, "stroke", strokeGene, 100);
+		}
+	}
+
+	// Add a single legend to the SVG
+	function addSVGLegend(container, type, gene, yOffset) {
+		const geneData = expressionData[gene];
+		const values = Object.values(geneData).filter(v => !isNaN(v));
+		const minVal = d3.min(values);
+		const maxVal = d3.max(values);
+		// const colorScale = type === "fill" ? fillColorScale : strokeColorScale;
+		// const interpolator = type === "fill" ? d3.interpolateYlOrRd : (t => d3.interpolateCool(1 - t));
+		const colorScale = type === "fill" ? fillColorScale : strokeColorScale;
+		const interpolator = type === "fill" ? fillColorChoice : strokeColorChoice;
+		
+		const legendGroup = container.append('g')
+			.attr('class', `svg-legend ${type}-legend`)
+			.attr('transform', `translate(0, ${yOffset})`);
+		
+		// Add title
+		legendGroup.append('text')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('class', 'svg-legend-title')
+			// .text(`${type === "fill" ? "Fill" : "Stroke"}: ${gene}`);
+			// .text(`${type === "fill" ? "Cell fill color" : "Cell border color"}: ${gene}`);
+			.text(`${gene}`);
+		
+		// Add color bar
+		const legendWidth = 150;
+		const legendHeight = 20;
+		const margin = 5;
+		
+		// Create gradient
+		const defs = container.append('defs');
+		const gradientId = `svg-${type}-gradient`;
+		const gradient = defs.append('linearGradient')
+			.attr('id', gradientId)
+			.attr('x1', '0%')
+			.attr('y1', '0%')
+			.attr('x2', '100%')
+			.attr('y2', '0%');
+		
+		// Add color stops
+		const stops = [0, 0.2, 0.4, 0.6, 0.8, 1];
+		stops.forEach(stop => {
+			gradient.append('stop')
+				.attr('offset', `${stop * 100}%`)
+				.attr('stop-color', interpolator(stop));
+		});
+		
+		// Append gradient to rectangle
+		legendGroup.append('rect')
+			.attr('x', 0)
+			.attr('y', 15)
+			.attr('width', legendWidth)
+			.attr('height', legendHeight)
+			.style('fill', `url(#${gradientId})`)
+			.attr('stroke', '#000')
+			.attr('stroke-width', 0.5);
+		
+		// Add min/max labels
+		legendGroup.append('text')
+			.attr('x', 0)
+			.attr('y', 15 + legendHeight + 15)
+			.attr('class', 'svg-legend-label')
+			.text(minVal.toFixed(0));
+		
+		legendGroup.append('text')
+			.attr('x', legendWidth)
+			.attr('y', 15 + legendHeight + 15)
+			.attr('class', 'svg-legend-label')
+			.attr('text-anchor', 'end')
+			.text(maxVal.toFixed(0));
+	}
+
+	// Clear web legend for a specific type
+	function clearLegend(type) {
+		const legend = d3.select(`#${type}-legend`);
+		legend.html('');
+		
+		// legend.append('strong').text(`${type === "fill" ? "Fill" : "Stroke"} Gene: `);
+		legend.append('strong').text(`${type === "fill" ? "Gene 1" : "Gene 2"} `);
+		legend.append('span').attr('class', 'no-selection').text('None selected');
+	}
+
+	// Export SVG with legends
+	function exportSVG() {
+		if (!svgElement || svgElement.empty()) return;
+		resetZoom(); // reset to save the whole picture
+		updateSVGLegends(); // add legend to the svg file
+		
+		// Clone the SVG element to avoid modifying the original
+		// const clone = svgElement.node().cloneNode(true);
+		const origsvg = svgElement.selectAll('svg');
+		const clone = origsvg.node().cloneNode(true);
+		
+		// Create a new SVG with the same dimensions
+		const serializer = new XMLSerializer();
+		let svgString = serializer.serializeToString(clone);
+		
+		// Add namespace if not present
+		if (!svgString.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+			svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+		}
+		
+		// Add XML declaration
+		svgString = '<?xml version="1.0" standalone="no"?>\n' + svgString;
+		
+		// Create a blob and download
+		const blob = new Blob([svgString], {type: 'image/svg+xml'});
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'heatmap_visualization.svg';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		svgElement.selectAll('.svg-legend-group').remove(); // remove the legend after downloading
+	}
+
+	// export to png
+	function svgToPng(svgString, width, height) {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.onload = () => {
+			const canvas = document.createElement("canvas");
+			canvas.width = width;
+			canvas.height = height;
+			const ctx = canvas.getContext("2d");
+			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+			const pngDataUrl = canvas.toDataURL("image/png");
+			resolve(pngDataUrl);
+			};
+			img.onerror = reject;
+			img.src = "data:image/svg+xml;base64," + btoa(svgString);
+		});
+	}
+
+	// Export png with legends
+	async function exportPNG() {
+		if (!svgElement || svgElement.empty()) return;
+		resetZoom(); // reset to save the whole picture
+		updateSVGLegends(); // add legend to the svg file
+		
+		// Clone the SVG element to avoid modifying the original
+		// const clone = svgElement.node().cloneNode(true);
+		const origsvg = svgElement.selectAll('svg');
+		const clone = origsvg.node().cloneNode(true);
+		// Ensure viewBox is set
+		let wd = 1100; // export width
+		let ht = 1200; // export height
+		if (!clone.getAttribute('viewBox')) {
+			const width = parseInt(clone.getAttribute('width')) || wd;
+			const height = parseInt(clone.getAttribute('height')) || ht;
+			clone.setAttribute('viewBox', `0 0 ${width} ${height}`);
+		}
+		
+		// Set output dimensions to match canvas
+		let svgScale = document.getElementById('png-quality').value;
+		clone.setAttribute('width', wd * svgScale);
+		clone.setAttribute('height',ht * svgScale);
+		
+		// Create a new SVG with the same dimensions
+		const serializer = new XMLSerializer();
+		let svgString = serializer.serializeToString(clone);
+		
+		// Add namespace if not present
+		if (!svgString.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+			svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+		}
+
+		svgToPng(svgString, wd * svgScale, ht * svgScale)
+		.then((pngUrl) => {
+			const pngImg = document.createElement("img");
+			pngImg.src = pngUrl;
+			document.body.appendChild(pngImg);
+			const downloadLink = document.createElement('a');
+			downloadLink.href = pngUrl;
+			downloadLink.download = 'heatmap_visualization.png';
+			downloadLink.click();
+			document.body.removeChild(pngImg);
+			svgElement.selectAll('.svg-legend-group').remove(); // remove the legend after downloading
+		})
+		.catch((error) => console.error("Error converting SVG to PNG:", error));
+	}
+
+	// Show loading indicator
+	function showLoading(type, message) {
+		d3.select(`#${type}-loading`).text(message || "Loading...");
+	}
+
+	// Hide loading indicator
+	function hideLoading(type) {
+		d3.select(`#${type}-loading`).text('');
+	}
+
+	loadCSV("https://wheatsinglecell.s3.us-east-2.amazonaws.com/data/filtered_countmatrix.csv");
+
+	// Zoom controls
+	document.getElementById('zoom-in').addEventListener('click', function() {
+		d3.select('#svg-container svg').transition().call(zoom.scaleBy, 1.2);
+	});
+	
+	document.getElementById('zoom-out').addEventListener('click', function() {
+		d3.select('#svg-container svg').transition().call(zoom.scaleBy, 0.8);
+	});
+	
+	document.getElementById('reset-zoom').addEventListener('click', resetZoom);
+	
+	document.getElementById('export-svg').addEventListener('click', exportSVG);
+	document.getElementById('export-png').addEventListener('click', exportPNG);
+	document.getElementById('download-svg').addEventListener('click', exportSVG);
+
+	// Initialize color scales with default domains
+	fillColorScale.domain([0, 1]);
+	strokeColorScale.domain([0, 1]);
+	////////////////// Cell selection //////////////////////////
+		// polygon selection with free drawing
+	// Freehand drawing variables
+	let isSelectionMode = false;
+	let isDrawing = false;
+	let freehandPath = [];
+	let selectionPath = null;
+	let selectedPolygonIds = [];
+	// let svg = d3.select(container);
+	// svg.call(zoom);
+	let svg = null;
+
+	// Line generator for the freehand path
+	const lineGenerator = d3.line()
+		.x(d => d[0])
+		.y(d => d[1]);
+
+	// Toggle selection mode
+	const toggleButton = d3.select("#toggleSelection");
+	const modeInstructions = d3.select("#modeInstructions");
+	const downloadExpression = d3.select("#downloadExpression");
+
+	// function to create  n-dimentional arrays
+	// createArray(2) - 1 dimention with 2 elements; createArray(3, 2)-3 rows with 2 cols;
+	function createArray(length) { 
+		let arr = new Array(length || 0),
+			i = length;
+
+		if (arguments.length > 1) {
+			let args = Array.prototype.slice.call(arguments, 1);
+			while(i--) arr[length-1 - i] = createArray.apply(this, args);
+		}
+
+		return arr;
+	}
+	// check whether all values are undefined for an array
+	function areAllUndefined(arr) {
+		// If the array is empty, it technically contains no elements that are not undefined,
+		// so it returns true.
+		if (arr.length === 0) {
+			return true;
+		}
+		return arr.every(value => value === undefined);
+	}
+
+	downloadExpression.on("click", async function() {
+		if (selectedPolygonIds.length > 0) {
+			d3.select("#selectedIds").text("Preparing data for downloading... Be patient ...");
+			// let cmd = "bcftools tabix test2.txt.gz";
+			// let selectedCellindices = [];
+			// selectedPolygonIds.forEach(cell => {
+			// 	let ind = cellIds.indexOf(cell);
+			// 	cmd += " " + (ind + 1);
+			// 	selectedCellindices.push(ind);
+			// });
+			// console.log(cmd);
+			// const output = await CLI.exec(cmd);
+			// console.log(output);
+			// let geneList = Object.keys(expressionData); // already claimed globally
+			// gene data structure: {gene: {cell1: value, cell2: value}}
+			let cellData = createArray(geneList.length, selectedPolygonIds.length); // each row is a gene, each col is a cell
+			geneList.forEach((gene, index1) => {
+				// console.log(`Index: ${index}, Value: ${value}`);
+				selectedPolygonIds.forEach((cell, index2) => {
+					cellData[index1][index2] = +expressionData[gene][cell];
+				});
+			});
+			// await d3.tsvParse("cellIndex\tgeneIndex\tdata\n" + output, function(d){
+			// 	let cellId = cellIds[d.cellIndex - 1]; //Cell-123
+			// 	let col = selectedPolygonIds.indexOf(cellId); // col index of cellData
+			// 	cellData[d.geneIndex-1][col] = +d.data;
+			// });
+			
+			// convert cellData to csv for downloading
+			let csvContent = "data:text/csv;charset=utf-8,";
+			csvContent += "Gene," + selectedPolygonIds.join(",") + "\n";
+			for (let i = 0; i < geneList.length; i++ ) {
+				// if(i < 5) console.log(cellData[i]);
+				if (!(areAllUndefined(cellData[i]))){
+					// const newArray = cellData[i].map(item => (item === undefined ? 0 : item));
+					const newArray = Array.from(cellData[i], item => item || 0);
+					let row = geneList[i] + "," + newArray.join(",");
+					csvContent += row + "\n";
+				}
+			}
+
+			//calling the csv download via anchor tag(link) so we can provide a name for the file
+			let encodedUri = encodeURI(csvContent);
+			let link = document.createElement("a");
+			link.setAttribute("href", encodedUri);
+			link.style.display = 'none';
+			link.setAttribute("download", "selected-cell-transcripts.csv"); //change it to give your own name
+			link.innerHTML = "Click Here to download";
+			document.body.appendChild(link); // Required for FF
+			link.click();
+			link.remove(); //removing the link after the download
+
+		} else {alert("No cells are selected!");}
+	});
+	
+	toggleButton.on("click", function() {
+		// svg = svgElement.selectAll('svg');
+		isSelectionMode = !isSelectionMode;
+		
+		if (isSelectionMode) {
+			toggleButton.classed("active", true)
+				.text("Disable Cell Selection");
+			modeInstructions.text("Selection mode: Click and drag to select polygons");
+			svg.on(".zoom", null); // Disable zoom during selection
+			// Assuming you have an SVG element and a polygon already created
+			svg.selectAll("polygon") // Select all polygons
+				.on("click", function(d) {
+					// 'd' here is the data bound to the clicked polygon
+					const polygonId = d3.select(this).attr("id"); // Get the ID
+					console.log("Clicked polygon ID:", polygonId);
+					if (selectedPolygonIds.indexOf(polygonId) == -1) {
+						selectedPolygonIds.push(polygonId);
+					// Change the color to blue
+						d3.select(this).attr("fill", "blue");
+					} else {// remove it from the list
+    					selectedPolygonIds = selectedPolygonIds.filter(item => item !== polygonId);
+						d3.select(this).attr("fill", "lightgray");
+					}
+					// Update the display
+					if (selectedPolygonIds.length > 0) {
+						document.getElementById("selectedIds").style.display = 'block';
+						d3.select("#selectedIds").text("Selected Cells: " + selectedPolygonIds.join(", "));
+					} else {
+						d3.select("#selectedIds").text("No cells selected");
+					}
+					// Change the color to blue
+					// d3.select(this).attr("fill", "blue");
+				});
+				// Mouse event handlers for selection
+			svg.on("mousedown", function(event) {
+				if (!isSelectionMode) return;
+				
+				// Prevent zoom behavior during selection
+				event.stopPropagation();
+				
+				isDrawing = true;
+				freehandPath = [];
+				// selectedPolygonIds = [];
+				// d3.select("#selectedIds").text("Selected IDs will appear here");
+				// Clear previous selection highlights
+				// svg.selectAll("polygon").attr("fill", "lightgray");
+				// Remove previous selection path if exists
+				if (selectionPath) selectionPath.remove();
+				// Create new selection path
+				selectionPath = g.append("path")
+					.attr("fill", "rgba(255,255,0,0.2)")
+					.attr("stroke", "orange")
+					.attr("stroke-width", 0.2);
+			});
+
+			svg.on("mousemove", function(event) {
+				if (!isSelectionMode || !isDrawing) return;
+				// Prevent zoom behavior during selection
+				event.stopPropagation();
+				const point = d3.pointer(event, g.node());
+				freehandPath.push(point);
+				selectionPath.attr("d", lineGenerator(freehandPath));
+			});
+
+			svg.on("mouseup", function(event) {
+				if (!isSelectionMode || !isDrawing) return;
+				// Prevent zoom behavior during selection
+				event.stopPropagation();
+				isDrawing = false;
+				if (freehandPath.length > 0) {
+					// Close the path
+					freehandPath.push(freehandPath[0]);
+					selectionPath.attr("d", lineGenerator(freehandPath));
+					// Find selected polygons
+					let newSelectedPolygonIds = findSelectedPolygons();
+					selectedPolygonIds = selectedPolygonIds.concat(newSelectedPolygonIds);
+					// Create a Set from the array to remove duplicates
+					const uniqueSet = new Set(selectedPolygonIds);
+					// Convert the Set back to an array
+					selectedPolygonIds = [...uniqueSet];
+					// Update the display
+					if (selectedPolygonIds.length > 0) {
+						document.getElementById("selectedIds").style.display = 'block';
+						d3.select("#selectedIds").text("Selected Cells: " + selectedPolygonIds.join(", "));
+					} else {
+						d3.select("#selectedIds").text("No cells selected");
+					}
+				}
+			});
+		} else {
+			toggleButton.classed("active", false)
+				.text("Enable Cell Selection");
+			modeInstructions.text("Toggle selection mode to select polygons with freehand drawing");
+			svg.call(zoom); // Re-enable zoom
+			svg.selectAll("polygon") // Select all polygons
+				.on("click", null);
+			
+			// Clean up any ongoing selection
+			if (isDrawing) {
+				isDrawing = false;
+				freehandPath = [];
+				if (selectionPath) selectionPath.remove();
+			}
+		}
+	});
+
+	// Clear selection button
+	d3.select("#clear").on("click", () => {
+		svg.selectAll("polygon").attr("fill", "lightgray");
+		if (selectionPath) selectionPath.remove();
+		selectedPolygonIds = [];
+		d3.select("#selectedIds").text("Selection cleared");
+		document.getElementById("selectedIds").style.display = 'none';
+	});
+
+	// get final transformed coordinates
+	function newxy(x, y, ctm){
+		const originalPoint = new DOMPointReadOnly(x, y); // DOMPointReadOnly {x: 10, y: 20, z: 0, w: 1}
+		const newpoint = originalPoint.matrixTransform(ctm); // DOMPoint {x: 25, y: 50, z: 0, w: 1}
+		return({x: parseFloat(newpoint.x), y: parseFloat(newpoint.y)});
+	}
+
+	// Find polygons that intersect with the selection
+	// updated to 2 steps: 1. check overlap with all the iamge groups; 2. if overlap,then check all polygons in that group
+	function findSelectedPolygons() {
+		const selectionPolygon = freehandPath.map(p => ({x: p[0], y: p[1]}));
+		// console.log("selectionPolygon is\n", selectionPolygon);
+		// const allPolygons = svg.selectAll("polygon").nodes();
+		const selectedIds = [];
+		// check groups
+		d3.selectAll('.smImage').each(function() {
+			const group = d3.select(this);
+			const bbox = group.node().getBBox();
+			let groupPoints = [
+			  {x:bbox.x, y:bbox.y}, {x:(bbox.x + bbox.width), y:bbox.y},
+			  {x:(bbox.x + bbox.width), y:(bbox.y + bbox.height)}, {x:bbox.x, y:(bbox.y + bbox.height)}
+			];
+			// console.log("groupPoints\n", groupPoints);
+			if (polygonsIntersect(groupPoints, selectionPolygon)){// freehand polygons has overlap with this group
+				console.log(this.id, "has overlap\n");
+				const allPolygons = group.selectAll("polygon").nodes();
+				allPolygons.forEach(polyElement => {
+					const ctm = polyElement.getCTM(); // transformation matrix
+					const polyPoints = polyElement.getAttribute("points").split(" ")
+						.map(p => p.split(","))
+						// .map(p => ({x: parseFloat(p[0]), y: parseFloat(p[1])}));
+						.map(p => (newxy(p[0], p[1], ctm)));
+					
+					if (polygonsIntersect(selectionPolygon, polyPoints)) {
+						selectedIds.push(polyElement.id);
+						d3.select(polyElement).attr("fill", "red");
+					}
+				});
+			} else {console.log(this.id, "has no overlap with the freehand selection.\n")}
+		});
+
+		return selectedIds;
+	}
+
+	// Check if two polygons intersect
+	function polygonsIntersect(polyA, polyB) {
+		// Check if any point of polyB is inside polyA
+		return polyB.some(point => pointInPolygon(point, polyA));
+	}
+
+	// Point-in-polygon algorithm
+	function pointInPolygon(point, polygon) {
+		let inside = false;
+		for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+			const xi = polygon[i].x, yi = polygon[i].y;
+			const xj = polygon[j].x, yj = polygon[j].y;
+			
+			const intersect = ((yi > point.y) !== (yj > point.y))
+				&& (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+			if (intersect) inside = !inside;
+		}
+		return inside;
+	}
+</script>
+
+<script id="clusterMap" type="module">
+	const checkboxContainer = document.getElementById('checkboxContainer');
+	const colors = ["#bf613f", "#98c03f", "#3fbf6c", "#bc823f", "#3fc049", "#babf3f", "#e5d225", "#77c03f", "#740006", "#276619", "#132c8c", "#3ebfae", "#3f4abf", "#3faebf", "#f98d1d", "#773ebf", "#f40915", "#553fbf", "#bf3fa4", "#ba3ebf", "#ba3e82"];
+
+	// create a checkbox to show all or none
+	const checkboxItem = document.createElement('div');
+	checkboxItem.className = 'checkbox-item';
+	const checkbox = document.createElement('input');
+	// checkbox.checked = true;
+	checkbox.type = 'checkbox';
+	checkbox.id = "checkall";
+	checkbox.value = "checkall";
+	
+	const label = document.createElement('label');
+	label.htmlFor = "checkall";
+	label.textContent = "All";
+
+	const colorPreview = document.createElement('span');
+	colorPreview.style.display = 'inline-block';
+	colorPreview.style.width = '15px';
+	colorPreview.style.height = '15px';
+	// colorPreview.style.backgroundColor = colors[i];
+	colorPreview.style.marginLeft = '5px';
+	colorPreview.style.border = '1px';
+	colorPreview.visibility = "hidden";
+	
+	checkboxItem.appendChild(colorPreview);
+	checkboxItem.appendChild(checkbox);
+	checkboxItem.appendChild(label);
+	checkboxContainer.appendChild(checkboxItem);
+	// Add event listener
+	checkbox.addEventListener('change', function() {
+		let clist=document.getElementsByClassName("clusterColor");
+	//   d3.selectAll(".circle").attr("stroke", "none");
+		if (this.checked) {
+		for (let j = 0; j < clist.length; ++j) { clist[j].checked = "checked"; }
+		for (let j = 0; j < 21; ++j) { d3.selectAll(".cluster-" + j).attr("fill", colors[j]);}
+		} else { // uncheck all
+		for (let j = 0; j < clist.length; ++j) { clist[j].checked = false; }
+		d3.selectAll(".circle").attr("fill", "lightgray");
+		}
+	});
+
+	// Create 21 checkboxes (0-20)
+	const annotation = ["Basal region", "Leaf epidermis", "Leaf mesophyll", "Spike central", "Vasculature", "Leaf basal", "Suppressed bract", "Glume / lemma", "Early Meristem", "SM base center", "Stem intercalary M.", "cell division", "Leaf abaxial", "Vasculature", "Glume axilla", "Central early", "Adaxial boundary", "SM LFY-band", "Floral meristem", "Trans. leaf/spike", "Leaf bud"]
+	for (let i = 0; i <= 20; i++) {
+		const checkboxItem = document.createElement('div');
+		checkboxItem.className = 'checkbox-item';
+		
+		const checkbox = document.createElement('input');
+		// checkbox.checked = true;
+		checkbox.type = 'checkbox';
+		checkbox.id = `color-${i}`;
+		checkbox.value = i;
+		checkbox.className = "clusterColor"
+		
+		const label = document.createElement('label');
+		label.htmlFor = `color-${i}`;
+		label.textContent = i + " " + annotation[i];
+		
+		// Add color preview
+		// const colorPreview = document.createElement('span');
+		// colorPreview.style.display = 'inline-block';
+		// colorPreview.style.width = '15px';
+		// colorPreview.style.height = '15px';
+		// colorPreview.style.backgroundColor = colors[i];
+		// colorPreview.style.marginLeft = '5px';
+		// colorPreview.style.border = '1px solid #000';
+		const colorPreview = document.createElement('input');
+		colorPreview.type = 'color';
+		colorPreview.id = `color${i}`;
+		colorPreview.value = colors[i];
+		colorPreview.style.width = '30px';
+		colorPreview.style.border = 'none';
+		colorPreview.style.backgroundColor = 'white';
+		colorPreview.addEventListener('change', () => {
+			const newColor = document.getElementById(`color${i}`).value;
+			colors[i] = newColor;
+			console.log("change color to: ", newColor);
+			if (document.getElementById(`color-${i}`).checked) {
+				d3.selectAll(".cluster-" + document.getElementById(`color-${i}`).value).attr("fill", newColor);
+			}
+		});
+		
+		checkboxItem.appendChild(colorPreview);
+		checkboxItem.appendChild(checkbox);
+		checkboxItem.appendChild(label);
+		
+		checkboxContainer.appendChild(checkboxItem);
+		
+		// init color
+		d3.selectAll(".cluster-" + i).attr("fill", colors[i]);
+		
+		// Add event listener
+		checkbox.addEventListener('change', function() {
+		//   d3.selectAll(".circle").attr("fill", "lightgray");
+			if (this.checked) {
+			d3.selectAll(".cluster-" + this.value).attr("fill", colors[this.value]);
+			} else {
+			// If unchecking, set background to lightgray
+			d3.selectAll(".cluster-" + this.value).attr("fill", "lightgray");
+			}
+		});
+	}
+</script>
+
+</body>
+</html>
