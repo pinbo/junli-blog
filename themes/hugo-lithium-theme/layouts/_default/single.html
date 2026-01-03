@@ -7,6 +7,9 @@
 </textarea>
 {{ partial "foot_remarkjs.html" . }}
 
+{{ else if in .Params.tags "fullHtml" }}
+{{ .Content }}
+
 {{ else if in .Params.tags "remark" }}
 {{/* use remark.js markdown  */}}
 {{ partial "header.html" . }}
