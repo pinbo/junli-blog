@@ -346,8 +346,8 @@ tags:
 	const colorblind = document.getElementById("colorblind");
 	colorblind.addEventListener('change', function() {
 		if (this.checked) {
-			fillColorChoice = d3.interpolatePlasma; //interpolatePuOr;
-			strokeColorChoice = d3.interpolateViridis; //interpolateRdYlBu;
+			fillColorChoice = t => d3.interpolatePlasma(1 - t); //interpolatePuOr;
+			strokeColorChoice = t => d3.interpolateViridis(1 - t); // interpolateTurbo; //interpolateRdYlBu;
 		} else {
 			fillColorChoice = d3.interpolateYlOrRd;
 			strokeColorChoice = t => d3.interpolateCool(1 - t);
