@@ -315,7 +315,17 @@ tags:
 		}
 		fillColorScale = d3.scaleSequential(fillColorChoice);
 		strokeColorScale = d3.scaleSequential(strokeColorChoice);
-		// updateAllPolygons();
+		const fillgene = d3.select('#fill-gene-select').node().value;
+		const strokegene = d3.select('#stroke-gene-select').node().value;
+		if (fillgene) {
+			updateColorScale("fill", fillgene);
+			updateLegend("fill", fillgene);
+		}
+		if (strokegene) {
+			updateColorScale("stroke", strokegene);
+			updateLegend("stroke", strokegene);
+		}
+		updateAllPolygons();
 	});
 	
 	let zoom = d3.zoom();
