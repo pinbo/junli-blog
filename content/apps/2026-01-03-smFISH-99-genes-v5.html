@@ -300,11 +300,15 @@ tags:
 	let fillColorScale = d3.scaleSequential(fillColorChoice);
 	let strokeColorScale = d3.scaleSequential(strokeColorChoice); //(t => d3.interpolateCool(1 - t)); reverse the scale
 	// colorblind checkbox element
+	// https://sjmgarnier.github.io/viridis/
+	// const mycolor = d3.scaleSequential()
+	// 	.range(["#e4ff7a", "#ffe81a", "#ffbd00", "#ffa000", "#fc7f00"]) // Define your color stops
+	// 	.domain([0, 0.25, 0.50, 0.75, 1]); // https://github.com/wistia/heatmap-palette
 	const colorblind = document.getElementById("colorblind");
 	colorblind.addEventListener('change', function() {
 		if (this.checked) {
-			fillColorChoice = d3.interpolatePuOr;
-			strokeColorChoice = d3.interpolateRdYlBu;
+			fillColorChoice = d3.interpolatePlasma; //interpolatePuOr;
+			strokeColorChoice = d3.interpolateViridis; //interpolateRdYlBu;
 		} else {
 			fillColorChoice = d3.interpolateYlOrRd;
 			strokeColorChoice = t => d3.interpolateCool(1 - t);
