@@ -845,11 +845,10 @@ tags:
 		const strokeGene = document.getElementById('stroke-gene-select').value;
 		
 		const origsvg = svgElement.selectAll('svg');
-		// origsvg.remove('style');
-		origsvg.append('style').html(`text {font:15pt sans-serif;} tspan {font: 10pt sans-serif;}`);
+		origsvg.append('style').html(`text {font:20pt sans-serif;} tspan {font: 15pt sans-serif;}`);
 		const legendGroup = origsvg.append('g')
 			.attr('class', 'svg-legend-group')
-			.attr('transform', `translate(220, 100)`);
+			.attr('transform', `translate(160, 25)`);
 		// Add fill legend if gene is selected
 		if (fillGene && fillGene !== "") {
 			addSVGLegend(legendGroup, "fill", fillGene, 0, 0);
@@ -857,7 +856,7 @@ tags:
 		
 		// Add stroke legend if gene is selected
 		if (strokeGene && strokeGene !== "") {
-			addSVGLegend(legendGroup, "stroke", strokeGene, 0, 90);
+			addSVGLegend(legendGroup, "stroke", strokeGene, 450, 0);
 		}
 	}
 
@@ -886,9 +885,9 @@ tags:
 			.html(`<tspan>HORVU.MOREX.r3.</tspan>${gene}`);
 		
 		// Add color bar
-		const legendWidth = 240;
-		const legendHeight = 25;
-		const margin = 30;
+		const legendWidth = 340;
+		const legendHeight = 30;
+		const margin = legendHeight * 1.2;
 		
 		// Create gradient
 		const defs = container.append('defs');
@@ -976,6 +975,7 @@ tags:
 		link.click();
 		document.body.removeChild(link);
 		svgElement.selectAll('.svg-legend-group').remove(); // remove the legend after downloading
+		svgElement.select("style").remove();
 	}
 
 	function svgToPng(svgString, width, height) {
@@ -1005,17 +1005,17 @@ tags:
 		// const clone = svgElement.node().cloneNode(true);
 		const origsvg = svgElement.selectAll('svg');
 		const clone = origsvg.node().cloneNode(true);
+		const width = parseInt(clone.getAttribute('width')) || 1200;
+		const height = parseInt(clone.getAttribute('height')) || 1600;
 		// Ensure viewBox is set
 		if (!clone.getAttribute('viewBox')) {
-			const width = parseInt(clone.getAttribute('width')) || 700;
-			const height = parseInt(clone.getAttribute('height')) || 400;
 			clone.setAttribute('viewBox', `0 0 ${width} ${height}`);
 		}
 		
 		// Set output dimensions to match canvas
 		let svgScale = document.getElementById('png-quality').value;
-		clone.setAttribute('width', 700 * svgScale);
-		clone.setAttribute('height',400 * svgScale);
+		clone.setAttribute('width', width * svgScale);
+		clone.setAttribute('height',height * svgScale);
 		
 		// Create a new SVG with the same dimensions
 		const serializer = new XMLSerializer();
@@ -1026,7 +1026,7 @@ tags:
 			svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
 		}
 
-		svgToPng(svgString, 700 * svgScale, 400 * svgScale)
+		svgToPng(svgString, width * svgScale, height * svgScale)
 		.then((pngUrl) => {
 			const pngImg = document.createElement("img");
 			pngImg.src = pngUrl;
@@ -1037,6 +1037,7 @@ tags:
 			downloadLink.click();
 			document.body.removeChild(pngImg);
 			svgElement.selectAll('.svg-legend-group').remove(); // remove the legend after downloading
+			svgElement.select("style").remove();
 		})
 		.catch((error) => console.error("Error converting SVG to PNG:", error));
 	}
