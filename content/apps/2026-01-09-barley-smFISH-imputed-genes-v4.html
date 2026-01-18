@@ -340,10 +340,10 @@ tags:
 
 		<div id="gene-controls">
 			<h3>Help</h3>
-			<p>To make it easier to view, I downloaded barley spatial and scRNA-seq data from <a href='https://www.plabipd.de/projects/hannah_demo/Barvista.html' target='_blank' class='url'>BARVISTA</a>. Here are the <strong>imputed gene expression</strong> for cells in single-molecule fluorescence in situ hybridization (smFISH) for barley apex at 2 stages (late double ridge (W1, vegetative shoot apical meristem (vSAM)) and floret primordia (W3.5) stages; each stage has two images) using 100 genes for similarity analysis with the scRNA-seq data. Please check the reference below for details of the smFISH experiment and gene imputation process. You can find the best hit of wheat genes on Arabidopsis, rice, and barley here: <a href='https://junli.netlify.app/apps/wheat-homeolog/' target='_blank' class='url'>https://junli.netlify.app/apps/wheat-homeolog/</a></p>
+			<p>To make it easier to view, I downloaded barley spatial and scRNA-seq data from <a href='https://www.plabipd.de/projects/hannah_demo/Barvista.html' target='_blank' class='url'>BARVISTA</a>. Here are the <strong>imputed gene expression</strong> for cells in single-molecule fluorescence in situ hybridization (smFISH) for barley apex at 2 stages (late double ridge (W1, vegetative shoot apical meristem (vSAM)) and floret primordia (W3.5) stages; W3.5 has two vertical images and a transverse section) using 100 genes for similarity analysis with the scRNA-seq data. Please check the reference below for details of the smFISH experiment and gene imputation process. You can find the best hit of wheat genes on Arabidopsis, rice, and barley here: <a href='https://junli.netlify.app/apps/wheat-homeolog/' target='_blank' class='url'>https://junli.netlify.app/apps/wheat-homeolog/</a></p>
 			<p>Below is just a quick guide:</p>
 			<ol>
-				<li>On the left panel (Cluster Map), you can view all or a few clusters of the smFISH genes.</li>
+				<li>On the left panel (W3.5 Cluster Map), you can view all or a few clusters of the smFISH genes for W3.5 vertical images.</li>
 				<li>On the right panel (Expression Heatmap), you can check single gene or a pair of gene expression in each cell.</li>
 				<li>"Gene 1" has heatmap for the cell fill color; "Gene 2" has heatmap for the cell border color. Values are counts per million per cell</li>
 				<li>Select "Gene 1" or "Gene 2" will clear the cluster colors; and <strong>"Gene 1" compete the color fill colors with clusters</strong>.</li>
@@ -633,7 +633,7 @@ tags:
 				});
 			});
 			// Load SVG after CSV is processed
-			loadSVG(baseURL + '/images/barley-D1-5-D2-1.svg'); // Change this to your SVG file path
+			loadSVG(baseURL + '/images/barley-D1-5-D2-1-A1-4.svg'); // Change this to your SVG file path
 		} catch (error) {
 			console.error("Error loading gene names:", error);
 			hideLoading();
