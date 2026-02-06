@@ -37,6 +37,14 @@ async function process(){
     if (document.getElementById("consensus").checked) consensus = "-c";
     if (document.getElementById("seqnum").checked) seqnum = "-n";
     if (document.getElementById("dna").checked) dna = "-d";
+    // prepare input from text box
+    let fasta = document.getElementById("paste").value.trim();
+    if (fasta.startsWith('>')){
+        let newfile = {};
+        newfile.name = "/data/" + infile;
+        newfile.content = fasta;
+        boxshade.write(newfile); // cannot use await for write function. never finishs
+    }
     let cmd = ["/data/" + infile, ruler, consensus, fraction, outlen, seqnum, dna, "-o=" + outfile, ifgc, ibgc, sfgc, sbgc].join(" ").replace(/  +/g, ' ');
 
     // fastp.setwd("/data") // set working directory
@@ -46,6 +54,16 @@ async function process(){
     console.log("stdout :", dd.stdout)
     document.getElementById("stdout").innerHTML = dd.stderr;
     document.getElementById("download-btn").style.display = "block";
+}
+
+// clear input sequences
+function clearseq() {
+    document.getElementById("paste").value = "";
+};
+
+// input an example
+function putExample(){
+    document.getElementById("paste").value = ">seq1\nAYTATLVTPT\n>seq2\nTYKVKFITPE"
 }
 
 // download
