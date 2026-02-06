@@ -24,22 +24,56 @@ tags:
     <label for="paste">OR Paste your sequences here in fasta format</label><br>
     <textarea id="paste" name="paste" rows="10" cols="60" placeholder="Paste your sequences"></textarea><br>
     <button onclick="clearseq()">Reset</button>
-    <button onclick="putExample()">Example</button><br><br>
-	<button onclick="showMSAfromPaste()" style="font-weight:bold;">View MSA directly</button><strong> OR </strong>
-    <button id="align" style="font-weight:bold;">Align then View MSA</button>
+    <button onclick="putExample()">Example</button>
+    <button id="copytable">Copy to clipboard</button><br><br>
+    <button onclick="showMSAfromPaste()" style="font-weight:bold;">View MSA directly</button><strong> OR </strong>
+    <button id="align" style="font-weight:bold;">Align then View MSA</button><br><br>
+    <input id="gpo" name="gpo" value="5.5" size="3">
+    <label for="gpo">Gap open penalty</label><br>
+    <input id="gpe" name="gpe" value="2.0" size="3">
+    <label for="gpe">Gap extension penalty</label><br>
+    <input id="tgpe" name="tgpe" value="1.0" size="3">
+    <label for="tgpe">Terminal gap extension penalty</label><br>
+    <p id="message" style="color: blue;"></p>
   </div>
   <div id="msa"></div>
 
   <div class="container">
     <h3>Acknowledgement</h3>
-    <p>Thanks to MSAViewer 
+    <p>Thanks to 
       <a href="https://github.com/wilzbach/msa" target="_blank">MSAViewer</a> for HTML multiple sequence alignment viewer and 
       <a href="https://biowasm.com/" target="_blank">biowasm</a> for <code>kalign</code> WebAssembly tool.
     </p>
   </div>
 <script>
 //  let fasta = ""; // input alignment content
-  document.getElementById('fasta').addEventListener('change', readFastaFile, false);
+document.getElementById('fasta').addEventListener('change', readFastaFile, false);
+// document.getElementById("copytable").addEventListener("click", copy2clipboard); // works, could also copy html
+document.getElementById("copytable").addEventListener("click", writeClipboardText); // also works, but just for plain text
+function copy2clipboard() {
+  // Convert the table element to plain text string
+  const plainTextString = document.getElementById("paste").value.trim();
+  navigator.clipboard.write([
+    new ClipboardItem({
+        // 'text/html': new Blob([plainTextString], {
+        //     type: 'text/html',
+        // }),
+        'text/plain': new Blob([plainTextString], {
+            type: 'text/plain',
+        }),
+    }),
+  ]);
+}
+
+async function writeClipboardText() {
+  const text = document.getElementById("paste").value.trim();
+  try {
+    await navigator.clipboard.writeText(text);
+    console.log('Text successfully copied to clipboard');
+  } catch (error) {
+    console.error('Failed to copy text: ', error.message);
+  }
+}
 
 // function to show MSA
 function showMSA() {
@@ -163,6 +197,8 @@ let dd = await CLI.exec("kalign -h");
 // console.log("stdout:\n", dd.stdout, "stderr:\n", dd.stderr);
 console.log(dd);
 async function alignAndShow() {
+  let msg = document.getElementById("message");
+  msg.textContent = "Alignment is running ... ";
   let fasta = document.getElementById("paste").value;
   // console.log("Before alignment:\n", fasta);
   // Create input
@@ -172,10 +208,16 @@ async function alignAndShow() {
   });
 
   // Run kalign and fetch FASTA file output
-  let dd = await CLI.exec("kalign input.fa -f fasta -o result.fasta");
+  let gpo = document.getElementById("gpo").value;
+  let gpe = document.getElementById("gpe").value;
+  let tgpe = document.getElementById("tgpe").value;
+  let cmd = "kalign input.fa -f fasta -o result.fasta --gpo " + gpo + " --gpe " + gpe + " --tgpe " + tgpe;
+  console.log(cmd + "\n");
+  let dd = await CLI.exec(cmd);
   console.log(dd);
   fasta = await CLI.cat("result.fasta");
   document.getElementById("paste").value = fasta;
+  msg.textContent = "Alignment is done!";
   // console.log("after alignment:\n", fasta);
   showMSA();
 }
