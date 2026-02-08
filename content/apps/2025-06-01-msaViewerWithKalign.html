@@ -1,5 +1,5 @@
 ---
-title: 'Multiple sequence alignment with Kalign'
+title: 'Multiple sequence alignments'
 author: Junli Zhang
 date: '2025-06-01'
 slug: msa-with-kalign
@@ -28,12 +28,17 @@ tags:
     <button id="copytable">Copy to clipboard</button><br><br>
     <button onclick="showMSAfromPaste()" style="font-weight:bold;">View MSA directly</button><strong> OR </strong>
     <button id="align" style="font-weight:bold;">Align then View MSA</button><br><br>
-    <input id="gpo" name="gpo" value="5.5" size="3">
+    <label for="tool">Align with:</label>
+    <select name="tool" id="tool">
+      <option value="muscle">muscle</option>
+      <option value="kalign">kalign</option>
+    </select>
+    <!-- <input id="gpo" name="gpo" value="5.5" size="3">
     <label for="gpo">Gap open penalty</label><br>
     <input id="gpe" name="gpe" value="2.0" size="3">
     <label for="gpe">Gap extension penalty</label><br>
     <input id="tgpe" name="tgpe" value="1.0" size="3">
-    <label for="tgpe">Terminal gap extension penalty</label><br>
+    <label for="tgpe">Terminal gap extension penalty</label><br> -->
     <p id="message" style="color: blue;"></p>
   </div>
   <div id="msa"></div>
@@ -42,7 +47,7 @@ tags:
     <h3>Acknowledgement</h3>
     <p>Thanks to 
       <a href="https://github.com/wilzbach/msa" target="_blank">MSAViewer</a> for HTML multiple sequence alignment viewer and 
-      <a href="https://biowasm.com/" target="_blank">biowasm</a> for <code>kalign</code> WebAssembly tool.
+      <a href="https://biowasm.com/" target="_blank">biowasm</a> for <code>kalign & muscle</code> WebAssembly tool.
     </p>
   </div>
 <script>
@@ -192,10 +197,13 @@ function reverse_complement (seq, method = "RC"){
 </script>
 <script src="https://biowasm.com/cdn/v3/aioli.js"></script>
 <script type="module">
-const CLI = await new Aioli(["kalign/3.3.1"]);
+const CLI = await new Aioli(["kalign/3.3.1", "muscle/3.8.1551"]);// muscle/3.8.1551
 let dd = await CLI.exec("kalign -h");
 // console.log("stdout:\n", dd.stdout, "stderr:\n", dd.stderr);
 console.log(dd);
+dd = await CLI.exec("muscle -h");
+console.log(dd);
+
 async function alignAndShow() {
   let msg = document.getElementById("message");
   msg.textContent = "Alignment is running ... ";
@@ -208,10 +216,15 @@ async function alignAndShow() {
   });
 
   // Run kalign and fetch FASTA file output
-  let gpo = document.getElementById("gpo").value;
-  let gpe = document.getElementById("gpe").value;
-  let tgpe = document.getElementById("tgpe").value;
-  let cmd = "kalign input.fa -f fasta -o result.fasta --gpo " + gpo + " --gpe " + gpe + " --tgpe " + tgpe;
+  // let gpo = document.getElementById("gpo").value;
+  // let gpe = document.getElementById("gpe").value;
+  // let tgpe = document.getElementById("tgpe").value;
+  // let cmd = "kalign input.fa -f fasta -o result.fasta --gpo " + gpo + " --gpe " + gpe + " --tgpe " + tgpe;
+  let cmd = "kalign input.fa -f fasta -o result.fasta";
+  if (document.getElementById('tool').value == 'muscle'){
+    // cmd = "muscle -align input.fa -output result.fasta"; // muscle v5
+    cmd = "muscle -in input.fa -out result.fasta"; // muscle v3
+  }
   console.log(cmd + "\n");
   let dd = await CLI.exec(cmd);
   console.log(dd);
