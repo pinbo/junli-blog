@@ -41,6 +41,34 @@ tags:
 				--excluded: #1a1f26;
 				--select-ring: #ffffff;
 				--accent2: #39c2c9;
+				--btn-hover-bg: #222d3a;
+				--btn-hover-border: #445064;
+			}
+			:root[data-theme="light"] {
+				--bg: #f3f5f8;
+				--surface: #ffffff;
+				--surface-2: #eaeef3;
+				--line: #d4dae2;
+				--text: #1d2630;
+				--muted: #4b5563;
+				--fam: #1f9d63;
+				--fam-dim: #1f9d6322;
+				--hex: #b4790c;
+				--hex-dim: #b4790c22;
+				--rox: #c5304a;
+				--het: #3f6fd6;
+				--het-dim: #3f6fd622;
+				--ambig: #8a4fc4;
+				--nocall: #c3cbd4;
+				--excluded: #e7eaee;
+				--select-ring: #1d2630;
+				--accent2: #1391a0;
+				--btn-hover-bg: #dde3ea;
+				--btn-hover-border: #b7c0cc;
+			}
+			html,
+			body {
+				transition: background 0.15s, color 0.15s;
 			}
 			* {
 				box-sizing: border-box;
@@ -116,8 +144,8 @@ tags:
 					background 0.15s;
 			}
 			.btn:hover {
-				border-color: #445064;
-				background: #222d3a;
+				border-color: var(--btn-hover-border);
+				background: var(--btn-hover-bg);
 			}
 			.btn:focus-visible {
 				outline: 2px solid var(--het);
@@ -133,6 +161,35 @@ tags:
 			}
 			input[type="file"] {
 				display: none;
+			}
+			.theme-toggle {
+				font-family: "IBM Plex Mono", monospace;
+				font-weight: 600;
+				font-size: 13px;
+				background: var(--surface-2);
+				border: 1px solid var(--line);
+				color: var(--text);
+				padding: 9px 14px;
+				border-radius: 6px;
+				cursor: pointer;
+				display: inline-flex;
+				align-items: center;
+				gap: 7px;
+				transition:
+					border-color 0.15s,
+					background 0.15s;
+			}
+			.theme-toggle:hover {
+				border-color: var(--btn-hover-border);
+				background: var(--btn-hover-bg);
+			}
+			.theme-toggle:focus-visible {
+				outline: 2px solid var(--het);
+				outline-offset: 2px;
+			}
+			.theme-toggle .icon {
+				font-size: 14px;
+				line-height: 1;
 			}
 
 			.empty-state {
@@ -210,7 +267,7 @@ tags:
 			}
 			.genotype-btn:hover {
 				transform: translateX(2px);
-				border-color: #445064;
+				border-color: var(--btn-hover-border);
 			}
 			.genotype-btn:disabled {
 				cursor: not-allowed;
@@ -267,6 +324,9 @@ tags:
 				position: relative;
 				user-select: none;
 			}
+			#scatterWrap.lasso-cursor {
+				cursor: crosshair;
+			}
 			#scatterSvg {
 				width: 100%;
 				height: auto;
@@ -299,6 +359,10 @@ tags:
 				stroke: #fff;
 				stroke-width: 2;
 			}
+			.pt.hover-link {
+				stroke: var(--select-ring);
+				stroke-width: 2.5;
+			}
 			.pt.multisel {
 				stroke: var(--select-ring);
 				stroke-width: 2;
@@ -311,6 +375,14 @@ tags:
 				stroke-dasharray: 4, 3;
 				pointer-events: none;
 			}
+			.lasso-path {
+				fill: #39c2c922;
+				stroke: var(--accent2);
+				stroke-width: 1.5;
+				stroke-dasharray: 4, 3;
+				stroke-linejoin: round;
+				pointer-events: none;
+			}
 
 			.legend {
 				display: flex;
@@ -320,6 +392,55 @@ tags:
 				font-family: "IBM Plex Mono", monospace;
 				font-size: 11.5px;
 				color: var(--muted);
+			}
+
+			/* Scatter zoom controls */
+			.zoom-controls {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+				flex-wrap: wrap;
+				margin-bottom: 12px;
+				padding: 10px 12px;
+				background: var(--surface-2);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				font-family: "IBM Plex Mono", monospace;
+			}
+			.zoom-controls .btn {
+				padding: 7px 12px;
+				font-size: 12px;
+				align-self: flex-end;
+			}
+			.zoom-controls .btn.zoom-fit {
+				background: var(--het-dim);
+				border-color: #7aa7ff66;
+				color: var(--het);
+			}
+			.zoom-controls .btn.zoom-fit:hover {
+				background: #7aa7ff50;
+			}
+			.zoom-controls .btn.zoom-fit:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+				background: var(--surface-2);
+				color: var(--muted);
+				border-color: var(--line);
+			}
+			.zoom-controls .btn.lasso-active {
+				background: var(--accent2);
+				border-color: var(--accent2);
+				color: #fff;
+			}
+			.zoom-controls .btn.lasso-active:hover {
+				background: var(--accent2);
+				filter: brightness(1.1);
+			}
+			.zoom-status {
+				font-size: 10.5px;
+				color: var(--muted);
+				width: 100%;
+				margin-top: -2px;
 			}
 			.legend .item {
 				display: flex;
@@ -363,7 +484,7 @@ tags:
 				z-index: 2;
 			}
 			.well-cell.selected {
-				outline: 2px solid #fff;
+				outline: 2px solid var(--select-ring);
 				outline-offset: 1px;
 				z-index: 3;
 			}
@@ -391,6 +512,12 @@ tags:
 			.well-cell.inactive-template {
 				opacity: 0.06;
 				cursor: default;
+			}
+			.well-cell.hover-link {
+				transform: scale(1.18);
+				z-index: 2;
+				outline: 2px solid var(--select-ring);
+				outline-offset: 1px;
 			}
 			.col-label,
 			.row-label {
@@ -440,6 +567,10 @@ tags:
 				background: var(--het);
 				border-color: var(--het);
 			}
+			.chip.active[data-ch="call"] {
+				background: var(--accent2);
+				border-color: var(--accent2);
+			}
 
 			/* Selection toolbar */
 			.selection-toolbar {
@@ -456,7 +587,7 @@ tags:
 			}
 			.selection-toolbar .count {
 				font-family: "IBM Plex Mono", monospace;
-				color: #fff;
+				color: var(--text);
 				font-weight: 600;
 			}
 			.selection-toolbar .hint {
@@ -474,7 +605,7 @@ tags:
 				border-radius: 5px;
 				border: 1px solid var(--line);
 				background: var(--surface);
-				color: var(--muted);
+				color: var(--text);
 				cursor: pointer;
 			}
 			.mode-btn.active {
@@ -508,7 +639,7 @@ tags:
 				border: 1px solid var(--line);
 				border-radius: 8px;
 				padding: 10px 18px;
-				color: #fff;
+				color: var(--text);
 				min-width: 80px;
 				text-align: center;
 			}
@@ -542,7 +673,7 @@ tags:
 				color: var(--rox);
 			}
 			.stat .value.call {
-				color: #fff;
+				color: var(--text);
 			}
 
 			.controls-row {
@@ -591,7 +722,7 @@ tags:
 				border-radius: 6px;
 				border: 1px solid var(--line);
 				background: var(--surface-2);
-				color: var(--muted);
+				color: var(--text);
 				cursor: pointer;
 				font-weight: 500;
 			}
@@ -706,6 +837,15 @@ tags:
 					<span class="meta" id="fileMeta">No file loaded</span>
 				</div>
 				<div class="upload-row">
+					<button
+						class="theme-toggle"
+						id="themeToggleBtn"
+						type="button"
+						aria-label="Toggle dark/light theme"
+					>
+						<span class="icon" id="themeToggleIcon">🌙</span>
+						<span id="themeToggleLabel">Dark</span>
+					</button>
 					<label class="btn primary" for="fileInput"
 						>Load plate CSV</label
 					>
@@ -759,7 +899,7 @@ tags:
 							value="200"
 							step="10"
 						/>
-						<span id="threshVal" class="mono">600</span>
+						<span id="threshVal" class="mono">200</span>
 					</label>
 					<button
 						class="btn"
@@ -793,31 +933,6 @@ tags:
 					</button>
 				</div>
 
-				<div
-					class="selection-toolbar"
-					id="selectionToolbar"
-					style="display: none"
-				>
-					<span class="count"
-						><span id="selCount">0</span> wells selected</span
-					>
-					<button class="btn" id="hideSelectedBtn">
-						Hide selected
-					</button>
-					<button
-						class="btn"
-						id="resetSelBtn"
-						style="margin-left: auto"
-					>
-						Clear selection
-					</button>
-					<span class="hint" id="selectionHint"
-						>Plate: click wells to toggle them, or drag across
-						several. Scatter: shift-click or drag a box. Then pick
-						a genotype call in the side panel.</span
-					>
-				</div>
-
 				<div class="grid grid-with-sidebar">
 					<div class="panel sidebar-panel">
 						<h2>Assign genotype</h2>
@@ -835,6 +950,22 @@ tags:
 								>FAM/ROX vs HEX/ROX, normalized</span
 							>
 						</h2>
+						<div class="zoom-controls" id="zoomControls">
+							<button class="btn zoom-fit" id="zoomToSelectionBtn" disabled>
+								Zoom to selection
+							</button>
+							<button class="btn" id="zoomResetBtn">Reset zoom</button>
+							<button
+								class="btn"
+								id="lassoModeBtn"
+								title="Draw a freeform outline to select wells, instead of a rectangle"
+							>
+								Lasso select
+							</button>
+							<span class="zoom-status" id="zoomStatus"
+								>Showing full data range. Select wells and click "Zoom to selection".</span
+							>
+						</div>
 						<div id="scatterWrap">
 							<svg id="scatterSvg" viewBox="0 0 520 480"></svg>
 						</div>
@@ -846,6 +977,30 @@ tags:
 							<span id="plateTitle">384-well plate</span>
 							<span class="sub" id="plateSub">raw signal</span>
 						</h2>
+						<div
+							class="selection-toolbar"
+							id="selectionToolbar"
+							style="display: none"
+						>
+							<span class="count"
+								><span id="selCount">0</span> wells selected</span
+							>
+							<button class="btn" id="hideSelectedBtn">
+								Hide selected
+							</button>
+							<!--<button
+								class="btn"
+								id="resetSelBtn"
+								style="margin-left: auto"
+							>
+								Clear selection
+							</button>-->
+							<span class="hint" id="selectionHint"
+								>Plate: click wells to toggle them, or drag across
+								several. Scatter: shift-click or drag a box. Then pick
+								a genotype call in the side panel.</span
+							>
+						</div>
 						<div class="channel-toggle" id="channelToggle">
 							<button class="chip" data-ch="fam">FAM</button>
 							<button class="chip" data-ch="hex">HEX</button>
@@ -909,6 +1064,24 @@ tags:
 				let activeClusterFilter = new Set();
 				let plateChannel = "call";
 				let activeQuadrant = "all"; // 'all' | 'A1' | 'A2' | 'B1' | 'B2' | 'A1A2' | 'B1B2' | 'A1B1' | 'A2B2'
+				// Manual scatter zoom/crop window. Values are in real FAM/ROX and HEX/ROX
+				// (ratio) units, NOT log space — converted to log space at render time.
+				// null fields mean "auto" (fall back to the full data range on that bound).
+				let scatterZoom = { xMin: null, xMax: null, yMin: null, yMax: null };
+				// Scatter drag-select mode: 'box' draws a rectangle, 'lasso' draws a
+				// freeform outline. Persists across re-renders of the scatter plot.
+				let scatterSelectMode = "box";
+
+				// ---------- Theme (dark/light) ----------
+				// Persisted across reloads via localStorage; defaults to dark, matching
+				// the app's original look, and falls back gracefully if storage is blocked.
+				let theme = "dark";
+				try {
+					const saved = localStorage.getItem("kaspTheme");
+					if (saved === "light" || saved === "dark") theme = saved;
+				} catch (e) {
+					/* localStorage unavailable (e.g. private mode) — just default to dark */
+				}
 
 				let ROWS = 16,
 					COLS = 24;
@@ -928,6 +1101,9 @@ tags:
 
 				const els = {
 					fileInput: document.getElementById("fileInput"),
+					themeToggleBtn: document.getElementById("themeToggleBtn"),
+					themeToggleIcon: document.getElementById("themeToggleIcon"),
+					themeToggleLabel: document.getElementById("themeToggleLabel"),
 					loadSampleBtn: document.getElementById("loadSampleBtn"),
 					fileMeta: document.getElementById("fileMeta"),
 					emptyState: document.getElementById("emptyState"),
@@ -935,11 +1111,18 @@ tags:
 					summaryBar: document.getElementById("summaryBar"),
 					threshSlider: document.getElementById("threshSlider"),
 					threshVal: document.getElementById("threshVal"),
-					resetSelBtn: document.getElementById("resetSelBtn"),
+					// resetSelBtn: document.getElementById("resetSelBtn"),
 					restoreHiddenBtn:
 						document.getElementById("restoreHiddenBtn"),
 					scatterSvg: document.getElementById("scatterSvg"),
 					legend: document.getElementById("legend"),
+					zoomToSelectionBtn: document.getElementById(
+						"zoomToSelectionBtn",
+					),
+					zoomResetBtn: document.getElementById("zoomResetBtn"),
+					lassoModeBtn: document.getElementById("lassoModeBtn"),
+					zoomStatus: document.getElementById("zoomStatus"),
+					zoomControls: document.getElementById("zoomControls"),
 					plateGrid: document.getElementById("plateGrid"),
 					channelToggle: document.getElementById("channelToggle"),
 					plateSub: document.getElementById("plateSub"),
@@ -972,6 +1155,36 @@ tags:
 						.getPropertyValue(varName)
 						.trim();
 				}
+
+				// ---------- Theme (dark/light) ----------
+				// Sets the data-theme attribute (which the CSS keys off of), updates the
+				// toggle button's icon/label, persists the choice, and re-renders anything
+				// that reads colors via getCss() at draw time (scatter points, legend).
+				function applyTheme(next) {
+					theme = next;
+					document.documentElement.setAttribute("data-theme", theme);
+					const isLight = theme === "light";
+					els.themeToggleIcon.textContent = isLight ? "🌙" : "☀️";
+					els.themeToggleLabel.textContent = isLight
+						? "Dark"
+						: "Light";
+					try {
+						localStorage.setItem("kaspTheme", theme);
+					} catch (e) {
+						/* ignore persistence failures */
+					}
+					// Re-render so colors pulled from CSS variables at draw time (scatter
+					// points, legend dots, plate heatmap) pick up the new palette.
+					if (wells.length > 0) renderAll();
+				}
+				function toggleTheme() {
+					applyTheme(theme === "light" ? "dark" : "light");
+				}
+				applyTheme(theme); // apply saved/default theme on load, before any plate is loaded
+				els.themeToggleBtn.addEventListener("click", (ev) => {
+					ev.stopPropagation();
+					toggleTheme();
+				});
 
 				// ---------- Quadrant template helpers ----------
 				// Standard 96->384 interleave: quadrant is determined by (row parity, col parity)
@@ -1136,6 +1349,52 @@ tags:
 					return Math.log10(Math.max(v, 0.01));
 				}
 
+				// Picks a "nice" gridline step (in log10 units) for a given span so that
+				// zoomed-in views get roughly 4-8 gridlines instead of one giant decade gap.
+				function niceStep(span) {
+					const candidates = [
+						0.05, 0.1, 0.2, 0.25, 0.5,
+					];
+					for (const c of candidates) {
+						if (span / c <= 10) return c;
+					}
+					return 1;
+				}
+
+				// Converts a log10 axis value back into a real-unit label. Whole decades
+				// are shown as 10^n; fractional steps are shown as the actual ratio value.
+				function formatDecadeLabel(d) {
+					// if (Math.abs(d - Math.round(d)) < 1e-9) {
+					// 	return "10^" + Math.round(d);
+					// }
+					const real = Math.pow(10, d);
+					return real >= 100
+						? Math.round(real).toString()
+						: real.toFixed(real >= 10 ? 1 : 2);
+				}
+
+				// Standard ray-casting point-in-polygon test. `poly` is an array of
+				// {x, y} points (the lasso path); used to decide which scatter points
+				// fall inside a freeform lasso selection.
+				function pointInPolygon(px, py, poly) {
+					let inside = false;
+					for (
+						let i = 0, j = poly.length - 1;
+						i < poly.length;
+						j = i++
+					) {
+						const xi = poly[i].x,
+							yi = poly[i].y;
+						const xj = poly[j].x,
+							yj = poly[j].y;
+						const intersects =
+							yi > py !== yj > py &&
+							px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+						if (intersects) inside = !inside;
+					}
+					return inside;
+				}
+
 				function recompute() {
 					const thresh = parseInt(els.threshSlider.value, 10);
 
@@ -1167,6 +1426,7 @@ tags:
 					renderTable();
 					renderInspector();
 					renderSelectionToolbar();
+					updateZoomControlsUI();
 				}
 
 				function renderSelectionToolbar() {
@@ -1320,10 +1580,30 @@ tags:
 
 					const xs = wells.map((w) => logT(w.famN));
 					const ys = wells.map((w) => logT(w.hexN));
-					const xMin = Math.min(...xs) - 0.15,
-						xMax = Math.max(...xs) + 0.15;
-					const yMin = Math.min(...ys) - 0.15,
-						yMax = Math.max(...ys) + 0.15;
+					const dataXMin = Math.min(...xs) - 0.15,
+						dataXMax = Math.max(...xs) + 0.15;
+					const dataYMin = Math.min(...ys) - 0.15,
+						dataYMax = Math.max(...ys) + 0.15;
+
+					// Manual zoom values are stored in real (ratio) units; convert to the
+					// log-space the plot is drawn in. Any unset bound falls back to the
+					// full-data extent computed above.
+					const xMin =
+						scatterZoom.xMin != null
+							? logT(scatterZoom.xMin)
+							: dataXMin;
+					const xMax =
+						scatterZoom.xMax != null
+							? logT(scatterZoom.xMax)
+							: dataXMax;
+					const yMin =
+						scatterZoom.yMin != null
+							? logT(scatterZoom.yMin)
+							: dataYMin;
+					const yMax =
+						scatterZoom.yMax != null
+							? logT(scatterZoom.yMax)
+							: dataYMax;
 
 					const sx = (v) =>
 						pad.l + ((v - xMin) / (xMax - xMin)) * plotW;
@@ -1332,30 +1612,51 @@ tags:
 
 					let svg = `<svg id="scatterSvgInner" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">`;
 
-					// grid lines (log decades)
-					const xDecadeStart = Math.floor(xMin),
-						xDecadeEnd = Math.ceil(xMax);
-					for (let d = xDecadeStart; d <= xDecadeEnd; d++) {
+					// grid lines (log decades). When zoomed into a span smaller than one
+					// decade, add intermediate fractional gridlines too so the zoomed
+					// view isn't left with zero or one reference line.
+					const xSpan = xMax - xMin,
+						ySpan = yMax - yMin;
+					const xStep = xSpan < 1 ? niceStep(xSpan) : 1;
+					const yStep = ySpan < 1 ? niceStep(ySpan) : 1;
+					const xGridStart = Math.floor(xMin / xStep) * xStep,
+						xGridEnd = Math.ceil(xMax / xStep) * xStep;
+					for (let d = xGridStart; d <= xGridEnd + 1e-9; d += xStep) {
+						if (d < xMin - 1e-9 || d > xMax + 1e-9) continue;
 						const X = sx(d);
-						svg += `<line class="grid-line" x1="${X}" y1="${pad.t}" x2="${X}" y2="${pad.t + plotH}"/>`;
-						svg += `<text class="axis-label" x="${X}" y="${H - pad.b + 18}" text-anchor="middle">10^${d}</text>`;
+						const isDecade = Math.abs(d - Math.round(d)) < 1e-9;
+						svg += `<line class="grid-line" x1="${X}" y1="${pad.t}" x2="${X}" y2="${pad.t + plotH}" ${isDecade ? "" : 'stroke-opacity="0.45"'}/>`;
+						svg += `<text class="axis-label" x="${X}" y="${H - pad.b + 18}" text-anchor="middle">${formatDecadeLabel(d)}</text>`;
 					}
-					const yDecadeStart = Math.floor(yMin),
-						yDecadeEnd = Math.ceil(yMax);
-					for (let d = yDecadeStart; d <= yDecadeEnd; d++) {
+					const yGridStart = Math.floor(yMin / yStep) * yStep,
+						yGridEnd = Math.ceil(yMax / yStep) * yStep;
+					for (let d = yGridStart; d <= yGridEnd + 1e-9; d += yStep) {
+						if (d < yMin - 1e-9 || d > yMax + 1e-9) continue;
 						const Y = sy(d);
-						svg += `<line class="grid-line" x1="${pad.l}" y1="${Y}" x2="${pad.l + plotW}" y2="${Y}"/>`;
-						svg += `<text class="axis-label" x="${pad.l - 10}" y="${Y + 4}" text-anchor="end">10^${d}</text>`;
+						const isDecade = Math.abs(d - Math.round(d)) < 1e-9;
+						svg += `<line class="grid-line" x1="${pad.l}" y1="${Y}" x2="${pad.l + plotW}" y2="${Y}" ${isDecade ? "" : 'stroke-opacity="0.45"'}/>`;
+						svg += `<text class="axis-label" x="${pad.l - 10}" y="${Y + 4}" text-anchor="end">${formatDecadeLabel(d)}</text>`;
 					}
 
 					svg += `<text class="axis-label" x="${pad.l + plotW / 2}" y="${H - 8}" text-anchor="middle" style="font-size:12px;">FAM / ROX (normalized, log scale)</text>`;
 					svg += `<text class="axis-label" x="14" y="${pad.t + plotH / 2}" text-anchor="middle" transform="rotate(-90 14 ${pad.t + plotH / 2})" style="font-size:12px;">HEX / ROX (normalized, log scale)</text>`;
 
+					// Clip points to the plot rectangle so that, when zoomed in, points
+					// outside the chosen range don't render on top of the axes/labels.
+					svg += `<clipPath id="scatterPlotClip"><rect x="${pad.l}" y="${pad.t}" width="${plotW}" height="${plotH}"/></clipPath>`;
+					svg += `<g clip-path="url(#scatterPlotClip)">`;
+
 					const ptPositions = {}; // id -> {cx, cy} in SVG user units, for lasso hit-testing
 
 					wells.forEach((w) => {
-						const cx = sx(logT(w.famN)),
-							cy = sy(logT(w.hexN));
+						const lx = logT(w.famN),
+							ly = logT(w.hexN);
+						const cx = sx(lx),
+							cy = sy(ly);
+						// Points outside the current zoom window are skipped entirely —
+						// they're not selectable/hoverable since they aren't visible.
+						if (lx < xMin || lx > xMax || ly < yMin || ly > yMax)
+							return;
 						ptPositions[w.id] = { cx, cy };
 						const color = clusterColor(w);
 						const passes = wellPassesFilter(w);
@@ -1371,6 +1672,8 @@ tags:
 						svg += `<circle class="${cls}" data-id="${w.id}" cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${r}" fill="${color}" fill-opacity="${isSel ? 0.95 : 0.78}"><title>${w.id}: FAM ${w.fam}, HEX ${w.hex}, ROX ${w.rox}</title></circle>`;
 					});
 
+					svg += `</g>`;
+
 					svg += `</svg>`;
 					const wrap = document.getElementById("scatterWrap");
 					wrap.innerHTML = svg;
@@ -1381,12 +1684,19 @@ tags:
 							ev.stopPropagation();
 							selectWell(el.getAttribute("data-id"), ev.shiftKey);
 						});
+						el.addEventListener("mouseenter", () => {
+							setHoverLink(el.getAttribute("data-id"));
+						});
+						el.addEventListener("mouseleave", () => {
+							setHoverLink(null);
+						});
 					});
 
-					// ---- Drag box-select ----
+					// ---- Drag select: rectangle box, or freeform lasso ----
 					let dragStart = null,
 						lassoEl = null,
-						dragged = false;
+						dragged = false,
+						lassoPoints = null; // freeform path points, only used in lasso mode
 
 					function svgPoint(ev) {
 						const rect = svgEl.getBoundingClientRect();
@@ -1399,6 +1709,8 @@ tags:
 						if (ev.target.closest(".pt")) return; // let point clicks handle themselves
 						dragStart = svgPoint(ev);
 						dragged = false;
+						lassoPoints =
+							scatterSelectMode === "lasso" ? [dragStart] : null;
 					});
 					svgEl.addEventListener("mousemove", (ev) => {
 						if (!dragStart) return;
@@ -1409,49 +1721,82 @@ tags:
 						)
 							dragged = true;
 						if (!dragged) return;
-						const x = Math.min(dragStart.x, p.x),
-							y = Math.min(dragStart.y, p.y);
-						const w_ = Math.abs(p.x - dragStart.x),
-							h_ = Math.abs(p.y - dragStart.y);
-						if (!lassoEl) {
-							lassoEl = document.createElementNS(
-								"http://www.w3.org/2000/svg",
-								"rect",
+
+						if (scatterSelectMode === "lasso") {
+							lassoPoints.push(p);
+							if (!lassoEl) {
+								lassoEl = document.createElementNS(
+									"http://www.w3.org/2000/svg",
+									"polygon",
+								);
+								lassoEl.setAttribute("class", "lasso-path");
+								svgEl.appendChild(lassoEl);
+							}
+							lassoEl.setAttribute(
+								"points",
+								lassoPoints.map((pt) => `${pt.x},${pt.y}`).join(" "),
 							);
-							lassoEl.setAttribute("class", "lasso-rect");
-							svgEl.appendChild(lassoEl);
+						} else {
+							const x = Math.min(dragStart.x, p.x),
+								y = Math.min(dragStart.y, p.y);
+							const w_ = Math.abs(p.x - dragStart.x),
+								h_ = Math.abs(p.y - dragStart.y);
+							if (!lassoEl) {
+								lassoEl = document.createElementNS(
+									"http://www.w3.org/2000/svg",
+									"rect",
+								);
+								lassoEl.setAttribute("class", "lasso-rect");
+								svgEl.appendChild(lassoEl);
+							}
+							lassoEl.setAttribute("x", x);
+							lassoEl.setAttribute("y", y);
+							lassoEl.setAttribute("width", w_);
+							lassoEl.setAttribute("height", h_);
 						}
-						lassoEl.setAttribute("x", x);
-						lassoEl.setAttribute("y", y);
-						lassoEl.setAttribute("width", w_);
-						lassoEl.setAttribute("height", h_);
 					});
 					function finishDrag(ev) {
 						if (dragStart && dragged) {
 							const p = svgPoint(ev);
-							const x0 = Math.min(dragStart.x, p.x),
-								x1 = Math.max(dragStart.x, p.x);
-							const y0 = Math.min(dragStart.y, p.y),
-								y1 = Math.max(dragStart.y, p.y);
-							const picked = wells
-								.filter((w) => {
-									const pos = ptPositions[w.id];
-									return (
-										pos &&
-										pos.cx >= x0 &&
-										pos.cx <= x1 &&
-										pos.cy >= y0 &&
-										pos.cy <= y1 &&
-										wellPassesFilter(w)
-									);
-								})
-								.map((w) => w.id);
+							let picked;
+							if (scatterSelectMode === "lasso") {
+								const poly = lassoPoints;
+								picked = wells
+									.filter((w) => {
+										const pos = ptPositions[w.id];
+										return (
+											pos &&
+											wellPassesFilter(w) &&
+											pointInPolygon(pos.cx, pos.cy, poly)
+										);
+									})
+									.map((w) => w.id);
+							} else {
+								const x0 = Math.min(dragStart.x, p.x),
+									x1 = Math.max(dragStart.x, p.x);
+								const y0 = Math.min(dragStart.y, p.y),
+									y1 = Math.max(dragStart.y, p.y);
+								picked = wells
+									.filter((w) => {
+										const pos = ptPositions[w.id];
+										return (
+											pos &&
+											pos.cx >= x0 &&
+											pos.cx <= x1 &&
+											pos.cy >= y0 &&
+											pos.cy <= y1 &&
+											wellPassesFilter(w)
+										);
+									})
+									.map((w) => w.id);
+							}
 							if (!ev.shiftKey) multiSelect.clear();
 							picked.forEach((id) => multiSelect.add(id));
 							renderAll();
 						}
 						dragStart = null;
 						dragged = false;
+						lassoPoints = null;
 						if (lassoEl) {
 							lassoEl.remove();
 							lassoEl = null;
@@ -1464,6 +1809,7 @@ tags:
 							else {
 								dragStart = null;
 								dragged = false;
+								lassoPoints = null;
 							}
 						}
 					});
@@ -1491,6 +1837,53 @@ tags:
 
 				function wellAt(row, col) {
 					return wells[row * COLS + col];
+				}
+
+				// Cross-highlights a well between the plate grid and the scatter plot.
+				// Pass a well id to highlight that well in both views, or null to clear.
+				let hoverLinkId = null;
+				function setHoverLink(id) {
+					if (id === hoverLinkId) return;
+					if (hoverLinkId != null) {
+						const prevCell = els.plateGrid.querySelector(
+							`.well-cell[data-id="${hoverLinkId}"]`,
+						);
+						if (prevCell) prevCell.classList.remove("hover-link");
+						const prevPt = document.querySelector(
+							`#scatterWrap .pt[data-id="${hoverLinkId}"]`,
+						);
+						if (prevPt) {
+							prevPt.classList.remove("hover-link");
+							prevPt.setAttribute(
+								"r",
+								prevPt.getAttribute("data-base-r") || 4.2,
+							);
+						}
+					}
+					hoverLinkId = id;
+					if (hoverLinkId != null) {
+						const cell = els.plateGrid.querySelector(
+							`.well-cell[data-id="${hoverLinkId}"]`,
+						);
+						if (cell) cell.classList.add("hover-link");
+						const pt = document.querySelector(
+							`#scatterWrap .pt[data-id="${hoverLinkId}"]`,
+						);
+						if (pt) {
+							pt.classList.add("hover-link");
+							if (!pt.getAttribute("data-base-r")) {
+								pt.setAttribute(
+									"data-base-r",
+									pt.getAttribute("r"),
+								);
+							}
+							pt.setAttribute(
+								"r",
+								Number(pt.getAttribute("data-base-r")) + 2.5,
+							);
+							pt.parentNode.appendChild(pt); // bring to front so it isn't occluded by neighbors
+						}
+					}
 				}
 
 				// Repaint just the .well-cell classes/styles to reflect multiSelect during a drag,
@@ -1636,6 +2029,13 @@ tags:
 							} // suppress click that follows a drag
 							toggleWellSelection(id);
 						});
+
+						el.addEventListener("mouseenter", () => {
+							setHoverLink(id);
+						});
+						el.addEventListener("mouseleave", () => {
+							setHoverLink(null);
+						});
 					});
 				}
 
@@ -1696,7 +2096,7 @@ tags:
 
 				function renderInspector() {
 					if (!selectedWellId) {
-						els.inspectorBody.innerHTML = `<div class="inspector-empty">Click a well on the plate, or a point on the scatter, to inspect it.</div>`;
+						els.inspectorBody.innerHTML = `<div class="inspector-empty">Click a point on the scatter to inspect it.</div>`;
 						return;
 					}
 					const w = wells.find((x) => x.id === selectedWellId);
@@ -1733,6 +2133,7 @@ tags:
 							multiSelect.clear();
 							activeClusterFilter.clear();
 							activeQuadrant = "all";
+							scatterZoom = { xMin: null, xMax: null, yMin: null, yMax: null };
 							setActiveQuadrantButton("all");
 							updatePlateFormatUI();
 							els.fileMeta.textContent =
@@ -1917,12 +2318,12 @@ tags:
 					recompute();
 				});
 
-				els.resetSelBtn.addEventListener("click", () => {
-					selectedWellId = null;
-					multiSelect.clear();
-					activeClusterFilter.clear();
-					renderAll();
-				});
+				// els.resetSelBtn.addEventListener("click", () => {
+				// 	selectedWellId = null;
+				// 	multiSelect.clear();
+				// 	activeClusterFilter.clear();
+				// 	renderAll();
+				// });
 				// click anywhere to clear the selection
 				document.addEventListener('click', () => {
 					selectedWellId = null;
@@ -1930,6 +2331,97 @@ tags:
 					activeClusterFilter.clear();
 					renderAll();
 				});
+
+				// ---------- Scatter zoom controls ----------
+				function isZoomActive() {
+					return (
+						scatterZoom.xMin != null ||
+						scatterZoom.xMax != null ||
+						scatterZoom.yMin != null ||
+						scatterZoom.yMax != null
+					);
+				}
+
+				// Enables "Zoom to selection" only when there's something to zoom to,
+				// and keeps the status line + reset button in sync with current state.
+				function updateZoomControlsUI() {
+					els.zoomToSelectionBtn.disabled =
+						multiSelect.size === 0 && !selectedWellId;
+					if (isZoomActive()) {
+						els.zoomStatus.textContent =
+							"Zoomed — showing only wells within the chosen FAM/ROX and HEX/ROX bounds.";
+					} else {
+						els.zoomStatus.textContent =
+							'Showing full data range. Select wells and click "Zoom to selection".';
+					}
+				}
+
+				function selectedWellsForZoom() {
+					if (multiSelect.size > 0) {
+						return wells.filter((w) => multiSelect.has(w.id));
+					}
+					if (selectedWellId) {
+						return wells.filter((w) => w.id === selectedWellId);
+					}
+					return [];
+				}
+
+				// Computes the FAM/ROX and HEX/ROX bounding box of the currently selected
+				// wells (with a little padding) and sets that as the new zoom window.
+				function zoomToSelection() {
+					const sel = selectedWellsForZoom();
+					if (sel.length === 0) return;
+					const xs = sel.map((w) => w.famN);
+					const ys = sel.map((w) => w.hexN);
+					let xMin = Math.min(...xs),
+						xMax = Math.max(...xs);
+					let yMin = Math.min(...ys),
+						yMax = Math.max(...ys);
+					// Pad in log space so a single selected well (or a tight cluster)
+					// still renders with breathing room around it rather than a single
+					// point glued to the plot edges.
+					const padLog = 0.02;
+					xMin = Math.pow(10, logT(xMin) - padLog);
+					xMax = Math.pow(10, logT(xMax) + padLog);
+					yMin = Math.pow(10, logT(yMin) - padLog);
+					yMax = Math.pow(10, logT(yMax) + padLog);
+					scatterZoom = { xMin, xMax, yMin, yMax };
+					renderAll();
+				}
+
+				function resetZoom() {
+					scatterZoom = { xMin: null, xMax: null, yMin: null, yMax: null };
+					renderAll();
+				}
+
+				els.zoomToSelectionBtn.addEventListener("click", (ev) => {
+					ev.stopPropagation();
+					zoomToSelection();
+				});
+				els.zoomResetBtn.addEventListener("click", (ev) => {
+					ev.stopPropagation();
+					resetZoom();
+				});
+				els.lassoModeBtn.addEventListener("click", (ev) => {
+					ev.stopPropagation();
+					scatterSelectMode =
+						scatterSelectMode === "lasso" ? "box" : "lasso";
+					updateLassoModeUI();
+				});
+				function updateLassoModeUI() {
+					const isLasso = scatterSelectMode === "lasso";
+					els.lassoModeBtn.classList.toggle("lasso-active", isLasso);
+					els.lassoModeBtn.textContent = isLasso
+						? "Lasso select: on"
+						: "Lasso select";
+					document
+						.getElementById("scatterWrap")
+						.classList.toggle("lasso-cursor", isLasso);
+				}
+				updateLassoModeUI();
+				els.zoomControls.addEventListener("click", (ev) =>
+					ev.stopPropagation(),
+				);
 
 				// ---------- Example data (synthetic, clearly fabricated for demo only) ----------
 				function generateExample() {
@@ -1969,6 +2461,7 @@ tags:
 					multiSelect.clear();
 					activeClusterFilter.clear();
 					activeQuadrant = "all";
+					scatterZoom = { xMin: null, xMax: null, yMin: null, yMax: null };
 					setActiveQuadrantButton("all");
 					updatePlateFormatUI();
 					els.fileMeta.textContent =
@@ -1981,3 +2474,4 @@ tags:
 		</script>
 	</body>
 </html>
+
