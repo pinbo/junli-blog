@@ -398,7 +398,7 @@ tags:
 			.zoom-controls {
 				display: flex;
 				align-items: center;
-				gap: 14px;
+				gap: 10px;
 				flex-wrap: wrap;
 				margin-bottom: 12px;
 				padding: 10px 12px;
@@ -441,6 +441,40 @@ tags:
 				color: var(--muted);
 				width: 100%;
 				margin-top: -2px;
+			}
+			.stretch-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				width: 100%;
+				font-family: "IBM Plex Mono", monospace;
+				font-size: 11px;
+				color: var(--muted);
+				margin-top: 2px;
+			}
+			.shear-sliders {
+				display: flex;
+				flex-direction: row;
+				gap: 18px;
+				width: 100%;
+			}
+			.shear-sliders .stretch-row {
+				width: auto;
+				flex: 1;
+				margin-top: 0;
+				min-width: 0;
+			}
+			.stretch-row input[type="range"] {
+				flex: 1;
+				max-width: 280px;
+			}
+			.shear-sliders .stretch-row input[type="range"] {
+				max-width: none;
+				min-width: 60px;
+			}
+			.stretch-row input[type="range"]:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
 			}
 			.legend .item {
 				display: flex;
@@ -570,6 +604,28 @@ tags:
 			.chip.active[data-ch="call"] {
 				background: var(--accent2);
 				border-color: var(--accent2);
+			}
+
+			.raw-toggle {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				font-family: "IBM Plex Mono", monospace;
+				font-size: 11px;
+				color: var(--text);
+				cursor: pointer;
+				user-select: none;
+				padding: 6px 8px;
+				border: 1px solid var(--line);
+				border-radius: 6px;
+				background: var(--surface-2);
+				white-space: nowrap;
+			}
+			.raw-toggle input[type="checkbox"] {
+				accent-color: var(--accent2);
+				width: 14px;
+				height: 14px;
+				cursor: pointer;
 			}
 
 			/* Selection toolbar */
@@ -901,13 +957,6 @@ tags:
 						/>
 						<span id="threshVal" class="mono">200</span>
 					</label>
-					<button
-						class="btn"
-						id="restoreHiddenBtn"
-						style="display: none"
-					>
-						Restore hidden wells
-					</button>
 				</div>
 
 				<div class="quadrant-row" id="quadrantRow">
@@ -946,7 +995,7 @@ tags:
 					<div class="panel">
 						<h2>
 							Genotype scatter
-							<span class="sub"
+							<span class="sub" id="scatterSub"
 								>FAM/ROX vs HEX/ROX, normalized</span
 							>
 						</h2>
@@ -962,9 +1011,41 @@ tags:
 							>
 								Lasso select
 							</button>
+							<label class="raw-toggle" id="rawModeToggle">
+								<input type="checkbox" id="rawModeCheckbox" />
+								Raw (FAM, HEX)
+							</label>
 							<span class="zoom-status" id="zoomStatus"
 								>Showing full data range. Select wells and click "Zoom to selection".</span
 							>
+							<div class="shear-sliders" id="shearSliders">
+								<label class="stretch-row" id="aSliderRow">
+									Shear X
+									<input
+										type="range"
+										id="aSlider"
+										min="-1"
+										max="1"
+										value="0"
+										step="0.01"
+										title="Shear X: x' = x + a*y, applied to the underlying FAM/ROX (or raw FAM) values."
+									/>
+									<span id="aSliderVal" class="mono">0.00</span>
+								</label>
+								<label class="stretch-row" id="bSliderRow">
+									Shear Y
+									<input
+										type="range"
+										id="bSlider"
+										min="-1"
+										max="1"
+										value="0"
+										step="0.01"
+										title="Shear Y: y' = y + b*x, applied to the underlying HEX/ROX (or raw HEX) values."
+									/>
+									<span id="bSliderVal" class="mono">0.00</span>
+								</label>
+							</div>
 						</div>
 						<div id="scatterWrap">
 							<svg id="scatterSvg" viewBox="0 0 520 480"></svg>
@@ -983,10 +1064,20 @@ tags:
 							style="display: none"
 						>
 							<span class="count"
-								><span id="selCount">0</span> wells selected</span
+								><span id="selCount">0</span> selected</span
 							>
 							<button class="btn" id="hideSelectedBtn">
 								Hide selected
+							</button>
+							<button class="btn" id="hideAllBtn">
+								Hide all
+							</button>
+							<button
+								class="btn"
+								id="restoreHiddenBtn"
+								style="display: none"
+							>
+								Unhide all
 							</button>
 							<!--<button
 								class="btn"
@@ -1042,14 +1133,18 @@ tags:
 
 				<div class="footer-note">
 					Normalization: FAM/ROX and HEX/ROX (ROX is the passive
-					reference dye). Genotype calls are assigned manually —
-					select wells, then click a genotype class in the side
-					panel. Wells with both raw FAM and HEX below the no-call
-					threshold are flagged "No call" until assigned. On the
-					plate or table, click wells to toggle them in/out of your
-					selection, or click-drag across a range; on the scatter,
-					shift-click or drag a box. Hidden wells are excluded from
-					counts until restored.
+					reference dye). The scatter plot can switch between this
+					normalized view and raw FAM/HEX signal via the toggle above
+					it. Genotype calls are assigned manually — select wells,
+					then click a genotype class in the side panel. Wells with
+					both raw FAM and HEX below the no-call threshold are
+					flagged "No call" until assigned. On the plate or table,
+					click wells to toggle them in/out of your selection, or
+					click-drag across a range; on the scatter, shift-click or
+					drag a box. Hidden wells are excluded from counts until
+					restored. Wells outside the active plate template (e.g. a
+					384-well quadrant selection) are dimmed on the plate and
+					table, and left out of the scatter plot entirely.
 				</div>
 			</div>
 		</div>
@@ -1063,6 +1158,17 @@ tags:
 				let multiSelect = new Set(); // ids of wells in the current multi-selection (for coloring/hiding)
 				let activeClusterFilter = new Set();
 				let plateChannel = "call";
+				let scatterMode = "normalized"; // 'normalized' (FAM/ROX, HEX/ROX) | 'raw' (FAM, HEX)
+				// Linear shear applied to the scatter values (normalized FAM/ROX &
+				// HEX/ROX, or raw FAM & HEX), which are plotted on a plain linear
+				// scale (no log transform):
+				//   x' = x + shearA * y
+				//   y' = y + shearB * x
+				// Each ranges -1 to 1 (default 0 = no shear) and is controlled by its
+				// own slider, applied directly to every plotted point with no anchor
+				// point or normalization.
+				let shearA = 0;
+				let shearB = 0;
 				let activeQuadrant = "all"; // 'all' | 'A1' | 'A2' | 'B1' | 'B2' | 'A1A2' | 'B1B2' | 'A1B1' | 'A2B2'
 				// Manual scatter zoom/crop window. Values are in real FAM/ROX and HEX/ROX
 				// (ratio) units, NOT log space — converted to log space at render time.
@@ -1115,6 +1221,10 @@ tags:
 					restoreHiddenBtn:
 						document.getElementById("restoreHiddenBtn"),
 					scatterSvg: document.getElementById("scatterSvg"),
+					scatterSub: document.getElementById("scatterSub"),
+					rawModeCheckbox: document.getElementById(
+						"rawModeCheckbox",
+					),
 					legend: document.getElementById("legend"),
 					zoomToSelectionBtn: document.getElementById(
 						"zoomToSelectionBtn",
@@ -1123,6 +1233,12 @@ tags:
 					lassoModeBtn: document.getElementById("lassoModeBtn"),
 					zoomStatus: document.getElementById("zoomStatus"),
 					zoomControls: document.getElementById("zoomControls"),
+					aSliderRow: document.getElementById("aSliderRow"),
+					aSlider: document.getElementById("aSlider"),
+					aSliderVal: document.getElementById("aSliderVal"),
+					bSliderRow: document.getElementById("bSliderRow"),
+					bSlider: document.getElementById("bSlider"),
+					bSliderVal: document.getElementById("bSliderVal"),
 					plateGrid: document.getElementById("plateGrid"),
 					channelToggle: document.getElementById("channelToggle"),
 					plateSub: document.getElementById("plateSub"),
@@ -1136,6 +1252,7 @@ tags:
 					genotypeBtnList:
 						document.getElementById("genotypeBtnList"),
 					hideSelectedBtn: document.getElementById("hideSelectedBtn"),
+					hideAllBtn: document.getElementById("hideAllBtn"),
 					downloadCallsBtn:
 						document.getElementById("downloadCallsBtn"),
 				};
@@ -1345,32 +1462,30 @@ tags:
 					return out;
 				}
 
-				function logT(v) {
-					return Math.log10(Math.max(v, 0.01));
+				// Picks a "nice" linear gridline step (1/2/5 x 10^n) for a given axis
+				// span, aiming for roughly 5-8 gridlines across the plot.
+				function niceLinearStep(span) {
+					if (span <= 0) return 1;
+					const targetTicks = 6;
+					const rawStep = span / targetTicks;
+					const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+					const norm = rawStep / mag;
+					let niceNorm;
+					if (norm < 1.5) niceNorm = 1;
+					else if (norm < 3.5) niceNorm = 2;
+					else if (norm < 7.5) niceNorm = 5;
+					else niceNorm = 10;
+					return niceNorm * mag;
 				}
 
-				// Picks a "nice" gridline step (in log10 units) for a given span so that
-				// zoomed-in views get roughly 4-8 gridlines instead of one giant decade gap.
-				function niceStep(span) {
-					const candidates = [
-						0.05, 0.1, 0.2, 0.25, 0.5,
-					];
-					for (const c of candidates) {
-						if (span / c <= 10) return c;
-					}
-					return 1;
-				}
-
-				// Converts a log10 axis value back into a real-unit label. Whole decades
-				// are shown as 10^n; fractional steps are shown as the actual ratio value.
-				function formatDecadeLabel(d) {
-					// if (Math.abs(d - Math.round(d)) < 1e-9) {
-					// 	return "10^" + Math.round(d);
-					// }
-					const real = Math.pow(10, d);
-					return real >= 100
-						? Math.round(real).toString()
-						: real.toFixed(real >= 10 ? 1 : 2);
+				// Formats a linear axis tick value for display: whole numbers print
+				// without decimals; otherwise a couple of significant decimal places.
+				function formatTickLabel(v) {
+					if (Math.abs(v) >= 1000)
+						return Math.round(v).toLocaleString();
+					if (Math.abs(v - Math.round(v)) < 1e-9)
+						return Math.round(v).toString();
+					return v.toFixed(v >= 10 || v <= -10 ? 1 : 2);
 				}
 
 				// Standard ray-casting point-in-polygon test. `poly` is an array of
@@ -1571,6 +1686,29 @@ tags:
 					return activeClusterFilter.has(idx);
 				}
 
+				// Returns the {x, y} values to plot for a well, in whichever units the
+				// current scatter mode uses: normalized (FAM/ROX, HEX/ROX) or raw (FAM, HEX).
+				function scatterXY(w) {
+					return scatterMode === "raw"
+						? { x: w.fam, y: w.hex }
+						: { x: w.famN, y: w.hexN };
+				}
+
+				// Linear shear applied to the scatter's plotted coordinates:
+				//   x' = x + shearA * y
+				//   y' = y + shearB * x
+				// No anchor point, no normalization — just the raw formula, scaled
+				// by the two slider values (each -1 to 1), applied in the same
+				// units scatterXY returns (normalized ratios, or raw FAM/HEX). The
+				// scatter is plotted on a plain linear scale, so this is the only
+				// transform applied before drawing.
+				function applyShear(x, y) {
+					return {
+						x: x + shearA * y,
+						y: y + shearB * x,
+					};
+				}
+
 				function renderScatter() {
 					const W = 520,
 						H = 480,
@@ -1578,32 +1716,52 @@ tags:
 					const plotW = W - pad.l - pad.r,
 						plotH = H - pad.t - pad.b;
 
-					const xs = wells.map((w) => logT(w.famN));
-					const ys = wells.map((w) => logT(w.hexN));
-					const dataXMin = Math.min(...xs) - 0.15,
-						dataXMax = Math.max(...xs) + 0.15;
-					const dataYMin = Math.min(...ys) - 0.15,
-						dataYMax = Math.max(...ys) + 0.15;
+					// Wells outside the active plate template (e.g. a 384-well quadrant
+					// selection) are left out of the scatter entirely — not just dimmed —
+					// so they don't appear as points, affect the axis range, or be
+					// selectable here.
+					const scatterWells = wells.filter((w) =>
+						quadrantMatches(activeQuadrant, w.row, w.col),
+					);
 
-					// Manual zoom values are stored in real (ratio) units; convert to the
-					// log-space the plot is drawn in. Any unset bound falls back to the
+					// Shear is applied to each well's original linear coordinates.
+					// The scatter now plots these values directly — no log transform.
+					const sheared = {}; // id -> {x, y} in sheared linear units
+					scatterWells.forEach((w) => {
+						const xy = scatterXY(w);
+						sheared[w.id] = applyShear(xy.x, xy.y);
+					});
+
+					const xs = scatterWells.map((w) => sheared[w.id].x);
+					const ys = scatterWells.map((w) => sheared[w.id].y);
+					const xSpanRaw = xs.length
+						? Math.max(...xs) - Math.min(...xs)
+						: 1;
+					const ySpanRaw = ys.length
+						? Math.max(...ys) - Math.min(...ys)
+						: 1;
+					// Pad by 8% of the data's own span (with a small absolute floor
+					// so a single point or a zero-span axis doesn't collapse).
+					const xPad = Math.max(xSpanRaw * 0.08, 1);
+					const yPad = Math.max(ySpanRaw * 0.08, 1);
+					const dataXMin = (xs.length ? Math.min(...xs) : 0) - xPad,
+						dataXMax = (xs.length ? Math.max(...xs) : 1) + xPad;
+					const dataYMin = (ys.length ? Math.min(...ys) : 0) - yPad,
+						dataYMax = (ys.length ? Math.max(...ys) : 1) + yPad;
+
+					// Manual zoom values are stored directly in the sheared linear
+					// units the plot is drawn in (see zoomToSelection), so the zoom
+					// window stays aligned with where points actually render even
+					// when a shear is active. Any unset bound falls back to the
 					// full-data extent computed above.
 					const xMin =
-						scatterZoom.xMin != null
-							? logT(scatterZoom.xMin)
-							: dataXMin;
+						scatterZoom.xMin != null ? scatterZoom.xMin : dataXMin;
 					const xMax =
-						scatterZoom.xMax != null
-							? logT(scatterZoom.xMax)
-							: dataXMax;
+						scatterZoom.xMax != null ? scatterZoom.xMax : dataXMax;
 					const yMin =
-						scatterZoom.yMin != null
-							? logT(scatterZoom.yMin)
-							: dataYMin;
+						scatterZoom.yMin != null ? scatterZoom.yMin : dataYMin;
 					const yMax =
-						scatterZoom.yMax != null
-							? logT(scatterZoom.yMax)
-							: dataYMax;
+						scatterZoom.yMax != null ? scatterZoom.yMax : dataYMax;
 
 					const sx = (v) =>
 						pad.l + ((v - xMin) / (xMax - xMin)) * plotW;
@@ -1612,34 +1770,36 @@ tags:
 
 					let svg = `<svg id="scatterSvgInner" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">`;
 
-					// grid lines (log decades). When zoomed into a span smaller than one
-					// decade, add intermediate fractional gridlines too so the zoomed
-					// view isn't left with zero or one reference line.
-					const xSpan = xMax - xMin,
-						ySpan = yMax - yMin;
-					const xStep = xSpan < 1 ? niceStep(xSpan) : 1;
-					const yStep = ySpan < 1 ? niceStep(ySpan) : 1;
-					const xGridStart = Math.floor(xMin / xStep) * xStep,
-						xGridEnd = Math.ceil(xMax / xStep) * xStep;
-					for (let d = xGridStart; d <= xGridEnd + 1e-9; d += xStep) {
-						if (d < xMin - 1e-9 || d > xMax + 1e-9) continue;
-						const X = sx(d);
-						const isDecade = Math.abs(d - Math.round(d)) < 1e-9;
-						svg += `<line class="grid-line" x1="${X}" y1="${pad.t}" x2="${X}" y2="${pad.t + plotH}" ${isDecade ? "" : 'stroke-opacity="0.45"'}/>`;
-						svg += `<text class="axis-label" x="${X}" y="${H - pad.b + 18}" text-anchor="middle">${formatDecadeLabel(d)}</text>`;
+					// Linear grid lines, spaced at a "nice" round step for the
+					// current axis span (recomputed on every render/zoom so a
+					// zoomed-in view still gets a sensible number of gridlines).
+					const xStep = niceLinearStep(xMax - xMin);
+					const yStep = niceLinearStep(yMax - yMin);
+					const xGridStart = Math.ceil(xMin / xStep) * xStep,
+						xGridEnd = Math.floor(xMax / xStep) * xStep;
+					for (let v = xGridStart; v <= xGridEnd + 1e-9; v += xStep) {
+						const X = sx(v);
+						svg += `<line class="grid-line" x1="${X}" y1="${pad.t}" x2="${X}" y2="${pad.t + plotH}"/>`;
+						svg += `<text class="axis-label" x="${X}" y="${H - pad.b + 18}" text-anchor="middle">${formatTickLabel(v)}</text>`;
 					}
-					const yGridStart = Math.floor(yMin / yStep) * yStep,
-						yGridEnd = Math.ceil(yMax / yStep) * yStep;
-					for (let d = yGridStart; d <= yGridEnd + 1e-9; d += yStep) {
-						if (d < yMin - 1e-9 || d > yMax + 1e-9) continue;
-						const Y = sy(d);
-						const isDecade = Math.abs(d - Math.round(d)) < 1e-9;
-						svg += `<line class="grid-line" x1="${pad.l}" y1="${Y}" x2="${pad.l + plotW}" y2="${Y}" ${isDecade ? "" : 'stroke-opacity="0.45"'}/>`;
-						svg += `<text class="axis-label" x="${pad.l - 10}" y="${Y + 4}" text-anchor="end">${formatDecadeLabel(d)}</text>`;
+					const yGridStart = Math.ceil(yMin / yStep) * yStep,
+						yGridEnd = Math.floor(yMax / yStep) * yStep;
+					for (let v = yGridStart; v <= yGridEnd + 1e-9; v += yStep) {
+						const Y = sy(v);
+						svg += `<line class="grid-line" x1="${pad.l}" y1="${Y}" x2="${pad.l + plotW}" y2="${Y}"/>`;
+						svg += `<text class="axis-label" x="${pad.l - 10}" y="${Y + 4}" text-anchor="end">${formatTickLabel(v)}</text>`;
 					}
 
-					svg += `<text class="axis-label" x="${pad.l + plotW / 2}" y="${H - 8}" text-anchor="middle" style="font-size:12px;">FAM / ROX (normalized, log scale)</text>`;
-					svg += `<text class="axis-label" x="14" y="${pad.t + plotH / 2}" text-anchor="middle" transform="rotate(-90 14 ${pad.t + plotH / 2})" style="font-size:12px;">HEX / ROX (normalized, log scale)</text>`;
+					const xAxisLabel =
+						scatterMode === "raw"
+							? "FAM (raw)"
+							: "FAM / ROX (normalized)";
+					const yAxisLabel =
+						scatterMode === "raw"
+							? "HEX (raw)"
+							: "HEX / ROX (normalized)";
+					svg += `<text class="axis-label" x="${pad.l + plotW / 2}" y="${H - 8}" text-anchor="middle" style="font-size:12px;">${xAxisLabel}</text>`;
+					svg += `<text class="axis-label" x="14" y="${pad.t + plotH / 2}" text-anchor="middle" transform="rotate(-90 14 ${pad.t + plotH / 2})" style="font-size:12px;">${yAxisLabel}</text>`;
 
 					// Clip points to the plot rectangle so that, when zoomed in, points
 					// outside the chosen range don't render on top of the axes/labels.
@@ -1648,14 +1808,15 @@ tags:
 
 					const ptPositions = {}; // id -> {cx, cy} in SVG user units, for lasso hit-testing
 
-					wells.forEach((w) => {
-						const lx = logT(w.famN),
-							ly = logT(w.hexN);
-						const cx = sx(lx),
-							cy = sy(ly);
+					scatterWells.forEach((w) => {
+						const xy = sheared[w.id];
+						const px = xy.x,
+							py = xy.y;
+						const cx = sx(px),
+							cy = sy(py);
 						// Points outside the current zoom window are skipped entirely —
 						// they're not selectable/hoverable since they aren't visible.
-						if (lx < xMin || lx > xMax || ly < yMin || ly > yMax)
+						if (px < xMin || px > xMax || py < yMin || py > yMax)
 							return;
 						ptPositions[w.id] = { cx, cy };
 						const color = clusterColor(w);
@@ -2198,6 +2359,32 @@ tags:
 					});
 				});
 
+				// ---------- Scatter axis mode: normalized (FAM/ROX, HEX/ROX) vs raw (FAM, HEX) ----------
+				els.rawModeCheckbox.addEventListener("click", (ev) =>
+					ev.stopPropagation(),
+				);
+				els.rawModeCheckbox.addEventListener("change", () => {
+					const mode = els.rawModeCheckbox.checked
+						? "raw"
+						: "normalized";
+					if (mode === scatterMode) return;
+					scatterMode = mode;
+					els.scatterSub.textContent =
+						scatterMode === "raw"
+							? "FAM vs HEX, raw signal"
+							: "FAM/ROX vs HEX/ROX, normalized";
+					// The zoom window is stored in the previous mode's units
+					// (ratios vs raw intensities), so it no longer means anything
+					// meaningful after switching — reset rather than carry it over.
+					scatterZoom = {
+						xMin: null,
+						xMax: null,
+						yMin: null,
+						yMax: null,
+					};
+					renderAll();
+				});
+
 				// ---------- Quadrant / plate template selector ----------
 				function setActiveQuadrantButton(q) {
 					els.quadrantRow
@@ -2311,6 +2498,18 @@ tags:
 					recompute();
 				});
 
+				els.hideAllBtn.addEventListener("click", () => {
+					// Hides every well in the active plate template (e.g. just the
+					// current 384-well quadrant, if one is selected) — matching the
+					// same scoping used elsewhere (scatter, table, plate dimming).
+					wells.forEach((w) => {
+						if (quadrantMatches(activeQuadrant, w.row, w.col)) {
+							w.excluded = true;
+						}
+					});
+					recompute();
+				});
+
 				els.restoreHiddenBtn.addEventListener("click", () => {
 					wells.forEach((w) => {
 						w.excluded = false;
@@ -2343,13 +2542,20 @@ tags:
 				}
 
 				// Enables "Zoom to selection" only when there's something to zoom to,
-				// and keeps the status line + reset button in sync with current state.
+				// and keeps the status line + reset button + shear sliders in sync
+				// with current state.
 				function updateZoomControlsUI() {
 					els.zoomToSelectionBtn.disabled =
 						multiSelect.size === 0 && !selectedWellId;
+					// The zoom window is captured in sheared coordinates at the
+					// moment you zoom in; changing the shear afterward would no
+					// longer line up with that fixed window, so the shear sliders
+					// are locked until you reset zoom.
+					els.aSlider.disabled = isZoomActive();
+					els.bSlider.disabled = isZoomActive();
 					if (isZoomActive()) {
 						els.zoomStatus.textContent =
-							"Zoomed — showing only wells within the chosen FAM/ROX and HEX/ROX bounds.";
+							"Zoomed — showing only wells within the chosen FAM/ROX and HEX/ROX bounds. Reset zoom to adjust the shear sliders again.";
 					} else {
 						els.zoomStatus.textContent =
 							'Showing full data range. Select wells and click "Zoom to selection".';
@@ -2366,25 +2572,34 @@ tags:
 					return [];
 				}
 
-				// Computes the FAM/ROX and HEX/ROX bounding box of the currently selected
-				// wells (with a little padding) and sets that as the new zoom window.
+				// Computes the bounding box of the currently selected wells in the
+				// same sheared linear units the scatter is actually drawn in (so
+				// the zoom window lines up with the points as they visually
+				// appear, including any active shear), with a little padding, and
+				// sets that as the new zoom window.
 				function zoomToSelection() {
 					const sel = selectedWellsForZoom();
 					if (sel.length === 0) return;
-					const xs = sel.map((w) => w.famN);
-					const ys = sel.map((w) => w.hexN);
+					const shearedSel = sel.map((w) => {
+						const xy = scatterXY(w);
+						return applyShear(xy.x, xy.y);
+					});
+					const xs = shearedSel.map((p) => p.x);
+					const ys = shearedSel.map((p) => p.y);
 					let xMin = Math.min(...xs),
 						xMax = Math.max(...xs);
 					let yMin = Math.min(...ys),
 						yMax = Math.max(...ys);
-					// Pad in log space so a single selected well (or a tight cluster)
-					// still renders with breathing room around it rather than a single
-					// point glued to the plot edges.
-					const padLog = 0.02;
-					xMin = Math.pow(10, logT(xMin) - padLog);
-					xMax = Math.pow(10, logT(xMax) + padLog);
-					yMin = Math.pow(10, logT(yMin) - padLog);
-					yMax = Math.pow(10, logT(yMax) + padLog);
+					// Pad by a fraction of the selection's own span so a single
+					// selected well (or a tight cluster) still renders with
+					// breathing room around it rather than glued to the plot
+					// edges; a small absolute floor covers single-point selections.
+					const xPad = Math.max((xMax - xMin) * 0.1, 1);
+					const yPad = Math.max((yMax - yMin) * 0.1, 1);
+					xMin -= xPad;
+					xMax += xPad;
+					yMin -= yPad;
+					yMax += yPad;
 					scatterZoom = { xMin, xMax, yMin, yMax };
 					renderAll();
 				}
@@ -2422,6 +2637,21 @@ tags:
 				els.zoomControls.addEventListener("click", (ev) =>
 					ev.stopPropagation(),
 				);
+
+				// ---------- Scatter shear sliders ----------
+				// x' = x + a*y, y' = y + b*x, applied directly to the (linear)
+				// scatter coordinates. Each ranges -1 to 1 (default 0); disabled
+				// while a manual zoom is active (see updateZoomControlsUI).
+				els.aSlider.addEventListener("input", () => {
+					shearA = Number(els.aSlider.value);
+					els.aSliderVal.textContent = shearA.toFixed(2);
+					renderScatter();
+				});
+				els.bSlider.addEventListener("input", () => {
+					shearB = Number(els.bSlider.value);
+					els.bSliderVal.textContent = shearB.toFixed(2);
+					renderScatter();
+				});
 
 				// ---------- Example data (synthetic, clearly fabricated for demo only) ----------
 				function generateExample() {
