@@ -508,7 +508,7 @@ tags:
 			}
 			.well-cell {
 				aspect-ratio: 1;
-				border-radius: 3px;
+				border-radius: 50%;
 				cursor: pointer;
 				position: relative;
 				transition: transform 0.08s;
@@ -1721,7 +1721,7 @@ tags:
 					// so they don't appear as points, affect the axis range, or be
 					// selectable here.
 					const scatterWells = wells.filter((w) =>
-						quadrantMatches(activeQuadrant, w.row, w.col),
+						!w.excluded && quadrantMatches(activeQuadrant, w.row, w.col),
 					);
 
 					// Shear is applied to each well's original linear coordinates.
