@@ -159,6 +159,14 @@ tags:
 			.btn.primary:hover {
 				background: #5fd99450;
 			}
+			.btn.download {
+				background: var(--hex-dim);
+				border-color: #e09d59fe;
+				color: var(--hex);
+			}
+			.btn.download:hover {
+				background: #ed8c2afe;
+			}
 			input[type="file"] {
 				display: none;
 			}
@@ -909,7 +917,7 @@ tags:
 					<button class="btn" id="loadSampleBtn">
 						Use example layout
 					</button>
-					<button class="btn" id="downloadCallsBtn">
+					<button class="btn download" id="downloadCallsBtn">
 						Download calls CSV
 					</button>
 				</div>
@@ -928,7 +936,7 @@ tags:
 					<path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
 				</svg>
 				<div>
-					Drop a plate-reader export here, or click "Load plate CSV"
+					Drop a plate-reader export here (comma separated), or click "Load plate CSV"
 					above.
 				</div>
 				<div style="margin-top: 6px; font-size: 12.5px">
@@ -1720,9 +1728,12 @@ tags:
 					// selection) are left out of the scatter entirely — not just dimmed —
 					// so they don't appear as points, affect the axis range, or be
 					// selectable here.
+					// const scatterWells = wells.filter((w) =>
+					// 	quadrantMatches(activeQuadrant, w.row, w.col),
+					// );
 					const scatterWells = wells.filter((w) =>
 						!w.excluded && quadrantMatches(activeQuadrant, w.row, w.col),
-					);
+					); // show only non excluded wells
 
 					// Shear is applied to each well's original linear coordinates.
 					// The scatter now plots these values directly — no log transform.
@@ -2627,7 +2638,7 @@ tags:
 					const isLasso = scatterSelectMode === "lasso";
 					els.lassoModeBtn.classList.toggle("lasso-active", isLasso);
 					els.lassoModeBtn.textContent = isLasso
-						? "Lasso select: on"
+						? "Lasso select" // Lasso select: on
 						: "Lasso select";
 					document
 						.getElementById("scatterWrap")
