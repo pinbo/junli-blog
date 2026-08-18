@@ -26,8 +26,10 @@ This is a duplicate to the app [boxshade page](/apps/boxshade/). It is just my t
 <!-- 
 <textarea id="paste" name="paste" rows="6" cols="85" placeholder="OR paste your sequences here in fasta format"></textarea><br>
 <p id="demoFq" style="display:none;"></p> -->
-
-
+<label for="paste">OR Paste your sequences here in fasta format</label><br>
+<textarea id="paste" name="paste" rows="10" cols="60" placeholder="Paste your sequences"></textarea><br>
+<button onclick="clearseq()">Reset</button>
+<button onclick="putExample()">Example</button><br><br>
 
 <!-- Output file name (without extension) <input size="20" id="output" value="" type="text">   -->
 
