@@ -668,7 +668,7 @@ function processSequence(input) {
                 for (const rt of bestRT) {
                     result.pegRNAs.push(
                         // onTargetSeq1 + scaffold + reverseComplement(rt) + reverseComplement(pbs.toUpperCase()) + "xxxxxxxx" + tevopreQ1
-                        onTargetSeq1 + '<span style="color:red">' + scaffold + '</span>' + reverseComplement(rt) + reverseComplement(pbs.toUpperCase()) + "xxxxxxxx" + '<span style="color:purple">' + tevopreQ1 + '</span>'
+                        onTargetSeq1 + '<span style="color:red">' + scaffold + '</span>' + '<span style="color:cyan">' + reverseComplement(rt) + '</span>' + reverseComplement(pbs.toUpperCase()) + '<span style="color:green">' + "xxxxxxxx" + '</span>' + '<span style="color:purple">' + tevopreQ1 + '</span>'
                     );
                 }
             }
@@ -804,7 +804,7 @@ function generateHTML(finalResults, ccggModel, ccggPamCount, useCCNNGG) {
                 html += `<p class="section-header" colspan="5">PegRNA (Recommended):</p>`;
                 html += `<p>xxxxxxxx is the linker, and can designed here: <a href="https://peglit.liugroup.us/" target="_blank">https://peglit.liugroup.us/</a></p>`
                 for (const pegRNA of result.pegRNAs) {
-                    html += `<p style="word-break: break-all; white-space: normal;"><strong>Final pegRNA = spacer + <span style="color:red">scaffold</span> + RT-template + PBS + 8bp-linker + <span style="color:purple">tevopreQ1</span>:</strong><br>${pegRNA}</p>`;
+                    html += `<p style="word-break: break-all; white-space: normal;"><strong>Final pegRNA = spacer + <span style="color:red">scaffold</span> + <span style="color:cyan">RT-template</span> + PBS + <span style="color:green">8bp-linker</span> + <span style="color:purple">tevopreQ1</span>:</strong><br>${pegRNA}</p>`;
                 }
             }
         }
