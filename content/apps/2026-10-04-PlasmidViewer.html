@@ -3793,22 +3793,31 @@ function designGGPlasmids(o) {
 const ATT1_CORE = 'TTTGTACAAAAAAGC', ATT2_CORE = 'GCTTTCTTGTACAAA';        // crossover cores, att1 and att2 (as read with the gene)
 const ATTB1_PRIMER = 'GGGGACAAGTTTGTACAAAAAAGCAGGCT', ATTB2_PRIMER = 'GGGGACCACTTTGTACAAGAAAGCTGGGT';
 
-/* locate the two crossover cores in a plasmid; returns a doc in the orientation att1 … att2 plus the core start positions */
-function findAtt(doc, label) {
-  const U = seqU(doc), find = s => { const out = []; let i = U.indexOf(s); while (i !== -1) { out.push(i); i = U.indexOf(s, i + 1); } return out; };
-  const f1 = find(ATT1_CORE), r1 = find(revcomp(ATT1_CORE)), f2 = find(ATT2_CORE), r2 = find(revcomp(ATT2_CORE));
-  const n1 = f1.length + r1.length, n2 = f2.length + r2.length;
-  if (n1 !== 1 || n2 !== 1) {
-    // explain near-misses: the 15-nt crossover core must match exactly
-    const near = (core, label) => {
-      const hits = [...scanDNA(U, doc.circular, core, 3), ...scanDNA(U, doc.circular, revcomp(core), 3)].filter(([, m]) => m > 0);
-      return hits.length ? ` Near-matches for the ${label} core: ${hits.slice(0, 3).map(([i, m]) => `${i + 1} (${m} mismatch${m > 1 ? 'es' : ''})`).join(', ')} – the recombination core must be exactly ${core}.` : '';
-    };
-    throw new Error(`“${doc.name}” must contain exactly one att1 and one att2 crossover core (found ${n1} and ${n2}).` + (n1 !== 1 ? near(ATT1_CORE, 'att1') : '') + (n2 !== 1 ? near(ATT2_CORE, 'att2') : ''));
+/* the 25-bp att sites (Invitrogen Gateway manual); in each, the 15-nt crossover core starts at index 5 */
+const ATT_SITES = {
+  L: ['CCAACTTTGTACAAAAAAGCAGGCT', 'ACCCAGCTTTCTTGTACAAAGTTGG'], R: ['ACAAGTTTGTACAAAAAAGCTGAAC', 'GTTCAGCTTTCTTGTACAAAGTGGT'],
+  B: ['ACAAGTTTGTACAAAAAAGCAGGCT', 'ACCCAGCTTTCTTGTACAAAGTGGT'], P: ['CCAACTTTGTACAAAAAAGCTGAAC', 'GTTCAGCTTTCTTGTACAAAGTTGG'],
+};
+const ATT_TOL = 2;   // mismatches allowed when locating a site (other att types differ by 3 or more, e.g. attB2 vs attR2)
+
+/* locate the att1 and att2 sites of one kind (L, R or P) in a plasmid – matching the full 25-bp site, so extra sites of other kinds (e.g. attB3 in
+   a destination vector) do not matter; returns a doc in the orientation att1 … att2 plus the start positions of the two crossover cores */
+function findAtt(doc, kind) {
+  const U = seqU(doc), n = U.length, names = [1, 2].map(i => `att${kind}${i}`);
+  const hitsFor = site => {
+    const fw = scanDNA(U, doc.circular, site, ATT_TOL).map(([i, m]) => ({ i, m, rc: false })), rv = scanDNA(U, doc.circular, revcomp(site), ATT_TOL).map(([i, m]) => ({ i, m, rc: true }));
+    const all = fw.concat(rv); if (!all.length) return all;
+    const best = Math.min(...all.map(h => h.m)); return all.filter(h => h.m === best);   // only the best-matching site counts
+  };
+  const hits = ATT_SITES[kind].map(hitsFor);
+  const bad = hits.map((h, k) => (h.length === 1 ? '' : `${names[k]}: ${h.length ? `${h.length} equally good matches at ${h.map(x => x.i + 1).join(', ')}` : 'not found'}`)).filter(Boolean);
+  if (bad.length) throw new Error(`“${doc.name}” must contain one ${names[0]} and one ${names[1]} site (25 bp, up to ${ATT_TOL} mismatches) – ${bad.join('; ')}. Other att sites (e.g. attB3) are ignored.`);
+  const [h1, h2] = [hits[0][0], hits[1][0]];
+  if (h1.rc === h2.rc) {
+    const d = h1.rc ? rcDoc(doc) : doc, N = n, core = h => (h1.rc ? N - h.i - 20 : h.i + 5);
+    return { doc: d, p1: core(h1), p2: core(h2) };
   }
-  if (f1.length && f2.length) return { doc, p1: f1[0], p2: f2[0] };
-  if (r1.length && r2.length) { const d = rcDoc(doc), N = d.seq.length; return { doc: d, p1: N - r1[0] - 15, p2: N - r2[0] - 15 }; }
-  throw new Error(`The att1 and att2 sites in “${doc.name}” point in opposite directions – not a valid Gateway vector.`);
+  throw new Error(`The ${names[0]} and ${names[1]} sites in “${doc.name}” point in opposite directions – not a valid Gateway vector.`);
 }
 
 /* text + features of the forward path a → b of a doc; the path may run across the origin of a circular plasmid */
@@ -3830,7 +3839,7 @@ function designGateway(o) {
     const product = tailF + part.text + revcomp(tailR), P = product.toUpperCase();
     const c1 = P.indexOf(ATT1_CORE), c2 = P.indexOf(ATT2_CORE);
     if (c1 < 0 || c2 < 0 || c2 < c1) throw new Error('Internal error: att cores not found in the PCR product.');
-    const donor = findAtt(o.donor), D = donor.doc, shift = tailF.length - (c1 + 15);
+    const donor = findAtt(o.donor, 'P'), D = donor.doc, shift = tailF.length - (c1 + 15);
     const mid = { text: product.slice(c1 + 15, c2), features: part.features.map(f => { const c = cloneFeat(f); c.locs = c.locs.map(([a, b]) => [a + shift, b + shift]); return c; }) };
     asm = backboneAssembly(D, donor.p2, donor.p1 + 15, mid);
     notes.push('BP reaction: the attB1/attB2 PCR product recombines with the attP sites of the donor vector; the region between the attP crossover cores (ccdB cassette) is replaced by your insert, giving an entry clone with attL1/attL2.');
@@ -3841,7 +3850,7 @@ function designGateway(o) {
     const hangF = c1, hangR = P.length - (c2 + 15), mR = tailR.length - hangR;
     asm.features.push(primerFeature(primers[0].name, primers[0].seq, 1, circLocs(s - (tailF.length - hangF), s + gsF.length, N), null, hangF), primerFeature(primers[1].name, primers[1].seq, -1, circLocs(e - gsR.length, e + mR, N), null, hangR));
   } else {
-    const entry = findAtt(o.entry), dest = findAtt(o.dest);
+    const entry = findAtt(o.entry, 'L'), dest = findAtt(o.dest, 'R');
     const E = entry.doc, D = dest.doc;
     const seg = pathSegment(E, entry.p1 + 15, entry.p2);    // attL1 core end → attL2 core start (may cross the origin)
     asm = backboneAssembly(D, dest.p2, dest.p1 + 15, seg);
