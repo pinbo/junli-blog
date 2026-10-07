@@ -145,10 +145,10 @@ svg.map.lin { width: auto; height: auto; }
 .mp-feat:hover { filter: brightness(1.08); }
 .mp-feat.on { stroke: var(--text); stroke-width: 2.2; }
 .mp-feat.orf { opacity: .55; }
-.mp-lbl { fill: var(--text); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.mp-lbl { fill: var(--text); font-size: 16px; font-weight: 700; cursor: pointer; }
 .mp-lbl.enz { fill: var(--enz); font-weight: 600; font-size: 12px; }
 .mp-lbl:hover { text-decoration: underline; }
-.mp-flbl { font-size: 12px; font-weight: 600; pointer-events: none; }
+.mp-flbl { font-size: 15px; font-weight: 600; pointer-events: none; }
 .mp-hang { fill: none; stroke-width: 2; stroke-linejoin: round; cursor: pointer; }
 .mp-hang.hov, .mp-hang.on { stroke: #e5322d; }
 .mp-lead { fill: none; stroke: var(--muted); stroke-width: .8; opacity: .55; pointer-events: none; }
@@ -180,6 +180,17 @@ svg.map.lin { width: auto; height: auto; }
 .fbar.arR { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); padding-right: 10px; }
 .fbar.arL { clip-path: polygon(8px 0, 100% 0, 100% 100%, 8px 100%, 0 50%); padding-left: 10px; }
 .fbar.orf { opacity: .55; }
+/* Golden Gate enzyme picker: aligned grid, one enzyme per cell, never wrapped */
+.enzgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 3px 10px; max-height: 130px; overflow: auto; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
+.enzgrid label.chk { display: grid; grid-template-columns: 16px 56px 1fr; align-items: center; gap: 4px; margin: 0; white-space: nowrap; }
+.enzgrid label.chk input { margin: 0; }
+.enzgrid label.chk b { font-weight: 600; }
+.enzgrid label.chk small { color: var(--muted); }
+.fbrk { display: none; position: absolute; pointer-events: none; z-index: 3; }
+.fbrk.bl::before, .fbrk.br::after { content: ''; position: absolute; top: 0; bottom: 0; width: 6px; border: 2px solid #e5322d; box-sizing: border-box; }
+.fbrk.bl::before { left: 0; border-right: 0; }
+.fbrk.br::after { right: 0; border-left: 0; }
+.fbrk.hov { display: block; }
 .fhang { position: absolute; overflow: visible; cursor: pointer; }
 .fhang polyline { fill: none; stroke-width: 2; stroke-linejoin: round; }
 .fhang.hov polyline { stroke: #e5322d; }
@@ -198,15 +209,17 @@ svg.map.lin { width: auto; height: auto; }
 .mp-flbl.hov { fill: #fff; stroke: #e5322d; stroke-width: 3px; paint-order: stroke; }
 .fhang.hov polyline { stroke: #e5322d !important; }
 .fbar.hov { box-shadow: inset 0 0 0 2px #e5322d; }
-/* arrow-headed bars are clipped, so the box-shadow outline is cut off at the point: draw a closed outline with two stacked clipped layers instead */
-.fbar.arR.hov, .fbar.arL.hov, .fbar.arR.on, .fbar.arL.on { box-shadow: none; --oc: #e5322d; }
-.fbar.arR.on:not(.hov), .fbar.arL.on:not(.hov) { --oc: var(--text); }
-.fbar.arR.hov::before, .fbar.arL.hov::before, .fbar.arR.on::before, .fbar.arL.on::before { content: ''; position: absolute; inset: 0; background: var(--oc); z-index: -2; }
-.fbar.arR.hov::after, .fbar.arL.hov::after, .fbar.arR.on::after, .fbar.arL.on::after { content: ''; position: absolute; inset: 2px; background: inherit; z-index: -1; }
-.fbar.arR.hov::before, .fbar.arR.on::before { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
-.fbar.arL.hov::before, .fbar.arL.on::before { clip-path: polygon(8px 0, 100% 0, 100% 100%, 8px 100%, 0 50%); }
-.fbar.arR.hov::after, .fbar.arR.on::after { clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%); }
-.fbar.arL.hov::after, .fbar.arL.on::after { clip-path: polygon(7px 0, 100% 0, 100% 100%, 7px 100%, 0 50%); }
+/* arrow-headed bars are clipped, so a box-shadow outline is cut off at the point: draw a closed outline with two stacked clipped layers instead (default grey, red on hover, dark when selected) */
+.fbar.arR, .fbar.arL { box-shadow: none; --oc: rgba(0,0,0,.3); --ow: 1px; }
+.fbar.arR.hov, .fbar.arL.hov, .fbar.arR.on, .fbar.arL.on { --ow: 2px; }
+.fbar.arR.on, .fbar.arL.on { --oc: var(--text); }
+.fbar.arR.hov, .fbar.arL.hov { --oc: #e5322d; }
+.fbar.arR::before, .fbar.arL::before { content: ''; position: absolute; inset: 0; background: var(--oc); z-index: -2; }
+.fbar.arR::after, .fbar.arL::after { content: ''; position: absolute; inset: var(--ow); background: inherit; z-index: -1; }
+.fbar.arR::before { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+.fbar.arL::before { clip-path: polygon(8px 0, 100% 0, 100% 100%, 8px 100%, 0 50%); }
+.fbar.arR::after { clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%); }
+.fbar.arL::after { clip-path: polygon(7px 0, 100% 0, 100% 100%, 7px 100%, 0 50%); }
 #tip, #aaTip { display: none; position: fixed; z-index: 90; pointer-events: none; min-width: 190px; max-width: 280px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 9px 12px; font-size: 12px; }
 #tip .th, #aaTip .th { font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
 #tip .th i, #aaTip .th i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
@@ -510,7 +523,7 @@ function gcPercent(s) { if (!s.length) return 0; let g = 0; for (const c of s) i
 const NN_PARAMS = { AA: [-7.9, -22.2], TT: [-7.9, -22.2], AT: [-7.2, -20.4], TA: [-7.2, -21.3], CA: [-8.5, -22.7], TG: [-8.5, -22.7], GT: [-8.4, -22.4], AC: [-8.4, -22.4],
   CT: [-7.8, -21.0], AG: [-7.8, -21.0], GA: [-8.2, -22.2], TC: [-8.2, -22.2], CG: [-10.6, -27.2], GC: [-9.8, -24.4], GG: [-8.0, -19.9], CC: [-8.0, -19.9] };
 const TM_DEFAULTS = { mv: 50, dv: 1.5, dntp: 0.6, dna: 50 };    // mM Na+/K+, mM Mg2+, mM dNTP, nM oligo (primer3 defaults)
-const tmConf = () => Object.assign({}, TM_DEFAULTS, store.get('tmConf', {}));
+const tmConf = () => Object.assign({ method: 'primer3' }, TM_DEFAULTS, store.get('tmConf', {}));
 function tmPrimer3(seq, c = tmConf()) {
   const s = String(seq).toUpperCase(), n = s.length;
   if (n < 2 || /[^ACGT]/.test(s)) return NaN;
@@ -524,9 +537,25 @@ function tmPrimer3(seq, c = tmConf()) {
   S += 0.368 * (n - 1) * Math.log(mv / 1000);
   return H * 1000 / (S + 1.9872 * Math.log(c.dna * 1e-9 / (sym ? 1 : 4))) - 273.15;
 }
-const meltingTemp = s => tmPrimer3(s);
+/* NEB Tm Calculator, Q5 settings (reverse-engineered from tmcalculator.neb.com v1.17): SantaLucia 1998 nearest-neighbour thermodynamics at 1 M Na+ with
+   500 nM primer (plain Ct, no Ct/4) and the Owczarzy 2004 monovalent salt correction for the 150 mM Q5 buffer; no length cut-off, no Mg2+ term. */
+function tmQ5(seq) {
+  const s = String(seq).toUpperCase(), n = s.length;
+  if (n < 2 || /[^ACGT]/.test(s)) return NaN;
+  let H = 0, S = 0, gc = 0;
+  for (let i = 0; i < n - 1; i++) { const v = NN_PARAMS[s.substr(i, 2)]; H += v[0] * 1000; S += v[1]; }
+  for (const ch of s) if (ch === 'G' || ch === 'C') gc++;
+  for (const ch of [s[0], s[n - 1]]) { if (ch === 'G' || ch === 'C') { H += 100; S -= 2.8; } else { H += 2300; S += 4.1; } }
+  if (s === revcomp(s)) S -= 1.4;
+  const na = 0.150, ln = Math.log(na), fgc = gc / n;
+  const t1M = H / (S + 1.9872 * Math.log(500e-9));
+  return 1 / (1 / t1M + 1e-5 * (4.29 * fgc - 3.95) * ln + 9.4e-6 * ln * ln) - 273.15;
+}
+/* the Tm used throughout the app: primer3 (adjustable conditions) or NEB Q5 */
+const tmPrimer = (seq, c = tmConf()) => c.method === 'q5' ? tmQ5(seq) : tmPrimer3(seq, c);
+const meltingTemp = s => tmPrimer(s);
 const fmtTm = t => (Number.isFinite(t) ? t.toFixed(1) + ' °C' : '—');
-const tmConfText = (c = tmConf()) => `primer3 method · ${c.mv} mM Na⁺, ${c.dv} mM Mg²⁺, ${c.dntp} mM dNTP, ${c.dna} nM oligo`;
+const tmConfText = (c = tmConf()) => c.method === 'q5' ? 'NEB Tm Calculator method for Q5 (SantaLucia 1998, 500 nM primer, 150 mM Na⁺ equivalent)' : `primer3 method · ${c.mv} mM Na⁺, ${c.dv} mM Mg²⁺, ${c.dntp} mM dNTP, ${c.dna} nM oligo`;
 
 /* ---------- feature colours / types ---------- */
 const TYPE_COLORS = {
@@ -1596,7 +1625,7 @@ function findAll(doc, query) {
   const U = seqU(doc), n = U.length, ext = doc.circular ? U + U.slice(0, q.length - 1) : U;
   const res = [], seen = new Set();
   const src = iupacRegexSrc(q), rcSrc = iupacRegexSrc(revcomp(q));
-  const run = (re, strand) => { for (const m of ext.matchAll(new RegExp('(?=(' + re + '))', 'g'))) if (m.index < n && !seen.has(m.index + ':' + strand)) { seen.add(m.index + ':' + strand); res.push({ s: m.index, e: Math.min(m.index + q.length, n), strand }); } };
+  const run = (re, strand) => { for (const m of ext.matchAll(new RegExp('(?=(' + re + '))', 'g'))) if (m.index < n && !seen.has(m.index + ':' + strand)) { seen.add(m.index + ':' + strand); res.push({ s: m.index, e: m.index + q.length, strand }); } };   // e > n: the match runs across the origin of a circular plasmid
   run(src, 1); if (revcomp(q) !== q) run(rcSrc, -1);
   return res.sort((a, b) => a.s - b.s);
 }
@@ -1694,7 +1723,7 @@ function normFeature(f) {
   return f;
 }
 function makeDoc(p) {
-  const doc = Object.assign({ name: 'Untitled', seq: '', circular: true, features: [], meta: {}, undo: [], redo: [], dirty: false, rev: 0, anchor: 0, caret: 0, selFid: null, handle: null, _cache: {} }, p);
+  const doc = Object.assign({ name: 'Untitled', seq: '', circular: true, features: [], meta: {}, undo: [], redo: [], dirty: false, rev: 0, anchor: 0, caret: 0, wrap: false, selFid: null, handle: null, _cache: {} }, p);
   doc.id = ++_docUid;
   const n = doc.seq.length;
   doc.features = doc.features.filter(f => f.locs.every(([a, b]) => a >= 0 && b <= n && b > a)).map(normFeature);
@@ -1702,11 +1731,23 @@ function makeDoc(p) {
 }
 
 const featBounds = f => [Math.min(...f.locs.map(l => l[0])), Math.max(...f.locs.map(l => l[1]))];
-function selRange(doc) { const a = Math.min(doc.anchor, doc.caret), b = Math.max(doc.anchor, doc.caret); return a === b ? null : [a, b]; }
+/* Selection model: anchor/caret are the two ends. Normally the selection is the stretch between them (selRange, null when empty).
+   With doc.wrap (circular plasmids only) it is the other arc – from the larger end through the origin to the smaller one – and selRange is null so that
+   editing code never touches the wrong stretch; use selSegs / selText wherever a read-only view of the selection is enough. */
+function selRange(doc) { if (doc.wrap) return null; const a = Math.min(doc.anchor, doc.caret), b = Math.max(doc.anchor, doc.caret); return a === b ? null : [a, b]; }
+function selSegs(doc) {
+  const lo = Math.min(doc.anchor, doc.caret), hi = Math.max(doc.anchor, doc.caret), n = doc.seq.length;
+  if (lo === hi) return [];
+  return doc.wrap && doc.circular ? [[hi, n], [0, lo]].filter(s => s[1] > s[0]) : [[lo, hi]];
+}
+const selText = doc => selSegs(doc).map(([a, b]) => doc.seq.slice(a, b)).join('');
+const segLabel = segs => segs.map(([a, b]) => `${a + 1}..${b}`).join(' + ');
+const wrapBlocked = doc => { if (!doc.wrap) return false; toast('The selection runs across the origin – editing is not possible there. Copy it, or use “Set origin here” first.', 4500); return true; };
 
-function setSel(doc, anchor, caret, fid = null, reveal = true) {
+function setSel(doc, anchor, caret, fid = null, reveal = true, wrap = false) {
   const n = doc.seq.length;
   doc.anchor = clamp(anchor, 0, n); doc.caret = clamp(caret, 0, n); doc.selFid = fid;
+  doc.wrap = !!wrap && doc.circular && doc.anchor !== doc.caret;
   doc._reveal = reveal;
   requestUpdate(false);
 }
@@ -1778,6 +1819,7 @@ function editReplace(doc, s, e, text, feats, opts) {
   }, opts);
 }
 function deleteSelection(doc, forward = true) {
+  if (wrapBlocked(doc)) return;
   const r = selRange(doc);
   if (r) return editReplace(doc, r[0], r[1], '');
   const n = doc.seq.length;
@@ -1785,6 +1827,7 @@ function deleteSelection(doc, forward = true) {
   else if (!forward && doc.caret > 0) editReplace(doc, doc.caret - 1, doc.caret, '', null, { coalesce: true });
 }
 function typeBases(doc, text) {
+  if (wrapBlocked(doc)) return;
   const r = selRange(doc) || [doc.caret, doc.caret];
   editReplace(doc, r[0], r[1], text, null, { coalesce: true });
 }
@@ -1809,8 +1852,11 @@ function revcompClip(clip) {
 
 /* ----- clipboard (internal clip keeps features; plain text goes to system clipboard) ----- */
 function currentClip(doc) {
-  const r = selRange(doc); if (!r) return null;
-  return { text: doc.seq.slice(r[0], r[1]), features: clipFeatures(doc, r[0], r[1]) };
+  const segs = selSegs(doc); if (!segs.length) return null;
+  if (segs.length === 1) return { text: doc.seq.slice(segs[0][0], segs[0][1]), features: clipFeatures(doc, segs[0][0], segs[0][1]) };
+  // across the origin: the two arcs are joined; features lying in either arc (including ones that themselves cross the origin) come along
+  const n = doc.seq.length, [[hi], [, lo]] = segs;
+  return { text: doc.seq.slice(hi) + doc.seq.slice(0, lo), features: carryFeatures(doc, [{ a: hi, b: n, off: 0 }, { a: 0, b: lo, off: n - hi }]).feats };
 }
 function storeClip(clip) { App.clip = clip; store.set('clip', clip); }
 function lookupClip(text) {
@@ -1837,6 +1883,7 @@ async function doCopyRC(doc) {
   const rc = revcompClip(clip); storeClip(rc); await copyToSystem(rc.text); toast('Copied reverse complement');
 }
 function pasteClip(doc, clip) {
+  if (wrapBlocked(doc)) return;
   if (!clip || !clip.text) return toast('Nothing to paste');
   const r = selRange(doc) || [doc.caret, doc.caret];
   if (!App.editing) return lockedToast();
@@ -1950,6 +1997,7 @@ function warnNonATGC(text, where) {
 /* ----- case conversion (length-preserving, so features stay put) ----- */
 function changeCase(doc, mode) {
   if (!App.editing) return lockedToast();
+  if (wrapBlocked(doc)) return;
   const r = selRange(doc); if (!r) return toast('Select some sequence first');
   const t = doc.seq.slice(r[0], r[1]);
   const nt = mode === 'upper' ? t.toUpperCase() : mode === 'lower' ? t.toLowerCase() : t.replace(/[a-z]/gi, c => (c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()));
@@ -1959,8 +2007,8 @@ function changeCase(doc, mode) {
 
 /* ----- translations to the clipboard ----- */
 async function copyTranslation(doc, reverse) {
-  const r = selRange(doc); if (!r) return toast('Select some sequence first');
-  let s = seqU(doc).slice(r[0], r[1]); if (reverse) s = revcomp(s);
+  if (!selSegs(doc).length) return toast('Select some sequence first');
+  let s = selText(doc).toUpperCase(); if (reverse) s = revcomp(s);
   const p = translate(s);
   if (!p) return toast('The selection is shorter than one codon');
   await copyToSystem(p);
@@ -2012,19 +2060,16 @@ function spreadLabels(items, gap, minY, maxY) {
 
 function renderCircular(doc, host) {
   const n = doc.seq.length, feats = visibleFeatures(doc);
-  const R = 215, BH = 22, LH = 25;
+  const R = 215, BH = 16.5, LH = 19.5;
   const { lane, count } = assignLanes(feats.map(f => ({ id: f.id, ivs: f.locs.concat(hangSegs(f, n)) })), n * 0.002);
   const lanes = Math.max(1, count), rTop = R + (lanes - 1) * LH + BH / 2 + 4;
   const ang = p => 2 * Math.PI * p / n;
-  const sel = selRange(doc);
+  const sel = selRange(doc), segs = selSegs(doc);
   const out = [];
   out.push(`<circle class="mp-ring" cx="${CCX}" cy="${CCY}" r="${R}" fill="none" stroke-width="3"/>`);
 
   // selection band
-  if (sel) {
-    const a1 = ang(sel[0]), a2 = ang(sel[1]);
-    out.push(`<path class="mp-sel" d="${arcSeg(R - 34, rTop + 6, a1, a2, 0, 0)}"/>`);
-  }
+  for (const [x, y] of segs) out.push(`<path class="mp-sel" d="${arcSeg(R - 34, rTop + 6, ang(x), Math.min(ang(y), 2 * Math.PI - 0.002), 0, 0)}"/>`);
   // ticks
   const step = niceStep(n, 12), minor = step / 5;
   for (let p = 0; p < n; p += minor) {
@@ -2064,7 +2109,7 @@ function renderCircular(doc, host) {
   const sides = { 1: [], '-1': [] };
   for (const l of labels) { const s = Math.sin(l.theta) >= 0 ? 1 : -1; l.side = s; l.y = CCY - Rl * Math.cos(l.theta); sides[s].push(l); }
   for (const s of [1, -1]) {
-    spreadLabels(sides[s], 15, 22, CH - 22);
+    spreadLabels(sides[s], 18, 22, CH - 22);
     for (const l of sides[s]) {
       const dy = l.y - CCY, x = CCX + s * (Math.sqrt(Math.max(Rl * Rl - dy * dy, 0)) + 10);
       const [ax, ay] = polar(l.rr, l.theta);
@@ -2075,7 +2120,7 @@ function renderCircular(doc, host) {
     }
   }
   // caret
-  if (!sel) {
+  if (!segs.length) {
     const a = ang(doc.caret), [x1, y1] = polar(R - 30, a), [x2, y2] = polar(rTop + 8, a);
     out.push(`<line class="mp-caret" x1="${f2(x1)}" y1="${f2(y1)}" x2="${f2(x2)}" y2="${f2(y2)}"/>`);
   }
@@ -2083,7 +2128,7 @@ function renderCircular(doc, host) {
   const nm = doc.name.length > 26 ? doc.name.slice(0, 25) + '…' : doc.name;
   out.push(`<text class="mp-title" x="${CCX}" y="${CCY - 16}" text-anchor="middle">${esc(nm)}</text>`);
   out.push(`<text class="mp-sub" x="${CCX}" y="${CCY + 12}" text-anchor="middle">${n.toLocaleString('en-US')} bp</text>`);
-  if (sel) out.push(`<text class="mp-sub small" x="${CCX}" y="${CCY + 36}" text-anchor="middle">${sel[0] + 1}..${sel[1]} · ${(sel[1] - sel[0]).toLocaleString('en-US')} bp selected</text>`);
+  if (segs.length) out.push(`<text class="mp-sub small" x="${CCX}" y="${CCY + 36}" text-anchor="middle">${segLabel(segs)} · ${segs.reduce((t, s) => t + s[1] - s[0], 0).toLocaleString('en-US')} bp selected</text>`);
   host.innerHTML = `<svg class="map circ" viewBox="0 0 ${CW} ${CH}" data-n="${n}" preserveAspectRatio="xMidYMid meet">${out.join('')}</svg>`;
 }
 
@@ -2121,7 +2166,7 @@ function renderLinear(doc, host) {
 
   // features lanes
   const items = feats.map(f => {
-    const nameW = textWidth(f.name, font) + 8;
+    const nameW = textWidth(f.name, '700 16px system-ui, sans-serif') + 8;
     const [a, b] = featBounds(f); const bw = (X(b) - X(a));
     const inside = nameW <= bw - 14;
     const ivs = f.locs.concat(hangSegs(f, n)).map(([s, e]) => [X(s), X(e)]);
@@ -2130,7 +2175,7 @@ function renderLinear(doc, host) {
   });
   const { lane, count } = assignLanes(items.map(i => ({ id: i.id, ivs: i.ivs })), 3);
   const info = new Map(items.map(i => [i.id, i]));
-  const FH = 22, LH = 28, featY0 = baseY + 46;
+  const FH = 16.5, LH = 22.5, featY0 = baseY + 46;
   const H = featY0 + Math.max(1, count) * LH + 24;
 
   if (sel) out.push(`<rect class="mp-sel" x="${f2(X(sel[0]))}" y="${enzRows * EH + 10}" width="${f2(Math.max(1.5, X(sel[1]) - X(sel[0])))}" height="${H - enzRows * EH - 14}"/>`);
@@ -2193,9 +2238,9 @@ svg { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 .mp-ticklbl { fill: #6a7686; font-size: 11px; }
 .mp-feat { stroke: rgba(0,0,0,.28); stroke-width: .8; }
 .mp-feat.orf { opacity: .55; }
-.mp-lbl { fill: #1d2530; font-size: 12.5px; font-weight: 700; }
+.mp-lbl { fill: #1d2530; font-size: 16px; font-weight: 700; }
 .mp-lbl.enz { fill: #1c55c7; font-weight: 600; font-size: 12px; }
-.mp-flbl { font-size: 12px; font-weight: 600; }
+.mp-flbl { font-size: 15px; font-weight: 600; }
 .mp-hang { fill: none; stroke-width: 2; stroke-linejoin: round; cursor: pointer; }
 .mp-hang.hov, .mp-hang.on { stroke: #e5322d; }
 .mp-lead { fill: none; stroke: #6a7686; stroke-width: .8; opacity: .55; pointer-events: none; }
@@ -2283,7 +2328,7 @@ function renderSeq(doc, force) {
       for (let r = Math.floor(a / bpr); r <= Math.floor((b - 1) / bpr); r++) {
         const rs = r * bpr, x = Math.max(a, rs), y = Math.min(b, rs + bpr);
         const head = f.strand !== 0 && i === headSeg;
-        rowFeat[r].push({ f, lane: k, x, y, arrR: head && f.strand === 1 && y === b, arrL: head && f.strand === -1 && x === a });
+        rowFeat[r].push({ f, lane: k, x, y, a, b, arrR: head && f.strand === 1 && y === b, arrL: head && f.strand === -1 && x === a });
       }
     });
     for (const [a, b] of hangSegs(f, n)) for (let r = Math.floor(a / bpr); r <= Math.floor((b - 1) / bpr); r++) rowFeat[r].push({ f, lane: k, x: Math.max(a, r * bpr), y: Math.min(b, (r + 1) * bpr), hang: true });
@@ -2339,6 +2384,11 @@ function renderSeq(doc, force) {
       if (rowOf(e.bot) === r) b.push(zig(xt, (e.bot - rs) * cw, 'full', e)); else b.push(zig(xt, xt, 'top', e));
     }
     for (const e of rowBot[r]) if (rowOf(e.top) !== r) { const xb = Math.min(e.bot - rs, len) * cw; b.push(zig(xb, xb, 'bot', e)); }
+    for (const o of rowFeat[r]) {   // red [ ] marking the feature's range on the sequence while it is hovered
+      if (o.hang || o.f.ext) continue;
+      const l = o.x === o.a, rr = o.y === o.b;
+      b.push(`<div class="fbrk${l ? ' bl' : ''}${rr ? ' br' : ''}" data-fid="${o.f.id}" style="left:${f2((o.x - rs) * cw - 1)}px;width:${f2((o.y - o.x) * cw + 2)}px;top:${eH}px;height:${2 * SV.lineH}px"></div>`);
+    }
     b.push(`<div class="selLayer" style="top:${eH}px;height:${2 * SV.lineH}px"></div>`);
     const fy0 = eH + 2 * SV.lineH + 6;
     for (const o of rowFeat[r]) {
@@ -2390,7 +2440,7 @@ function updateSeqSelection(doc) {
   if (!doc || !SV.rows.length) return;
   for (const r of SV.touched) { const l = r.querySelector('.selLayer'); if (l) l.innerHTML = ''; }
   SV.touched = [];
-  const n = doc.seq.length, bpr = SV.bpr, cw = SV.cw, sel = selRange(doc), LH = SV.lineH;
+  const n = doc.seq.length, bpr = SV.bpr, cw = SV.cw, sel = selRange(doc), segs = selSegs(doc), LH = SV.lineH;
   const box = (a0, b0, cls, strand) => {   // paints [a0,b0) over the whole row pair, or only the matched strand's line
     for (let r = Math.floor(a0 / bpr); r <= Math.floor((b0 - 1) / bpr) && r < SV.rows.length; r++) {
       const rs = r * bpr, a = Math.max(a0, rs), b = Math.min(b0, rs + bpr);
@@ -2401,11 +2451,12 @@ function updateSeqSelection(doc) {
   };
   const F = (typeof UI !== 'undefined' && UI.find && UI.find.q) ? UI.find : null;
   const curHit = F && F.idx >= 0 ? F.res[F.idx] : null;
-  const curIsSel = !!(curHit && sel && sel[0] === curHit.s && sel[1] === curHit.e);
-  if (F && F.res.length <= 3000) for (const m of F.res) if (!(curIsSel && m === curHit)) box(m.s, m.e, 'fm', m.strand);
-  if (curIsSel) box(curHit.s, curHit.e, 'fm cur', curHit.strand);
-  else if (sel) box(sel[0], sel[1], 'selbox');
-  if (!sel) {
+  const hitBox = (h, cls) => { if (h.e > n) { box(h.s, n, cls, h.strand); box(0, h.e - n, cls, h.strand); } else box(h.s, h.e, cls, h.strand); };   // a match across the origin is drawn at both ends
+  const curIsSel = !!(curHit && sel && sel[0] === curHit.s && sel[1] === Math.min(curHit.e, n));
+  if (F && F.res.length <= 3000) for (const m of F.res) if (!(curIsSel && m === curHit)) hitBox(m, 'fm');
+  if (curIsSel) hitBox(curHit, 'fm cur');
+  else for (const [a, b] of segs) box(a, b, 'selbox');
+  if (!segs.length) {
     const r = seqRowOfPos(doc.caret), col = doc.caret - r * bpr;
     SV.rows[r].querySelector('.selLayer').insertAdjacentHTML('beforeend', `<div class="caret" style="left:${f2(col * cw)}px"></div>`);
     SV.touched.push(SV.rows[r]);
@@ -2454,8 +2505,8 @@ function renderMini(doc) {
   }
   for (const e of enzymeView(doc)) out.push(`<line class="mp-cut" x1="${f2(X(e.top))}" y1="${baseY - 2}" x2="${f2(X(e.top))}" y2="${baseY + 8}"/>`);
   for (const p of badBases(doc).slice(0, 3000)) out.push(`<line class="mp-bad" x1="${f2(X(p))}" y1="${baseY - 6}" x2="${f2(X(p))}" y2="${baseY + 5}"/>`);
-  const sel = selRange(doc);
-  if (sel) out.push(`<rect class="mp-sel" x="${f2(X(sel[0]))}" y="2" width="${f2(Math.max(2, X(sel[1]) - X(sel[0])))}" height="${H - 4}"/>`);
+  const segs = selSegs(doc);
+  if (segs.length) for (const [a, b] of segs) out.push(`<rect class="mp-sel" x="${f2(X(a))}" y="2" width="${f2(Math.max(2, X(b) - X(a)))}" height="${H - 4}"/>`);
   else out.push(`<line class="mp-caret" x1="${f2(X(doc.caret))}" y1="2" x2="${f2(X(doc.caret))}" y2="${H - 2}"/>`);
   out.push(`<rect id="miniWin" class="mini-win" x="0" y="2" width="0" height="${H - 4}" rx="3"/>`);
   host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" data-n="${n}">${out.join('')}</svg>`;
@@ -2520,7 +2571,7 @@ function update(full) {
   if (App.settings.view !== 'seq') renderMap(doc);
   if (App.settings.view !== 'map') renderSeq(doc, false);
   renderMini(doc);
-  if (full) renderSide(doc); else updateSideSel(doc);
+  if (full || App.settings.sideTab === 'info') renderSide(doc); else updateSideSel(doc);   // the Info tab shows the selection, so it follows it live
   renderToolbarState(doc);
   renderStatus(doc);
 }
@@ -2544,12 +2595,12 @@ function renderToolbarState(doc) {
 }
 
 function renderStatus(doc) {
-  const sel = selRange(doc), n = doc.seq.length; let left;
-  if (sel) {
-    const s = doc.seq.slice(sel[0], sel[1]);
-    left = `Selected ${sel[0] + 1}..${sel[1]} · ${fmtBp(s.length)} · GC ${gcPercent(s).toFixed(1)}% · Tm ${fmtTm(meltingTemp(s))}`;
+  const segs = selSegs(doc), n = doc.seq.length; let left;
+  if (segs.length) {
+    const s = selText(doc);
+    left = `Selected ${segLabel(segs)}${doc.wrap ? ' (across the origin)' : ''} · ${fmtBp(s.length)} · GC ${gcPercent(s).toFixed(1)}% · Tm ${fmtTm(meltingTemp(s))}`;
   } else left = `Cursor after base ${doc.caret.toLocaleString('en-US')}`;
-  if (UI.find.q) { const h = UI.find.res[UI.find.idx]; left += ` · Find: ${UI.find.res.length ? `${UI.find.idx >= 0 ? UI.find.idx + 1 : '–'} of ${UI.find.res.length}` : 'no matches'}${h ? (h.strand === 1 ? ' · forward strand (top)' : ' · reverse strand (bottom)') : ''}`; }
+  if (UI.find.q) { const h = UI.find.res[UI.find.idx]; left += ` · Find: ${UI.find.res.length ? `${UI.find.idx >= 0 ? UI.find.idx + 1 : '–'} of ${UI.find.res.length}` : 'no matches'}${h ? (h.strand === 1 ? ' · forward strand (top)' : ' · reverse strand (bottom)') + (h.e > doc.seq.length ? ` · spans the origin (${h.s + 1}..${doc.seq.length} + 1..${h.e - doc.seq.length})` : '') : ''}`; }
   $('#stLeft').textContent = left;
   const bad = badBases(doc).length, w = $('#stWarn'); w.hidden = !bad; if (bad) w.textContent = `⚠ ${bad.toLocaleString('en-US')} non-ATGC`;
   $('#stRight').textContent = `${doc.circular ? 'Circular' : 'Linear'} · ${fmtBp(n)} · ${doc.features.length} features · GC ${gcPercent(doc.seq).toFixed(1)}%`;
@@ -2631,7 +2682,7 @@ function updateSideSel(doc) {
 }
 
 function renderInfo(doc, body) {
-  const sel = selRange(doc), s = sel ? doc.seq.slice(sel[0], sel[1]) : '';
+  const segs = selSegs(doc), sel = segs.length, s = selText(doc);
   const row = (k, v) => el('div', { class: 'kv' }, el('span', {}, k), el('b', {}, v));
   body.append(el('div', { class: 'info' },
     el('label', {}, 'Name', el('input', { value: doc.name, onchange: e => { doc.name = e.target.value.trim() || 'Untitled'; doc.dirty = true; requestUpdate(true); } })),
@@ -2639,7 +2690,7 @@ function renderInfo(doc, body) {
     row('Length', fmtBp(doc.seq.length)), row('GC content', gcPercent(doc.seq).toFixed(1) + '%'), row('Features', String(doc.features.length)),
     row('Unique cutters', String([...analyzeEnzymes(doc).values()].filter(r => r.cuts.length === 1).length)),
     el('h4', {}, 'Selection'),
-    sel ? el('div', {}, row('Range', `${sel[0] + 1}..${sel[1]}`), row('Length', fmtBp(s.length)), row('GC', gcPercent(s).toFixed(1) + '%'), row('Tm (primer3)', fmtTm(meltingTemp(s))),
+    sel ? el('div', {}, row('Range', segLabel(segs) + (doc.wrap ? ' (across the origin)' : '')), row('Length', fmtBp(s.length)), row('GC', gcPercent(s).toFixed(1) + '%'), row('Tm', fmtTm(meltingTemp(s))),
       el('div', { class: 'small-note' }, tmConfText(), ' · ', el('a', { href: '#', onclick: e => { e.preventDefault(); openTmDialog(); } }, 'change')),
       el('div', { class: 'mono wrap' }, el('small', {}, 'Translation (frame 1)'), el('div', {}, translate(s).slice(0, 400) || '—'))) : el('div', { class: 'empty-note' }, 'Nothing selected.'),
     el('h4', {}, 'Tools'),
@@ -2658,6 +2709,7 @@ function renderInfo(doc, body) {
 /* ===== selection helpers ===== */
 function selectFeature(doc, f) {
   const segs = f.locs, mono = segs.every((l, i) => !i || l[0] >= segs[i - 1][1]);
+  if (!mono && doc.circular && segs.length === 2 && segs[0][1] === doc.seq.length && segs[1][0] === 0) return setSel(doc, segs[0][0], segs[1][1], f.id, true, true);   // feature across the origin
   const [a, b] = mono ? featBounds(f) : segs[0];
   setSel(doc, a, b, f.id);
 }
@@ -2704,18 +2756,18 @@ function contextMenu(e) {
   const fe = e.target.closest('[data-fid]');
   const hit = fe && featureById(doc, fe.dataset.fid);            // feature or ORF under the pointer
   if (hit) selectFeature(doc, hit);
-  const sel = selRange(doc), f = hit && doc.features.includes(hit) ? hit : null, ro = !App.editing;
+  const sel = selRange(doc), has = selSegs(doc).length > 0, f = hit && doc.features.includes(hit) ? hit : null, ro = !App.editing;
   const items = [
     { label: 'Cut', hint: MOD + 'X', disabled: !sel || ro, action: () => doCopy(doc, true) },
-    { label: 'Copy', hint: MOD + 'C', disabled: !sel, action: () => doCopy(doc) },
-    { label: 'Copy reverse complement', disabled: !sel, action: () => doCopyRC(doc) },
-    { label: 'Copy translation', disabled: !sel, action: () => copyTranslation(doc, false) },
-    { label: 'Copy translation on reverse strand', disabled: !sel, action: () => copyTranslation(doc, true) },
+    { label: 'Copy', hint: MOD + 'C', disabled: !has, action: () => doCopy(doc) },
+    { label: 'Copy reverse complement', disabled: !has, action: () => doCopyRC(doc) },
+    { label: 'Copy translation', disabled: !has, action: () => copyTranslation(doc, false) },
+    { label: 'Copy translation on reverse strand', disabled: !has, action: () => copyTranslation(doc, true) },
     ...(hit && (hit.type === 'CDS' || hit.orf) ? [{ label: `Copy feature translation (${hit.name})`, action: () => copyFeatureTranslation(doc, hit) }] : []),
     { label: 'Paste', hint: MOD + 'V', disabled: ro, action: () => doPaste(doc) },
     { label: 'Paste reverse complement', disabled: ro, action: () => doPaste(doc, true) },
     { label: 'Delete', hint: '⌫', disabled: !sel || ro, action: () => deleteSelection(doc) }, '-',
-    { label: 'Add feature from selection…', disabled: !sel, action: () => openFeatureDialog(doc) },
+    { label: 'Add feature from selection…', disabled: !has, action: () => openFeatureDialog(doc) },
     { label: 'Add primer by sequence…', action: () => openPrimerDialog(doc) },
   ];
   if (f) items.push({ label: `Edit “${f.name}”…`, action: () => openFeatureDialog(doc, f) }, { label: `Delete feature “${f.name}”`, action: () => removeFeature(doc, f.id) });
@@ -2725,6 +2777,7 @@ function contextMenu(e) {
     { label: 'Reverse-complement selection', disabled: !sel || ro, action: () => reverseComplementRange(doc, ...sel) },
     { label: 'Set origin here', disabled: !doc.circular || ro, action: () => setOrigin(doc, doc.caret) },
     { label: 'Insert sequence here…', disabled: ro, action: () => openInsertDialog(doc) },
+    { label: 'Select the other arc (across the origin)', disabled: !doc.circular || !has, action: () => setSel(doc, doc.anchor, doc.caret, null, true, !doc.wrap) },
     { label: 'Select all', hint: MOD + 'A', action: () => setSel(doc, 0, doc.seq.length) });
   showMenu(e.clientX, e.clientY, items);
 }
@@ -2743,10 +2796,10 @@ function parseRanges(text, n) {
 }
 
 function openFeatureDialog(doc, f) {
-  const sel = selRange(doc);
-  if (!f && !sel) return toast('Select a region of the sequence first');
+  const sel = selSegs(doc);
+  if (!f && !sel.length) return toast('Select a region of the sequence first');
   const isNew = !f;
-  const rangesDefault = f ? f.locs.map(l => `${l[0] + 1}..${l[1]}`).join(', ') : `${sel[0] + 1}..${sel[1]}`;
+  const rangesDefault = f ? f.locs.map(l => `${l[0] + 1}..${l[1]}`).join(', ') : sel.map(([a, b]) => `${a + 1}..${b}`).join(', ');
   const name = el('input', { value: f ? f.name : '', placeholder: 'e.g. My promoter' });
   const type = el('select', {}, FEATURE_TYPES.map(t => el('option', { value: t }, t)));
   type.value = f ? f.type : 'misc_feature';
@@ -2799,7 +2852,7 @@ function openPrimerDialog(doc) {
     if (!s) { info.textContent = ''; return; }
     if (/[^ACGT]/.test(s)) { info.textContent = 'Only A, C, G, T are supported.'; return; }
     hit = findPrimerSite(doc, s, Math.max(8, +min.value || 15));
-    info.textContent = hit ? `Binds the ${hit.strand === 1 ? 'top' : 'bottom'} strand at ${hit.pos + 1}..${hit.pos + hit.L} with its 3′ ${hit.L} nt${hit.L < s.length ? `; the 5′ ${s.length - hit.L} nt do not match and are drawn as a zigzag` : ' (full match)'}${hit.count > 1 ? `. ${hit.count} binding sites found – the first is used` : ''}. Tm of binding part: ${fmtTm(tmPrimer3(s.slice(s.length - hit.L)))}.` : `No match of at least ${min.value} nt at the 3′ end was found.`;
+    info.textContent = hit ? `Binds the ${hit.strand === 1 ? 'top' : 'bottom'} strand at ${hit.pos + 1}..${hit.pos + hit.L} with its 3′ ${hit.L} nt${hit.L < s.length ? `; the 5′ ${s.length - hit.L} nt do not match and are drawn as a zigzag` : ' (full match)'}${hit.count > 1 ? `. ${hit.count} binding sites found – the first is used` : ''}. Tm of binding part: ${fmtTm(tmPrimer(s.slice(s.length - hit.L)))}.` : `No match of at least ${min.value} nt at the 3′ end was found.`;
   };
   ta.addEventListener('input', upd); min.addEventListener('input', upd);
   const body = el('div', { class: 'form' }, field('Name', name), field("Primer sequence (5′→3′)", ta), field('Minimum 3′ match (nt)', min), info);
@@ -2916,12 +2969,14 @@ function liveWarn(ta) {
 function openTmDialog() {
   const c = tmConf(), num = (v, step) => el('input', { type: 'number', min: 0, step, value: v });
   const mv = num(c.mv, 1), dv = num(c.dv, 0.1), dntp = num(c.dntp, 0.1), dna = num(c.dna, 10);
+  const method = el('select', {}, el('option', { value: 'primer3' }, 'primer3 (adjustable salt / oligo conditions)'), el('option', { value: 'q5' }, 'NEB Q5 (as in the NEB Tm Calculator)')); method.value = c.method;
   const body = el('div', { class: 'form' },
+    field('Tm method', method, 'The NEB Q5 method uses fixed conditions (500 nM primer, 150 mM salt); the salt / oligo fields below only apply to primer3.'),
     el('div', { class: 'two' }, field('Monovalent cations, Na⁺/K⁺ (mM)', mv), field('Divalent cations, Mg²⁺ (mM)', dv)),
     el('div', { class: 'two' }, field('dNTPs (mM)', dntp), field('Oligo concentration (nM)', dna)),
     el('div', { class: 'small-note' }, 'Tm is calculated as in primer3 (SantaLucia 1998 nearest-neighbour thermodynamics and salt correction; Mg²⁺ is converted to an equivalent monovalent concentration; sequences over 60 nt use primer3’s GC-content formula). Defaults match primer3: 50 mM, 1.5 mM, 0.6 mM, 50 nM.'));
   openModal('Tm settings', body, [{ label: 'Defaults', action: () => { store.set('tmConf', {}); requestUpdate(true); toast('Tm conditions reset'); } }, { label: 'Cancel' }, { label: 'Save', primary: true, action: () => {
-    store.set('tmConf', { mv: Math.max(0, +mv.value || 0), dv: Math.max(0, +dv.value || 0), dntp: Math.max(0, +dntp.value || 0), dna: Math.max(1, +dna.value || 50) }); requestUpdate(true);
+    store.set('tmConf', { method: method.value, mv: Math.max(0, +mv.value || 0), dv: Math.max(0, +dv.value || 0), dntp: Math.max(0, +dntp.value || 0), dna: Math.max(1, +dna.value || 50) }); requestUpdate(true);
     } }]);
 }
 
@@ -2935,8 +2990,10 @@ function openInsertDialog(doc) {
 }
 
 function openGotoDialog(doc) {
-  const inp = el('input', { placeholder: 'e.g. 1500 or 1500..1800' });
+  const inp = el('input', { placeholder: 'e.g. 1500, 1500..1800, or 3900..100 (across the origin)' });
   openModal('Go to', field('Position or range (1-based)', inp), [{ label: 'Cancel' }, { label: 'Go', primary: true, action: () => {
+    const w = inp.value.trim().match(/^(\d+)\s*(?:\.\.|-|–|:)\s*(\d+)$/);
+    if (w && doc.circular && +w[1] > +w[2] && +w[1] <= doc.seq.length) { setSel(doc, +w[1] - 1, +w[2], null, true, true); return; }   // e.g. 380..20 = across the origin
     const l = parseRanges(inp.value, doc.seq.length); if (!l) { toast('Invalid position'); return false; }
     if (inp.value.match(/\.\.|-/)) setSel(doc, l[0][0], l[0][1]); else setSel(doc, l[0][1], l[0][1]);
   } }]);
@@ -3014,7 +3071,7 @@ function runFind(dir) {
   let idx;
   if (dir > 0) { idx = f.res.findIndex(r => r.s > base); if (idx < 0) idx = 0; }
   else { idx = -1; f.res.forEach((r, i) => { if (r.s < base) idx = i; }); if (idx < 0) idx = f.res.length - 1; }
-  f.idx = idx; setSel(doc, f.res[idx].s, f.res[idx].e);
+  f.idx = idx; setSel(doc, f.res[idx].s, Math.min(f.res[idx].e, doc.seq.length));   // a match across the origin: its first part is selected, the rest is highlighted at the start
 }
 
 /* ===== file I/O ===== */
@@ -3125,13 +3182,15 @@ function wireMap() {
     if (fe) { const f = doc.features.find(x => x.id === +fe.dataset.fid) || findORFs(doc, App.settings.orfMin).find(x => x.id === fe.dataset.fid); if (f) selectFeature(doc, f); return; }
     let pos;
     if (circ) { const c = circularPos(svg, e, n); if (c.r < 120 || c.r > 380) { return; } pos = c.pos; } else pos = linearPos(svg, e, n);
-    drag = { start: pos }; setSel(doc, pos, pos, null, false);
+    drag = { start: pos, last: pos, cross: 0 }; setSel(doc, pos, pos, null, false);
     e.preventDefault();
   });
   window.addEventListener('mousemove', e => {
     if (!drag) return; const doc = App.cur, svg = pane.querySelector('svg'); if (!svg) return;
     const n = doc.seq.length, pos = doc.circular ? circularPos(svg, e, n).pos : linearPos(svg, e, n);
-    setSel(doc, drag.start, pos, null, false);
+    // dragging round the ring through the origin selects the arc across it
+    if (doc.circular) { const d = pos - drag.last; if (d > n / 2) drag.cross--; else if (d < -n / 2) drag.cross++; drag.last = pos; }
+    setSel(doc, drag.start, pos, null, false, doc.circular && drag.cross !== 0);
   });
   window.addEventListener('mouseup', () => { drag = null; });
   pane.addEventListener('dblclick', e => { const fe = e.target.closest('[data-fid]'), doc = App.cur; if (fe && doc) { const f = doc.features.find(x => x.id === +fe.dataset.fid); if (f) openFeatureDialog(doc, f); } });
@@ -3202,7 +3261,7 @@ function wireKeys() {
       case 'End': e.preventDefault(); move(e.ctrlKey ? n : Math.min(n, (Math.floor(doc.caret / bpr) + 1) * bpr)); return;
       case 'PageUp': e.preventDefault(); move(doc.caret - bpr * 10); return;
       case 'PageDown': e.preventDefault(); move(doc.caret + bpr * 10); return;
-      case 'Escape': if (sel) setSel(doc, doc.caret, doc.caret); return;
+      case 'Escape': if (sel || doc.wrap) setSel(doc, doc.caret, doc.caret); return;
       case 'Backspace': e.preventDefault(); deleteSelection(doc, false); return;
       case 'Delete': e.preventDefault(); deleteSelection(doc, true); return;
     }
@@ -3392,7 +3451,7 @@ document.addEventListener('DOMContentLoaded', init);
    Every design works on opened plasmids and returns the final plasmid (sequence + carried-over features) plus the primers. */
 
 /* ===== primer helpers ===== */
-const primerTm = seq => { const t = tmPrimer3(seq); return Number.isFinite(t) ? t : 0; };   // primer3-method Tm (conditions: see Tm settings)
+const primerTm = seq => { const t = tmPrimer(seq); return Number.isFinite(t) ? t : 0; };   // primer3-method Tm (conditions: see Tm settings)
 /* gene-specific 5' part of a primer: shortest 18–40 nt stretch reaching the target Tm, preferring a G/C 3' end */
 function pickGS(seq, target) {
   seq = seq.toUpperCase();
@@ -3458,9 +3517,8 @@ function resolvePart(spec, docs) {
   else {
     const m = spec.src.split(':'), doc = docs.find(d => d.id === +m[1]); if (!doc) throw new Error('Source plasmid is no longer open.');
     let a, b;
-    if (m[0] === 'sel') { const r = selRange(doc); if (!r) throw new Error(`Nothing is selected in “${doc.name}”.`); [a, b] = r; }
-    else { const f = doc.features.find(x => x.id === +m[2]); if (!f) throw new Error('Feature not found.'); [a, b] = featBounds(f); }
-    text = doc.seq.slice(a, b); features = clipFeatures(doc, a, b);
+    if (m[0] === 'sel') { const clip = currentClip(doc); if (!clip) throw new Error(`Nothing is selected in “${doc.name}”.`); text = clip.text; features = clip.features; }
+    else { const f = doc.features.find(x => x.id === +m[2]); if (!f) throw new Error('Feature not found.'); [a, b] = featBounds(f); text = doc.seq.slice(a, b); features = clipFeatures(doc, a, b); }
   }
   if (/[^ACGTacgt]/.test(text)) throw new Error(`Insert “${name}” contains non-ATGC characters – clean it up first.`);
   if (text.length < 30) throw new Error(`Insert “${name}” is too short (${text.length} bp).`);
@@ -3500,13 +3558,15 @@ function ggParams(e) { const end = e.len - e.trail; return { a: e.top - end, b: 
 function goldenGateEligible(e) { const { a, b } = ggParams(e); return !e.palin && a >= 0 && b > a && b - a <= 5; }
 const GG_OVERHANGS = ['AATG', 'GCTT', 'GGAG', 'TACT', 'CAGC', 'CGCT', 'AGGT', 'GCAG', 'TGCC', 'ACTA', 'TTAC', 'CCAA', 'GTTC', 'ATCC', 'CTCG', 'TCGA'];
 
-/* opts: vec, enzyme (name), parts, tm, pad, keep ('auto'|'A'|'B'), internal (array of user overhangs, may be empty) */
+/* opts: vec, enzyme (name of the enzyme whose site the primers carry), enzymes (optional: names of all enzymes that cut the vector), parts, tm, pad, keep ('auto'|'A'|'B'), internal (array of user overhangs, may be empty) */
 function designGoldenGate(o) {
   const { vec, parts } = o, notes = [], warnings = [];
   const e = ENZYMES.find(x => x.name === o.enzyme); if (!e || !goldenGateEligible(e)) throw new Error('Choose a Type IIS enzyme that cuts downstream of its site and leaves a 5′ overhang.');
   const { a, b, core } = ggParams(e), ovLen = b - a;
-  const res = analyzeEnzymes(vec).get(e.name), cuts = res ? res.cuts : [];
-  if (cuts.length !== 2) throw new Error(`${e.name} cuts this vector ${cuts.length} time${cuts.length === 1 ? '' : 's'}; a Golden Gate destination vector needs exactly 2 sites flanking the dropout region.`);
+  const encs = (o.enzymes && o.enzymes.length ? o.enzymes : [o.enzyme]).map(n => ENZYMES.find(x => x.name === n)).filter(Boolean), encNames = encs.map(x => x.name).join(' + ');
+  if (!encs.includes(e)) encs.push(e);
+  const cuts = encs.flatMap(en => ((analyzeEnzymes(vec).get(en.name) || { cuts: [] }).cuts).map(c => ({ ...c, enz: en.name })));
+  if (cuts.length !== 2) throw new Error(`${encNames} cut${encs.length > 1 ? '' : 's'} this vector ${cuts.length} time${cuts.length === 1 ? '' : 's'}; a Golden Gate destination vector needs exactly 2 sites flanking the dropout region.`);
   const [j1, j2] = cuts.slice().sort((x, y) => x.top - y.top);
   const lo = j => Math.min(j.top, j.bot), hi = j => Math.max(j.top, j.bot), n = vec.seq.length;
   const inA = c => c.s >= lo(j1) && c.e <= hi(j2) + 0;   // fragment A = j1 → j2 (no origin crossing)
@@ -3519,7 +3579,7 @@ function designGoldenGate(o) {
   // retained path runs rs → le; the insert is placed between le and rs
   const rs = keep === 'A' ? j1 : j2, le = keep === 'A' ? j2 : j1;
   const U = vec.seq.toUpperCase(), ovL = U.slice(lo(le), hi(le)), ovR = U.slice(lo(rs), hi(rs));
-  if (ovL.length !== ovLen || ovR.length !== ovLen) throw new Error('Unexpected overhang length at a vector cut.');
+  if (ovL.length !== ovLen || ovR.length !== ovLen) throw new Error(`The vector overhangs are ${ovL.length} and ${ovR.length} nt (${le.enz} / ${rs.enz}) but ${e.name} (used in the primers) leaves ${ovLen}-nt overhangs – choose a primer enzyme that matches the vector sites.`);
   const keepFrom = hi(rs), keepTo = lo(le);
   const retainedLen = keepTo >= keepFrom ? keepTo - keepFrom : n - keepFrom + keepTo;
   if (retainedLen < 100) warnings.push('The retained backbone is very short – you may have chosen the wrong fragment.');
@@ -3540,8 +3600,8 @@ function designGoldenGate(o) {
   const spacer = 'ACGT'.slice(0, a), pad = (o.pad || '').toUpperCase().replace(/[^ACGT]/g, ''), head = pad + core + spacer, primers = [];
   parts.forEach((p, i) => {
     const Up = p.text.toUpperCase(), gsF = pickGS(Up, o.tm), gsR = pickGS(revcomp(Up), o.tm);
-    const hits = [...Up.matchAll(e.regex)].length + (e.palin ? 0 : [...Up.matchAll(e.rcRegex)].length);
-    if (hits) warnings.push(`Insert “${p.name}” contains ${hits} ${e.name} site${hits > 1 ? 's' : ''} – it would be cut during assembly. Remove it (silent mutation) first.`);
+    for (const en of encs) { const hits = [...Up.matchAll(en.regex)].length + (en.palin ? 0 : [...Up.matchAll(en.rcRegex)].length);
+      if (hits) warnings.push(`Insert “${p.name}” contains ${hits} ${en.name} site${hits > 1 ? 's' : ''} – it would be cut during assembly. Remove it (silent mutation) first.`); }
     primers.push({ name: `${p.name}_F`, seq: head + junc[i] + gsF, tail: junc[i].length, gs: gsF, strand: 1, part: i, ov: junc[i] },
       { name: `${p.name}_R`, seq: head + revcomp(junc[i + 1]) + gsR, tail: junc[i + 1].length, gs: gsR, strand: -1, part: i, ov: junc[i + 1] });
   });
@@ -3556,8 +3616,80 @@ function designGoldenGate(o) {
     feats.push(primerFeature(pr.name, pr.seq, pr.strand, locs, null, head.length));   // pad + site + spacer are cut off, only overhang + binding part remain
   });
   if (asm.dropped) warnings.push(`${asm.dropped} vector feature(s) lie in the dropout region or span a cut and were not carried over.`);
-  notes.push(`${e.name} (${core}, ${a} nt spacer, ${ovLen}-nt 5′ overhang). Vector overhangs: ${ovL} → insert → ${ovR}. Primers = ${pad ? pad + ' + ' : ''}${core} + ${spacer} + overhang + gene-specific sequence; the pad, site and spacer are removed by the digestion and are not in the final plasmid. Junction overhangs: ${junc.join(' | ')}.`);
-  return { seq: asm.seq, circular: vec.circular, features: feats, primers, notes, warnings, method: 'Golden Gate (' + e.name + ')' };
+  notes.push(`${encs.length > 1 ? `Vector cut by ${encNames}; primers use ${e.name}. ` : ''}${e.name} (${core}, ${a} nt spacer, ${ovLen}-nt 5′ overhang). Vector overhangs: ${ovL} → insert → ${ovR}. Primers = ${pad ? pad + ' + ' : ''}${core} + ${spacer} + overhang + gene-specific sequence; the pad, site and spacer are removed by the digestion and are not in the final plasmid. Junction overhangs: ${junc.join(' | ')}.`);
+  return { seq: asm.seq, circular: vec.circular, features: feats, primers, notes, warnings, method: 'Golden Gate (' + encNames + ')' };
+}
+
+/* ----- Golden Gate between existing plasmids: digest every plasmid with the chosen enzyme(s) and ligate the compatible fragments ----- */
+/* opts: docs (circular plasmids), enzymes (names) */
+function designGGPlasmids(o) {
+  const notes = [], warnings = [], docs = o.docs;
+  const encs = (o.enzymes || []).map(n => ENZYMES.find(x => x.name === n)).filter(Boolean);
+  if (!encs.length) throw new Error('Choose at least one Type IIS enzyme.');
+  if (docs.length < 2) throw new Error('Choose at least two plasmids.');
+  const encNames = encs.map(e => e.name).join(' + '), frags = [];
+  docs.forEach((doc, di) => {
+    if (!doc.circular) throw new Error(`“${doc.name}” is a linear sequence – only circular plasmids can be assembled this way.`);
+    const U = doc.seq, n = U.length, cuts = [];
+    for (const e of encs) { const r = analyzeEnzymes(doc).get(e.name); if (r) for (const c of r.cuts) cuts.push({ top: c.top, len: c.bot - c.top, enz: e }); }
+    if (!cuts.length) throw new Error(`“${doc.name}” has no ${encNames} site.`);
+    for (const c of cuts) if (c.len <= 0) c.len = (c.len + n) % n;
+    cuts.sort((x, y) => x.top - y.top);
+    const slice = (a, l) => { let t = ''; for (let i = 0; i < l; i++) t += U[(a + i) % n]; return t; };
+    cuts.forEach((c, i) => {
+      const nx = cuts[(i + 1) % cuts.length], len = ((nx.top - c.top + n) % n) || n, full = len + nx.len, text = slice(c.top, full);
+      const U2 = text.toUpperCase();
+      let sites = 0; for (const e of encs) sites += [...U2.matchAll(e.regex)].length + (e.palin ? 0 : [...U2.matchAll(e.rcRegex)].length);
+      const tl = Math.min(full, n), ranges = c.top + tl <= n ? [{ a: c.top, b: c.top + tl, off: 0 }] : [{ a: c.top, b: n, off: 0 }, { a: 0, b: c.top + tl - n, off: n - c.top }];
+      const feats = carryFeatures(doc, ranges).feats;
+      frags.push({ doc, di, idx: frags.length, start: c.top, len, text, sites, feats, lov: U2.slice(0, c.len), rov: U2.slice(len), lLen: c.len, rLen: nx.len });
+    });
+  });
+  const usable = frags.filter(f => !f.sites);
+  if (usable.length < 2) throw new Error('Fewer than two fragments are free of recognition sites after digestion – nothing can be assembled (check that the sites point away from the fragments you want to keep).');
+  const ends = (f, rc) => rc ? { l: revcomp(f.rov), r: revcomp(f.lov) } : { l: f.lov, r: f.rov };
+  const cycles = [];
+  const dfs = (path, used, start) => {
+    if (cycles.length >= 200) return;
+    const last = path[path.length - 1], r = ends(last.f, last.rc).r;
+    if (path.length > 1 && r === ends(path[0].f, false).l) cycles.push(path.slice());
+    if (path.length >= 12) return;
+    for (const g of usable) {
+      if (used.has(g.idx) || g.idx < start.idx) continue;
+      for (const rc of [false, true]) { if (ends(g, rc).l !== r) continue; used.add(g.idx); path.push({ f: g, rc }); dfs(path, used, start); path.pop(); used.delete(g.idx); }
+    }
+  };
+  for (const f of usable) {
+    // a fragment that closes on itself (one cut site pair with identical ends) is a single-piece circle
+    dfs([{ f, rc: false }], new Set([f.idx]), f);
+  }
+  const score = c => new Set(c.map(x => x.f.di)).size * 1000 + c.length;
+  const good = cycles.filter(c => new Set(c.map(x => x.f.di)).size > 1);
+  if (!good.length) throw new Error(`No circular assembly joins fragments from more than one plasmid: the ${encNames} overhangs of the plasmids do not match (or the product would still contain sites).`);
+  good.sort((x, y) => score(y) - score(x));
+  const top = good.filter(c => score(c) === score(good[0]));
+  let cyc = good[0].slice();
+  // start at the largest fragment, read in its own orientation
+  let bi = 0; cyc.forEach((x, i) => { if (x.f.len > cyc[bi].f.len) bi = i; });
+  if (cyc[bi].rc) cyc = cyc.reverse().map(x => ({ f: x.f, rc: !x.rc }));
+  bi = 0; cyc.forEach((x, i) => { if (x.f.len > cyc[bi].f.len) bi = i; });
+  cyc = cyc.slice(bi).concat(cyc.slice(0, bi));
+  const parts = cyc.map(({ f, rc }) => {
+    let clip = { text: f.text, features: f.feats.map(cloneFeat) };
+    if (rc) clip = revcompClip(clip);
+    const keep = clip.text.length - (rc ? f.lLen : f.rLen);
+    return { text: clip.text.slice(0, keep), features: clip.features.filter(x => x.locs.every(([a, b]) => b <= keep)) };
+  });
+  const mid = joinParts(parts);
+  const seq = mid.text;
+  for (const x of cyc) notes.push(`${x.f.doc.name}: ${x.f.start + 1}→${((x.f.start + x.f.len - 1) % x.f.doc.seq.length) + 1} (${x.f.len.toLocaleString('en-US')} bp)${x.rc ? ', reverse-complemented' : ''}; overhangs ${ends(x.f, x.rc).l} … ${ends(x.f, x.rc).r}`);
+  notes.unshift(`Assembly of ${new Set(cyc.map(x => x.f.di)).size} plasmids with ${encNames}. Fragments joined, in order:`);
+  if (top.length > 1) warnings.push(`${top.length} different assemblies are possible with these plasmids and enzymes; the one starting with the largest fragment is shown. Use fewer plasmids or enzymes with distinct overhangs to make it unique.`);
+  const used = new Set(cyc.map(x => x.f.idx)), leftover = frags.filter(f => f.sites).length;
+  if (leftover) notes.push(`${leftover} fragment(s) still carrying recognition sites (e.g. the dropout or the excised vector parts) are re-cut and left out of the product.`);
+  const lead = cyc[0].f.doc.name.replace(/_rc$/, ''), rest = [...new Set(cyc.map(x => x.f.doc.name).filter(nm => nm !== cyc[0].f.doc.name))];
+  for (const e of encs) { const hits = [...seq.toUpperCase().matchAll(e.regex)].length + (e.palin ? 0 : [...seq.toUpperCase().matchAll(e.rcRegex)].length); if (hits) warnings.push(`The product still contains ${hits} ${e.name} site${hits > 1 ? 's' : ''}.`); }
+  return { seq, circular: true, features: mid.features, primers: [], notes, warnings, method: 'Golden Gate (' + encNames + ', plasmids)', name: [lead, ...rest].join('_') };
 }
 
 /* ===================== Gateway (BP / LR) ===================== */
@@ -3641,7 +3773,7 @@ function openCloningDialog() {
   /* ----- insert parts ----- */
   const sourceOptions = () => {
     const o = [];
-    for (const d of docs) { const r = selRange(d); if (r) o.push([`sel:${d.id}`, `Selection in “${d.name}” (${r[0] + 1}..${r[1]}, ${(r[1] - r[0]).toLocaleString('en-US')} bp)`]); }
+    for (const d of docs) { const sg = selSegs(d); if (sg.length) o.push([`sel:${d.id}`, `Selection in “${d.name}” (${segLabel(sg)}, ${sg.reduce((t, s) => t + s[1] - s[0], 0).toLocaleString('en-US')} bp)`]); }
     for (const d of docs) for (const f of d.features) o.push([`feat:${d.id}:${f.id}`, `Feature: ${f.name} — ${d.name}`]);
     o.push(['text', 'Pasted sequence…']); return o;
   };
@@ -3655,7 +3787,7 @@ function openCloningDialog() {
       else if (src.value.startsWith('sel:')) name.value = 'insert' + (rows.indexOf(row) + 1 || 1);
     };
     src.addEventListener('change', sync);
-    const first = !rows.length; if (first) { const d0 = docs.find(d => selRange(d)); if (d0) src.value = `sel:${d0.id}`; else if (src.options.length > 1) src.selectedIndex = 0; }
+    const first = !rows.length; if (first) { const d0 = docs.find(d => selSegs(d).length); if (d0) src.value = `sel:${d0.id}`; else if (src.options.length > 1) src.selectedIndex = 0; }
     row.el = el('div', { class: 'partrow' }, el('div', { class: 'prow' }, el('span', { class: 'pn' }, ''), src, name, el('label', { class: 'chk', title: 'Use the reverse complement of this region' }, rc, 'rev-comp'),
       el('button', { class: 'tx', title: 'Remove this part', onclick: () => { if (rows.length > 1) { rows.splice(rows.indexOf(row), 1); row.el.remove(); renumber(); } } }, '✕')), ta);
     rows.push(row); partsHost.append(row.el); sync(); renumber();
@@ -3683,12 +3815,27 @@ function openCloningDialog() {
     const uq = list.filter(o => o.k === 1).length;
     ctl.enzInfo.textContent = `${uq} unique cutter${uq === 1 ? '' : 's'}${list.length > uq ? ` + ${list.length - uq} site(s) of your selected enzymes` : ''} in ${d.name}`;
   };
+  /* Golden Gate: enzymes are chosen with checkboxes (several at once); labels show how often each cuts the vector / the chosen plasmids */
+  const ggChecked = new Set(['BsaI']);
+  const ggList = () => ENZYMES.filter(goldenGateEligible).sort((a, b) => (GOLDEN_GATE.has(b.name) - GOLDEN_GATE.has(a.name)) || a.name.localeCompare(b.name));
+  const ggCount = (d, name) => ((analyzeEnzymes(d).get(name) || { cuts: [] }).cuts).length;
   const fillGG = () => {
-    const d = getDoc(ctl.vec), res = analyzeEnzymes(d), v = ctl.ggEnz.value; ctl.ggEnz.innerHTML = '';
-    const list = ENZYMES.filter(goldenGateEligible).sort((a, b) => (GOLDEN_GATE.has(b.name) - GOLDEN_GATE.has(a.name)) || a.name.localeCompare(b.name));
-    for (const e of list) { const k = (res.get(e.name) || { cuts: [] }).cuts.length; ctl.ggEnz.append(el('option', { value: e.name }, `${e.name}  (${k} site${k === 1 ? '' : 's'} in vector)`)); }
-    const best = list.find(e => (res.get(e.name) || { cuts: [] }).cuts.length === 2 && GOLDEN_GATE.has(e.name)) || list.find(e => (res.get(e.name) || { cuts: [] }).cuts.length === 2);
-    ctl.ggEnz.value = v && list.some(e => e.name === v) && v !== '' ? v : (best ? best.name : 'BsaI');
+    if (!ctl.enzPick) return;
+    const plasmid = ctl.ggMode.value === 'plasmid', ds = plasmid ? ctl.plSel.filter(x => x.cb.checked).map(x => x.doc) : [getDoc(ctl.vec)];
+    ctl.enzPick.innerHTML = '';
+    for (const e of ggList()) {
+      const cnt = ds.map(d => ggCount(d, e.name)), used = cnt.some(k => k > 0);
+      if (!GOLDEN_GATE.has(e.name) && !used && !ggChecked.has(e.name)) continue;      // keep the list short: common enzymes + anything that cuts
+      const cb = el('input', { type: 'checkbox', checked: ggChecked.has(e.name) || undefined, onchange: () => { cb.checked ? ggChecked.add(e.name) : ggChecked.delete(e.name); fillPrim(); } });
+      ctl.enzPick.append(el('label', { class: 'chk' }, cb, el('b', {}, e.name), el('small', {}, `${cnt.join(' / ')} site${cnt.length === 1 && cnt[0] === 1 ? '' : 's'}`)));
+    }
+    fillPrim();
+  };
+  const fillPrim = () => {
+    if (!ctl.ggEnz) return;
+    const v = ctl.ggEnz.value, names = ggList().filter(e => ggChecked.has(e.name)).map(e => e.name); ctl.ggEnz.innerHTML = '';
+    for (const n of names) ctl.ggEnz.append(el('option', { value: n }, n));
+    if (names.includes(v)) ctl.ggEnz.value = v;
   };
   const buildPanel = () => {
     panel.innerHTML = ''; const f = (l, c, h) => panel.append(field(l, c, h));
@@ -3705,12 +3852,20 @@ function openCloningDialog() {
       const upd = () => { const sm = ctl.mode.value === 'sel'; ctl.enzBox.style.display = sm ? 'none' : 'block'; ctl.selInfo.style.display = sm ? 'block' : 'none'; const d = getDoc(ctl.vec), r = selRange(d); ctl.selInfo.textContent = r ? `Replaces ${r[0] + 1}..${r[1]} (${r[1] - r[0]} bp) of ${d.name}.` : `Inserts at the cursor (after base ${d.caret}) of ${d.name}.`; };
       ctl.mode.addEventListener('change', upd); ctl.vec.addEventListener('change', () => { fillEnz(); upd(); }); fillEnz(); upd();
     } else if (method === 'gg') {
-      ctl.vec = sel(docOpts, cur.id); f('Destination vector', ctl.vec);
-      ctl.ggEnz = sel([['BsaI', 'BsaI']]); f('Type IIS enzyme', ctl.ggEnz, 'Eligible enzymes only (cut downstream of the site, 5′ overhang). The vector needs exactly 2 sites.');
-      ctl.keep = sel([['auto', 'Automatic (keep the fragment without enzyme sites)'], ['A', 'Keep fragment A (between the sites, no origin crossing)'], ['B', 'Keep fragment B (spans the origin)']]); f('Backbone fragment', ctl.keep);
+      ctl.ggMode = sel([['pcr', 'PCR-amplified insert(s) (primers carry the enzyme site)'], ['plasmid', 'Digest & ligate existing plasmids (open tabs)']], 'pcr'); f('Insert source', ctl.ggMode);
+      ctl.enzPick = el('div', { class: 'enzgrid' }); f('Type IIS enzyme(s) – tick several to use them together', ctl.enzPick, 'Eligible enzymes only (cut downstream of the site, 5′ overhang).');
+      const pcr = el('div', {}), pl = el('div', {});
+      ctl.vec = sel(docOpts, cur.id); pcr.append(field('Destination vector', ctl.vec));
+      ctl.ggEnz = sel([['BsaI', 'BsaI']]); pcr.append(field('Enzyme whose site the primers carry', ctl.ggEnz, 'All ticked enzymes cut the vector (it needs exactly 2 sites in total); the PCR primers carry the site of this one.'));
+      ctl.keep = sel([['auto', 'Automatic (keep the fragment without enzyme sites)'], ['A', 'Keep fragment A (between the sites, no origin crossing)'], ['B', 'Keep fragment B (spans the origin)']]); pcr.append(field('Backbone fragment', ctl.keep));
       ctl.pad = txt('TTTT', '', 120); ctl.tm = num(60, 45, 72); ctl.internal = txt('', 'auto', 260);
-      panel.append(el('div', { class: 'two' }, field('5′ pad (helps the enzyme cut)', ctl.pad), field('Primer Tm target (°C)', ctl.tm)), field('Internal overhangs (comma-separated, blank = automatic)', ctl.internal, 'Only needed with 2+ inserts: one overhang per junction between inserts.'));
-      ctl.vec.addEventListener('change', fillGG); fillGG();
+      pcr.append(el('div', { class: 'two' }, field('5′ pad (helps the enzyme cut)', ctl.pad), field('Primer Tm target (°C)', ctl.tm)), field('Internal overhangs (comma-separated, blank = automatic)', ctl.internal, 'Only needed with 2+ inserts: one overhang per junction between inserts.'));
+      ctl.plSel = docs.map(d => ({ doc: d, cb: el('input', { type: 'checkbox', checked: (d === cur) || undefined, onchange: fillGG }) }));
+      pl.append(el('div', { class: 'small-note' }, 'Tick the plasmids to assemble. Each is cut with the ticked enzyme(s); fragments without remaining sites are ligated through matching overhangs (either orientation).'),
+        el('div', { class: 'enzpick' }, ctl.plSel.map(x => el('label', { class: 'chk', style: 'display:flex' }, x.cb, `${x.doc.name} (${x.doc.seq.length.toLocaleString('en-US')} bp${x.doc.circular ? '' : ', linear'})`))));
+      panel.append(pcr, pl);
+      const upd = () => { const isPl = ctl.ggMode.value === 'plasmid'; pcr.style.display = isPl ? 'none' : 'block'; pl.style.display = isPl ? 'block' : 'none'; partsWrap.style.display = isPl ? 'none' : 'block'; fillGG(); };
+      ctl.ggMode.addEventListener('change', upd); ctl.vec.addEventListener('change', fillGG); upd();
     } else {
       ctl.rxn = sel([['BP', 'BP reaction – PCR product (attB) + donor vector (attP)'], ['LR', 'LR reaction – entry clone (attL) + destination vector (attR)']], 'BP'); f('Reaction', ctl.rxn);
       const bp = el('div', {}), lr = el('div', {});
@@ -3737,12 +3892,15 @@ function openCloningDialog() {
     out.innerHTML = ''; design = null;
     try {
       const T = () => clamp(+ctl.tm.value || 60, 45, 72);
-      if (method === 'gateway' && ctl.rxn.value === 'LR') design = designGateway({ reaction: 'LR', entry: getDoc(ctl.entry), dest: getDoc(ctl.dest) });
+      if (method === 'gg' && ctl.ggMode.value === 'plasmid') {
+        if (!ggChecked.size) throw new Error('Tick at least one enzyme.');
+        design = designGGPlasmids({ docs: ctl.plSel.filter(x => x.cb.checked).map(x => x.doc), enzymes: [...ggChecked] });
+      } else if (method === 'gateway' && ctl.rxn.value === 'LR') design = designGateway({ reaction: 'LR', entry: getDoc(ctl.entry), dest: getDoc(ctl.dest) });
       else {
         const parts = specs().map(s => resolvePart(s, docs)), vec = getDoc(ctl.vec);
         if (method === 'homology') {
           const H = clamp(+ctl.H.value || 15, 8, 60); let leftEnd, rightStart, addL = '', addR = '', siteNote = '';
-          if (ctl.mode.value === 'sel') { const r = selRange(vec); [leftEnd, rightStart] = r || [vec.caret, vec.caret]; }
+          if (ctl.mode.value === 'sel') { if (vec.wrap) throw new Error('The selection in the vector runs across the origin – use “Set origin here” to move the origin first.'); const r = selRange(vec); [leftEnd, rightStart] = r || [vec.caret, vec.caret]; }
           else {
             if (!ctl.enz1.value) throw new Error('Choose at least one restriction enzyme for the vector (or use the selection mode).');
             const cutObj = v => { const [n, i] = v.split('|'); return { name: n, ...analyzeEnzymes(vec).get(n).cuts[+i] }; };
@@ -3760,7 +3918,8 @@ function openCloningDialog() {
           }
           design = designHomology({ vec, leftEnd, rightStart, parts, H, tm: T(), addL, addR, siteNote });
         } else if (method === 'gg') {
-          design = designGoldenGate({ vec, parts, enzyme: ctl.ggEnz.value, tm: T(), pad: ctl.pad.value, keep: ctl.keep.value, internal: ctl.internal.value.split(/[,\s]+/).filter(Boolean) });
+          if (!ggChecked.size) throw new Error('Tick at least one enzyme.');
+          design = designGoldenGate({ vec, parts, enzyme: ctl.ggEnz.value, enzymes: [...ggChecked], tm: T(), pad: ctl.pad.value, keep: ctl.keep.value, internal: ctl.internal.value.split(/[,\s]+/).filter(Boolean) });
         } else {
           design = designGateway({ reaction: 'BP', donor: vec, part: parts[0], extraF: cleanSeq(ctl.extraF.value).toUpperCase(), extraR: cleanSeq(ctl.extraR.value).toUpperCase(), tm: T() });
         }
@@ -3778,18 +3937,25 @@ function openCloningDialog() {
       const tbl = el('table', { class: 'ptable' }, el('tr', {}, ['Primer', "Sequence (5′→3′)", 'Length', 'Tm of binding part'].map(h => el('th', {}, h))));
       for (const p of d.primers) {
         const tail = p.seq.slice(0, p.seq.length - p.gs.length);
-        tbl.append(el('tr', {}, el('td', {}, el('b', {}, p.name)), el('td', { class: 'mono pseq' }, tail ? el('span', { class: 'tail' }, tail) : '', p.gs), el('td', {}, p.seq.length + ' nt'), el('td', {}, fmtTm(tmPrimer3(p.gs)))));
+        tbl.append(el('tr', {}, el('td', {}, el('b', {}, p.name)), el('td', { class: 'mono pseq' }, tail ? el('span', { class: 'tail' }, tail) : '', p.gs), el('td', {}, p.seq.length + ' nt'), el('td', {}, fmtTm(tmPrimer(p.gs)))));
       }
       out.append(el('div', { class: 'ptablewrap' }, tbl), el('div', { class: 'small-note' }, 'Coloured part = 5′ extension (homology / enzyme site / att site); black = gene-specific binding part. Tm: ' + tmConfText() + '.'));
     }
-    const csv = () => 'Name,Sequence,Length,Tm\n' + d.primers.map(p => `${p.name},${p.seq},${p.seq.length},${fmtTm(tmPrimer3(p.gs)).replace(' °C', '')}`).join('\n');
+    if (d.primers.length && tmConf().method === 'q5') {   // NEB rule for Q5: Ta = lower primer Tm + 1 °C (max 72 °C), calculated on the binding parts
+      const byPart = new Map(); for (const p of d.primers) { const k = p.part ?? 0; (byPart.get(k) || byPart.set(k, []).get(k)).push(tmPrimer(p.gs)); }
+      const ta = [...byPart.values()].filter(v => v.length === 2 && v.every(Number.isFinite)).map(v => Math.min(72, Math.min(...v) + 1).toFixed(1));
+      if (ta.length) out.append(el('div', { class: 'small-note' }, `Suggested Q5 annealing temperature (lower Tm + 1 °C, max 72 °C): ${ta.map((t, i) => (ta.length > 1 ? `PCR ${i + 1}: ` : '') + t + ' °C').join(' · ')}.`));
+    }
+    const csv = () => 'Name,Sequence,Length,Tm\n' + d.primers.map(p => `${p.name},${p.seq},${p.seq.length},${fmtTm(tmPrimer(p.gs)).replace(' °C', '')}`).join('\n');
     out.append(el('div', { class: 'btnrow' },
       el('button', { class: 'btn primary', onclick: () => { const doc = addDoc({ name: d.name, seq: d.seq, circular: d.circular, features: d.features, meta: { definition: `Designed with Plasmid Viewer – ${d.method}` } }); doc.dirty = true; toast(`Created “${doc.name}”`); if (modal) modal.close(); } }, 'Create plasmid in a new tab'),
       d.primers.length ? el('button', { class: 'btn', onclick: async () => { await copyToSystem(d.primers.map(p => `${p.name}\t${p.seq}`).join('\n')); toast('Primers copied'); } }, 'Copy primers') : null,
       d.primers.length ? el('button', { class: 'btn', onclick: () => downloadBlob(d.name + '_primers.csv', csv(), 'text/csv') }, 'Download primers (CSV)') : null));
   };
 
-  const tmLine = el('div', { class: 'small-note' }, 'Primer Tm: ' + tmConfText() + '  ', el('a', { href: '#', onclick: e => { e.preventDefault(); openTmDialog(); } }, 'change conditions'), ' (applies to the next design).');
+  const tmSel = el('select', { onchange: () => { store.set('tmConf', { ...store.get('tmConf', {}), method: tmSel.value }); tmTxt.textContent = tmConfText(); requestUpdate(true); } }, el('option', { value: 'primer3' }, 'primer3'), el('option', { value: 'q5' }, 'NEB Q5'));
+  tmSel.value = tmConf().method; const tmTxt = el('span', {}, tmConfText());
+  const tmLine = el('div', { class: 'small-note' }, 'Primer Tm method: ', tmSel, ' ', tmTxt, '  ', el('a', { href: '#', onclick: e => { e.preventDefault(); openTmDialog(); } }, 'more settings'), ' (applies to the next design).');
   const body = el('div', { class: 'cloning' }, tabs, panel, tmLine, partsWrap, el('div', { class: 'btnrow' }, el('button', { class: 'btn primary', onclick: run }, 'Design')), out);
   addPart(); setMethod('homology');
   modal = openModal('Cloning tools', body, [{ label: 'Close' }], { wide: true });
