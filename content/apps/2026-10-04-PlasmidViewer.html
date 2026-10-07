@@ -205,6 +205,7 @@ svg.map.lin { width: auto; height: auto; }
 
 /* hover highlight + info pop-up */
 .mp-feat.hov { stroke: #e5322d; stroke-width: 2.6; }
+.mp-lbl tspan.hov { fill: #e5322d; }
 .mp-lbl.hov, .mp-flbl.hov { fill: #e5322d; stroke: #e5322d; stroke-width: .6px; paint-order: stroke; }
 .mp-flbl.hov { fill: #fff; stroke: #e5322d; stroke-width: 3px; paint-order: stroke; }
 .fhang.hov polyline { stroke: #e5322d !important; }
@@ -2048,21 +2049,57 @@ function arcSeg(r1, r2, a1, a2, head, headPx) {
   return `M${P(rm, a1)} L${P(r2 + flare, ab)} L${P(r2, ab)} A${r2} ${r2} 0 ${large(ab, a2)} 1 ${P(r2, a2)} L${P(r1, a2)} A${r1} ${r1} 0 ${large(ab, a2)} 0 ${P(r1, ab)} L${P(r1 - flare, ab)}Z`;
 }
 
-/* spread labels vertically so that they do not overlap */
-function spreadLabels(items, gap, minY, maxY) {
-  items.sort((a, b) => a.y - b.y);
-  for (let i = 0; i < items.length; i++) { items[i].y = Math.max(items[i].y, i ? items[i - 1].y + gap : minY); }
-  if (items.length && items[items.length - 1].y > maxY) {
-    items[items.length - 1].y = maxY;
-    for (let i = items.length - 2; i >= 0; i--) items[i].y = Math.min(items[i].y, items[i + 1].y - gap);
+/* labels of enzymes that cut at the same position share one label: "BanII, SacI (406)" */
+function groupEnzymes(list) {
+  const g = new Map();
+  for (const e of list) { const k = e.top; if (!g.has(k)) g.set(k, { top: e.top, items: [] }); g.get(k).items.push(e); }
+  return [...g.values()].map(x => { x.items.sort((p, q) => p.name.localeCompare(q.name)); x.names = x.items.map(i => i.name); return x; });
+}
+const enzGroupSvg = (g, attrs = '') => `<text ${attrs}>${g.items.map((e, i) => `<tspan data-enz="${esc(e.name)}" data-s="${e.s}" data-e="${e.e}">${esc(e.name)}${i < g.items.length - 1 ? ', ' : ` (${g.top})`}</tspan>`).join('')}</text>`;   // separators and the position belong to a name's tspan so the whole label is hoverable
+
+/* Least-squares placement of labels along a vertical axis: keeps the order, keeps each label as near as possible to its wish (d) with room for the
+   labels' heights h between neighbours (pool-adjacent-violators on d_i - offset_i), then fits the whole stack into [lo, hi]. */
+function placeStack(d, h, lo, hi) {
+  const m = d.length; if (!m) return [];
+  const off = [0]; for (let i = 1; i < m; i++) off.push(off[i - 1] + (h[i - 1] + h[i]) / 2);
+  const k = off[m - 1] > hi - lo ? (hi - lo) / off[m - 1] : 1; for (let i = 0; i < m; i++) off[i] *= k;
+  const blocks = [];
+  d.forEach((v, i) => { blocks.push({ s: v - off[i], w: 1, n: 1 }); while (blocks.length > 1 && blocks[blocks.length - 2].s / blocks[blocks.length - 2].w > blocks[blocks.length - 1].s / blocks[blocks.length - 1].w) { const b = blocks.pop(), a = blocks[blocks.length - 1]; a.s += b.s; a.w += b.w; a.n += b.n; } });
+  const y = []; for (const b of blocks) for (let q = 0; q < b.n; q++) y.push(b.s / b.w);
+  return y.map((v, i) => Math.min(Math.max(v + off[i], lo + off[i]), hi - (off[m - 1] - off[i])));
+}
+/* Split ring labels (sorted by angle) into a right and a left column. The right column is a contiguous arc starting at the top; its ends are moved
+   (at most ~55° away from the vertical axis) so both columns carry a similar number of labels – contiguous arcs keep the leader lines from crossing. */
+function splitRingLabels(L) {
+  const N = L.length; let start = 0, cnt = L.filter(l => l.theta <= Math.PI).length;
+  const dTop = t => Math.min(t, 2 * Math.PI - t), dBot = t => Math.abs(t - Math.PI), lim = 55 * Math.PI / 180, thr = Math.max(2, N * 0.2), cap = 50;   // only rebalance when one column would be too full to keep the names near their sites
+  for (let guard = 0; guard < N; guard++) {
+    const diff = cnt - (N - cnt); if (Math.abs(diff) <= thr || Math.max(cnt, N - cnt) <= cap) break;
+    if (diff > 0) {   // right column too full: give away its first (near the top) or last (near the bottom) label
+      const a = L[start % N], z = L[(start + cnt - 1) % N], da = dTop(a.theta), dz = dBot(z.theta);
+      if (Math.min(da, dz) > lim) break; if (da <= dz) { start = (start + 1) % N; cnt--; } else cnt--;
+    } else {          // left column too full: take the label before the right arc's start (near the top) or the one after its end (near the bottom)
+      const a = L[(start - 1 + N) % N], z = L[(start + cnt) % N], da = dTop(a.theta), dz = dBot(z.theta);
+      if (Math.min(da, dz) > lim) break; if (da <= dz) { start = (start - 1 + N) % N; cnt++; } else cnt++;
+    }
   }
+  const right = [], left = [];
+  for (let i = 0; i < N; i++) { const l = L[(start + i) % N]; (i < cnt ? right : left).push(l); }
+  return { right, left: left.reverse() };   // both lists run from top to bottom
 }
 
 function renderCircular(doc, host) {
   const n = doc.seq.length, feats = visibleFeatures(doc);
-  const R = 215, BH = 16.5, LH = 19.5;
+  const BH = 16.5, LH = 19.5;
   const { lane, count } = assignLanes(feats.map(f => ({ id: f.id, ivs: f.locs.concat(hangSegs(f, n)) })), n * 0.002);
-  const lanes = Math.max(1, count), rTop = R + (lanes - 1) * LH + BH / 2 + 4;
+  const lanes = Math.max(1, count), laneSpan = (lanes - 1) * LH + BH / 2 + 4;
+  // ring size follows the number of names: few features / enzymes → a large ring that uses the room, many → a smaller ring (and the widest name decides how much width the ring may take)
+  const egroups = groupEnzymes(enzymeView(doc)), nLabels = feats.length + egroups.length;
+  let maxW = 60;
+  for (const f of feats) maxW = Math.max(maxW, textWidth(f.name, '700 16px system-ui, sans-serif'));
+  for (const g of egroups) maxW = Math.max(maxW, textWidth(`${g.names.join(', ')} (${g.top})`, '600 12px system-ui, sans-serif'));
+  const RMax = Math.min(250, 480 - maxW - 36 - laneSpan), RMin = Math.min(125, RMax);
+  const R = Math.max(100, RMin + (RMax - RMin) * (1 - clamp((nLabels - 8) / 52, 0, 1))), rTop = R + laneSpan;
   const ang = p => 2 * Math.PI * p / n;
   const sel = selRange(doc), segs = selSegs(doc);
   const out = [];
@@ -2078,8 +2115,8 @@ function renderCircular(doc, host) {
     out.push(`<line class="mp-tick" x1="${f2(x1)}" y1="${f2(y1)}" x2="${f2(x2)}" y2="${f2(y2)}"/>`);
     if (major && p > 0 && (n - p) > step * 0.35) { const [tx, ty] = polar(R - 36, a); out.push(`<text class="mp-ticklbl" x="${f2(tx)}" y="${f2(ty)}" text-anchor="middle" dominant-baseline="central">${Math.round(p).toLocaleString('en-US')}</text>`); }
   }
-  // features
-  const labels = [];
+  // features (leader lines are inserted below them afterwards, so they never run over a shape)
+  const labels = [], underAt = out.length;
   for (const f of feats) {
     const k = lane.get(f.id), rc = R + k * LH, r1 = rc - BH / 2, r2 = rc + BH / 2;
     const headSeg = f.strand === -1 ? 0 : f.locs.length - 1;
@@ -2097,28 +2134,42 @@ function renderCircular(doc, host) {
     const seg = f.locs.reduce((m, l) => (l[1] - l[0] > m[1] - m[0] ? l : m));
     labels.push({ kind: 'f', f, theta: ang((seg[0] + seg[1]) / 2), rr: r2 + 2, text: f.name, color: f.color });
   }
-  // enzymes
-  const enz = enzymeView(doc), isSel = e => !!sel && sel[0] === e.s && sel[1] === e.e;
-  for (const e of enz) {
-    const a = ang(e.top), [x1, y1] = polar(R - 13, a), [x2, y2] = polar(rTop + 2, a);
-    out.push(`<line class="mp-cut${isSel(e) ? ' on' : ''}" data-enz="${esc(e.name)}" x1="${f2(x1)}" y1="${f2(y1)}" x2="${f2(x2)}" y2="${f2(y2)}"/>`);
-    labels.push({ kind: 'e', e, theta: a, rr: rTop + 2, text: `${e.name} (${e.top})` });
+  // enzymes (sites cutting at the same position share a label and a line; the location tick is short, the leader continues from its end)
+  const isSel = e => !!sel && sel[0] === e.s && sel[1] === e.e, cutR0 = R - BH * 0.55, cutR1 = R + BH * 0.55;   // tick = 10% longer than the feature shapes are wide
+  for (const g of egroups) {
+    const a = ang(g.top), [x1, y1] = polar(cutR0, a), [x2, y2] = polar(cutR1, a);
+    out.push(`<line class="mp-cut${g.items.some(isSel) ? ' on' : ''}" data-enz="${esc(g.names.join('|'))}" x1="${f2(x1)}" y1="${f2(y1)}" x2="${f2(x2)}" y2="${f2(y2)}"/>`);
+    labels.push({ kind: 'e', g, theta: a, rr: cutR1 });
   }
-  // label layout
-  const Rl = rTop + 22;
-  const sides = { 1: [], '-1': [] };
-  for (const l of labels) { const s = Math.sin(l.theta) >= 0 ? 1 : -1; l.side = s; l.y = CCY - Rl * Math.cos(l.theta); sides[s].push(l); }
-  for (const s of [1, -1]) {
-    spreadLabels(sides[s], 18, 22, CH - 22);
-    for (const l of sides[s]) {
-      const dy = l.y - CCY, x = CCX + s * (Math.sqrt(Math.max(Rl * Rl - dy * dy, 0)) + 10);
-      const [ax, ay] = polar(l.rr, l.theta);
-      const cls = l.kind === 'e' ? 'mp-lbl enz' : 'mp-lbl';
-      const attr = l.kind === 'e' ? `data-enz="${esc(l.e.name)}" data-s="${l.e.s}" data-e="${l.e.e}"` : `data-fid="${l.f.id}"`;
-      out.push(`<polyline class="mp-lead${(l.kind === 'f' && doc.selFid === l.f.id) || (l.kind === 'e' && isSel(l.e)) ? ' on' : ''}" ${attr} points="${f2(ax)},${f2(ay)} ${f2(x - s * 6)},${f2(l.y)} ${f2(x - s * 3)},${f2(l.y)}"/>`);
-      out.push(`<text class="${cls}" ${attr} x="${f2(x)}" y="${f2(l.y)}" text-anchor="${s === 1 ? 'start' : 'end'}" dominant-baseline="central">${esc(l.text)}</text>`);
-    }
+  // label layout: names stay around the ring in two columns that follow the circle (right / left of the vertical axis); each column is filled
+  // evenly, every name as near to its position as the stacking allows, and the order matches the order around the ring so leaders do not cross
+  const Rl = rTop + 22, Re = rTop + 8, minY = 22, maxY = CH - 22, under = [], text = [];
+  let bx0 = CCX - rTop - 12, bx1 = CCX + rTop + 12, by0 = CCY - rTop - 12, by1 = CCY + rTop + 12;   // bounds of everything drawn, so the view can be fitted tightly
+  labels.sort((p, q) => p.theta - q.theta);
+  const cols = splitRingLabels(labels);
+  const segMin = (ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, -((ax - CCX) * dx + (ay - CCY) * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(ax + t * dx - CCX, ay + t * dy - CCY); };
+  for (const [s, list] of [[1, cols.right], [-1, cols.left]]) {
+    const ys = placeStack(list.map(l => CCY - Rl * Math.cos(l.theta)), list.map(l => (l.kind === 'e' ? 14 : 18)), minY, maxY);
+    list.forEach((l, i) => {
+      const y = ys[i], dy = y - CCY, x = CCX + s * (Math.sqrt(Math.max(Rl * Rl - dy * dy, (0.35 * Rl) ** 2)) + 10);
+      const [ax, ay] = polar(l.rr, l.theta), lx = x - s * 3;
+      // straight from the start of the leader to the near end of the name (its start on the right, its end on the left); if that would dip back
+      // towards the ring, leave the shape radially first
+      let pts = `${f2(ax)},${f2(ay)} ${f2(lx)},${f2(y)}`;
+      if (segMin(ax, ay, lx, y) < l.rr - 0.5) { const [ex, ey] = polar(Math.max(Re, l.rr), l.theta); pts = `${f2(ax)},${f2(ay)} ${f2(ex)},${f2(ey)} ${f2(lx)},${f2(y)}`; }
+      const lw = textWidth(l.kind === 'e' ? `${l.g.names.join(', ')} (${l.g.top})` : l.text, l.kind === 'e' ? '600 12px system-ui, sans-serif' : '700 16px system-ui, sans-serif') + 6;
+      bx0 = Math.min(bx0, s === 1 ? x : x - lw); bx1 = Math.max(bx1, s === 1 ? x + lw : x); by0 = Math.min(by0, y - 10); by1 = Math.max(by1, y + 10);
+      const tattr = `x="${f2(x)}" y="${f2(y)}" text-anchor="${s === 1 ? 'start' : 'end'}" dominant-baseline="central"`;
+      if (l.kind === 'e') {
+        under.push(`<polyline class="mp-lead${l.g.items.some(isSel) ? ' on' : ''}" data-enz="${esc(l.g.names.join('|'))}" points="${pts}"/>`);
+        text.push(enzGroupSvg(l.g, `class="mp-lbl enz" ${tattr}`));
+      } else {
+        under.push(`<polyline class="mp-lead${doc.selFid === l.f.id ? ' on' : ''}" data-fid="${l.f.id}" points="${pts}"/>`);
+        text.push(`<text class="mp-lbl" data-fid="${l.f.id}" ${tattr}>${esc(l.text)}</text>`);
+      }
+    });
   }
+  out.splice(underAt, 0, ...under); out.push(...text);
   // caret
   if (!segs.length) {
     const a = ang(doc.caret), [x1, y1] = polar(R - 30, a), [x2, y2] = polar(rTop + 8, a);
@@ -2129,7 +2180,8 @@ function renderCircular(doc, host) {
   out.push(`<text class="mp-title" x="${CCX}" y="${CCY - 16}" text-anchor="middle">${esc(nm)}</text>`);
   out.push(`<text class="mp-sub" x="${CCX}" y="${CCY + 12}" text-anchor="middle">${n.toLocaleString('en-US')} bp</text>`);
   if (segs.length) out.push(`<text class="mp-sub small" x="${CCX}" y="${CCY + 36}" text-anchor="middle">${segLabel(segs)} · ${segs.reduce((t, s) => t + s[1] - s[0], 0).toLocaleString('en-US')} bp selected</text>`);
-  host.innerHTML = `<svg class="map circ" viewBox="0 0 ${CW} ${CH}" data-n="${n}" preserveAspectRatio="xMidYMid meet">${out.join('')}</svg>`;
+  const pad = 14;
+  host.innerHTML = `<svg class="map circ" viewBox="${f2(bx0 - pad)} ${f2(by0 - pad)} ${f2(bx1 - bx0 + 2 * pad)} ${f2(by1 - by0 + 2 * pad)}" data-n="${n}" data-r="${f2(R)}" preserveAspectRatio="xMidYMid meet">${out.join('')}</svg>`;
 }
 
 /* converts a mouse event on the circular map to a sequence position + whether it is on the ring area */
@@ -2153,7 +2205,7 @@ function renderLinear(doc, host) {
   const sel = selRange(doc);
 
   // enzyme labels (above)
-  const enz = enzymeView(doc).map(e => ({ ...e, text: `${e.name} (${e.top})`, x: X(e.top) }));
+  const enz = groupEnzymes(enzymeView(doc)).map(g => ({ ...g, text: `${g.names.join(', ')} (${g.top})`, x: X(g.top) }));
   enz.forEach(e => { e.w = textWidth(e.text, font) + 8; });
   enz.sort((a, b) => a.x - b.x);
   const rowEnd = [];
@@ -2189,8 +2241,8 @@ function renderLinear(doc, host) {
   // enzymes
   for (const e of enz) {
     const y = 24 + e.row * EH + 6;
-    out.push(`<line class="mp-cut${sel && sel[0] === e.s && sel[1] === e.e ? ' on' : ''}" data-enz="${esc(e.name)}" x1="${f2(e.x)}" y1="${y + 4}" x2="${f2(e.x)}" y2="${baseY}"/>`);
-    out.push(`<text class="mp-lbl enz" data-enz="${esc(e.name)}" data-s="${e.s}" data-e="${e.e}" x="${f2(e.x + 3)}" y="${y}" dominant-baseline="central">${esc(e.text)}</text>`);
+    out.push(`<line class="mp-cut${sel && e.items.some(i => sel[0] === i.s && sel[1] === i.e) ? ' on' : ''}" data-enz="${esc(e.names.join('|'))}" x1="${f2(e.x)}" y1="${y + 4}" x2="${f2(e.x)}" y2="${baseY}"/>`);
+    out.push(enzGroupSvg(e, `class="mp-lbl enz" x="${f2(e.x + 3)}" y="${y}" dominant-baseline="central"`));
   }
   // features
   for (const f of feats) {
@@ -2265,7 +2317,7 @@ function buildMapSVG(doc) {
     svg.querySelectorAll('.on').forEach(n => n.classList.remove('on'));
     [svg, ...svg.querySelectorAll('*')].forEach(n => { for (const a of Array.from(n.attributes)) if (a.name.startsWith('data-')) n.removeAttribute(a.name); });
     let w, h;
-    if (doc.circular) { w = CW; h = CH; svg.setAttribute('width', w); svg.setAttribute('height', h); }
+    if (doc.circular) { const vb = svg.getAttribute('viewBox').split(' ').map(Number); w = Math.round(vb[2]); h = Math.round(vb[3]); svg.setAttribute('width', w); svg.setAttribute('height', h); }
     else { w = +svg.getAttribute('width'); h = +svg.getAttribute('height'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); }
     svg.removeAttribute('class'); svg.removeAttribute('preserveAspectRatio');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -3181,7 +3233,7 @@ function wireMap() {
     const fe = e.target.closest('[data-fid]');
     if (fe) { const f = doc.features.find(x => x.id === +fe.dataset.fid) || findORFs(doc, App.settings.orfMin).find(x => x.id === fe.dataset.fid); if (f) selectFeature(doc, f); return; }
     let pos;
-    if (circ) { const c = circularPos(svg, e, n); if (c.r < 120 || c.r > 380) { return; } pos = c.pos; } else pos = linearPos(svg, e, n);
+    if (circ) { const c = circularPos(svg, e, n); const rr = +svg.dataset.r || 160; if (c.r < rr * 0.7 || c.r > rr * 2.6) { return; } pos = c.pos; } else pos = linearPos(svg, e, n);
     drag = { start: pos, last: pos, cross: 0 }; setSel(doc, pos, pos, null, false);
     e.preventDefault();
   });
@@ -3309,7 +3361,7 @@ function wireHover() {
     else {
       const nm = ee.dataset.enz;
       $$('#viewport [data-ek]').forEach(n => { if (ee.dataset.ek ? n.dataset.ek === ee.dataset.ek : n.dataset.ek.startsWith(nm + ':')) n.classList.add('hov'); });
-      $$('#viewport [data-enz]').forEach(n => { if (n.dataset.enz === nm) n.classList.add('hov'); });
+      $$('#viewport [data-enz]').forEach(n => { if (n.dataset.enz.split('|').includes(nm)) n.classList.add('hov'); });
       html = enzymeTipHTML(doc, nm);
     }
     if (!html) return;
