@@ -3271,6 +3271,7 @@ function wireMap() {
   const pane = $('#mapPane'); let drag = null;
   pane.addEventListener('mousedown', e => {
     const doc = App.cur; if (!doc || e.button !== 0) return;
+    window.getSelection().removeAllRanges();   // a text selection elsewhere (side panel …) must not hijack Copy
     const svg = pane.querySelector('svg'); if (!svg) return;
     const n = doc.seq.length, circ = doc.circular;
     const enz = e.target.closest('[data-enz]');
@@ -3298,7 +3299,7 @@ function wireSeq() {
   const scroll = $('#seqScroll'); let drag = null;
   scroll.addEventListener('mousedown', e => {
     const doc = App.cur; if (!doc || e.button !== 0) return;
-    scroll.focus({ preventScroll: true }); e.preventDefault();
+    scroll.focus({ preventScroll: true }); e.preventDefault(); window.getSelection().removeAllRanges();
     const n = doc.seq.length;
     const enz = e.target.closest('[data-enz]');
     if (enz) { setSel(doc, +enz.dataset.s % n, Math.min(+enz.dataset.e, n), null, false); return; }
@@ -3320,6 +3321,12 @@ function wireSeq() {
   scroll.addEventListener('contextmenu', contextMenu);
 }
 
+/* text selected with the mouse in a dialog, the side panel, the toolbar … (not in the sequence / map view): copy / cut then belong to the browser, not to the sequence selection */
+function nativeTextSelected() {
+  const s = window.getSelection(); if (!s || s.isCollapsed || !s.toString()) return false;
+  const n = s.anchorNode, e = n && (n.nodeType === 1 ? n : n.parentElement);
+  return !!e && !e.closest('#viewport');
+}
 function inTextField(t) { return t && (['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName) || t.isContentEditable); }
 
 let clipTimer = 0;
@@ -3340,7 +3347,7 @@ function wireKeys() {
       else if ('cxv'.includes(lk) && !e.shiftKey && !e.altKey) {
         // normally the native copy/cut/paste events handle this; this fallback covers environments where they never fire
         clearTimeout(clipTimer);
-        clipTimer = setTimeout(() => { if (lk === 'v') doPaste(doc); else doCopy(doc, lk === 'x'); }, 80);
+        clipTimer = setTimeout(() => { if (nativeTextSelected()) return; if (lk === 'v') doPaste(doc); else doCopy(doc, lk === 'x'); }, 80);
       }
       return;
     }
@@ -3364,8 +3371,8 @@ function wireKeys() {
     }
     if (seqFocus && /^[a-zA-Z]$/.test(k) && /[ACGTUNRYKMSWBDHV]/i.test(k)) { e.preventDefault(); if (!App.editing) return lockedToast(); if (!/[ACGTacgt]/.test(k)) toast(`⚠ “${k}” is not A/C/G/T – it will be highlighted in red`, 3500, 'warn'); typeBases(doc, k); }
   });
-  document.addEventListener('copy', e => { clearTimeout(clipTimer); const doc = App.cur; if (!doc || inTextField(e.target)) return; const clip = currentClip(doc); if (!clip) return; e.preventDefault(); e.clipboardData.setData('text/plain', clip.text); storeClip(clip); toast(`Copied ${fmtBp(clip.text.length)}${clip.features.length ? ` + ${clip.features.length} feature(s)` : ''}`); });
-  document.addEventListener('cut', e => { clearTimeout(clipTimer); const doc = App.cur; if (!doc || inTextField(e.target)) return; const clip = currentClip(doc); if (!clip) return; e.preventDefault(); e.clipboardData.setData('text/plain', clip.text); storeClip(clip); deleteSelection(doc); toast(`Cut ${fmtBp(clip.text.length)}`); });
+  document.addEventListener('copy', e => { clearTimeout(clipTimer); const doc = App.cur; if (!doc || inTextField(e.target) || nativeTextSelected() || e.target.closest && e.target.closest('.backdrop')) return; const clip = currentClip(doc); if (!clip) return; e.preventDefault(); e.clipboardData.setData('text/plain', clip.text); storeClip(clip); toast(`Copied ${fmtBp(clip.text.length)}${clip.features.length ? ` + ${clip.features.length} feature(s)` : ''}`); });
+  document.addEventListener('cut', e => { clearTimeout(clipTimer); const doc = App.cur; if (!doc || inTextField(e.target) || nativeTextSelected() || e.target.closest && e.target.closest('.backdrop')) return; const clip = currentClip(doc); if (!clip) return; e.preventDefault(); e.clipboardData.setData('text/plain', clip.text); storeClip(clip); deleteSelection(doc); toast(`Cut ${fmtBp(clip.text.length)}`); });
   document.addEventListener('paste', e => { clearTimeout(clipTimer); const doc = App.cur; if (!doc || inTextField(e.target)) return; e.preventDefault(); const t = e.clipboardData.getData('text/plain'); if (t) pasteClip(doc, lookupClip(t)); });
 }
 
