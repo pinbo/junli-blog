@@ -148,6 +148,10 @@ svg.map.lin { width: auto; height: auto; }
 .mp-lbl { fill: var(--text); font-size: var(--mp-feat, 12px); font-weight: 700; cursor: pointer; }
 .mp-lbl.enz { fill: var(--enz); font-weight: 600; font-size: var(--mp-enz, 10px); }
 .mp-lbl:hover { text-decoration: underline; }
+.mp-lbx { stroke: rgba(0,0,0,.28); stroke-width: .8; cursor: pointer; }
+.mp-lbx.on { stroke: var(--text); stroke-width: 2; }
+.mp-lbx.hov { stroke: #e5322d; stroke-width: 2; }
+.mp-lbl.boxed, .mp-lbl.boxed.hov { fill: #111; stroke: none; }
 .mp-flbl { font-size: calc(var(--mp-feat, 12px) * 0.94); font-weight: 600; pointer-events: none; }
 .mp-hang { fill: none; stroke-width: 2; stroke-linejoin: round; cursor: pointer; }
 .mp-hang.hov, .mp-hang.on { stroke: #e5322d; }
@@ -2042,7 +2046,7 @@ function arcSeg(r1, r2, a1, a2, head, headPx) {
   if (!head) {
     return `M${P(r2, a1)} A${r2} ${r2} 0 ${large(a1, a2)} 1 ${P(r2, a2)} L${P(r1, a2)} A${r1} ${r1} 0 ${large(a1, a2)} 0 ${P(r1, a1)}Z`;
   }
-  let da = Math.min(headPx / rm, a2 - a1);
+  let da = Math.min(headPx / rm, (a2 - a1) / 2);   // short shapes: the head takes half of the length
   if (head === 1) {
     const ab = a2 - da, flare = 3;
     if (ab <= a1 + 1e-6) return `M${P(r2 + flare, a1)} L${P(rm, a2)} L${P(r1 - flare, a1)}Z`;
@@ -2059,7 +2063,7 @@ function groupEnzymes(list) {
   for (const e of list) { const k = e.top; if (!g.has(k)) g.set(k, { top: e.top, items: [] }); g.get(k).items.push(e); }
   return [...g.values()].map(x => { x.items.sort((p, q) => p.name.localeCompare(q.name)); x.names = x.items.map(i => i.name); return x; });
 }
-const enzGroupSvg = (g, attrs = '') => `<text ${attrs}>${g.items.map((e, i) => `<tspan data-enz="${esc(e.name)}" data-s="${e.s}" data-e="${e.e}">${esc(e.name)}${i < g.items.length - 1 ? ', ' : ` (${g.top})`}</tspan>`).join('')}</text>`;   // separators and the position belong to a name's tspan so the whole label is hoverable
+const enzGroupSvg = (g, attrs = '', posFirst = false) => `<text ${attrs}>${g.items.map((e, i) => `<tspan data-enz="${esc(e.name)}" data-s="${e.s}" data-e="${e.e}">${posFirst && !i ? `(${g.top}) ` : ''}${esc(e.name)}${i < g.items.length - 1 ? ', ' : posFirst ? '' : ` (${g.top})`}</tspan>`).join('')}</text>`;   // separators and the position belong to a name's tspan so the whole label is hoverable
 
 /* Least-squares placement of labels along a vertical axis: keeps the order, keeps each label as near as possible to its wish (d) with room for the
    labels' heights h between neighbours (pool-adjacent-violators on d_i - offset_i), then fits the whole stack into [lo, hi]. */
@@ -2095,13 +2099,22 @@ function splitRingLabels(L) {
 /* map font sizes (Display ▸ Map font sizes…): feature names and plasmid name; everything else in the map scales from them */
 const mapFonts = () => { const S = App.settings; return { feat: clamp(+S.mapFeatFont || 12, 2, 60), name: clamp(+S.mapNameFont || 16, 2, 60), enz: clamp(+S.mapEnzFont || 10, 2, 60) }; };
 const mapShapeW = () => clamp(+App.settings.mapShapeW || 16.5, 2, 60);   // thickness of the feature shapes
+const isDark = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return false; const n = parseInt(m[1], 16); return 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255) < 105; };   // too dark for the black name to be read on it
+/* feature name with an optional round-corner box in the feature's colour (Display ▸ Colour feature names); anchor: x is where the name starts (s = 1) or ends (s = -1) */
+function featNameSvg(f, F, x, y, s, doc) {
+  const box = App.settings.mapNameBox, tattr = `x="${f2(x)}" y="${f2(y)}" text-anchor="${s === 1 ? 'start' : 'end'}" dominant-baseline="central"`;
+  const w = textWidth(f.name, `700 ${F.feat}px system-ui, sans-serif`) + 10, h = F.feat * 1.3;
+  const rect = box ? `<rect class="mp-lbx${doc.selFid === f.id ? ' on' : ''}" data-fid="${f.id}" x="${f2(s === 1 ? x - 5 : x - w + 5)}" y="${f2(y - h / 2)}" width="${f2(w)}" height="${f2(h)}" rx="${f2(h * 0.3)}" fill="${isDark(f.color) ? '#d9dce1' : f.color}" fill-opacity=".7"/>` : '';
+  return `${rect}<text class="mp-lbl${box ? ' boxed' : ''}" data-fid="${f.id}" ${tattr}>${esc(f.name)}</text>`;
+}
 const mapFontStyle = F => `--mp-feat:${F.feat}px;--mp-name:${F.name}px;--mp-enz:${F.enz}px`;
 
 function renderCircular(doc, host) {
   const F = mapFonts();
   const n = doc.seq.length, feats = visibleFeatures(doc);
   const BH = mapShapeW(), LH = BH + 3;
-  const { lane, count } = assignLanes(feats.map(f => ({ id: f.id, ivs: f.locs.concat(hangSegs(f, n)) })), n * 0.002);
+  const { lane, count } = App.settings.mapOverlap ? { lane: new Map(feats.map(f => [f.id, 0])), count: 1 }   // option: every shape on the ring, overlapping ones drawn over each other
+    : assignLanes(feats.map(f => ({ id: f.id, ivs: f.locs.concat(hangSegs(f, n)) })), 0);   // no extra gap: features that are merely adjacent share a lane
   const lanes = Math.max(1, count), laneSpan = (lanes - 1) * LH + BH / 2 + 4;
   // ring size follows the number of names: few features / enzymes → a large ring that uses the room, many → a smaller ring (and the widest name decides how much width the ring may take)
   const egroups = groupEnzymes(enzymeView(doc)), nLabels = feats.length + egroups.length;
@@ -2153,52 +2166,42 @@ function renderCircular(doc, host) {
   }
   // label layout: names stay around the ring in two columns that follow the circle (right / left of the vertical axis); each column is filled
   // evenly, every name as near to its position as the stacking allows, and the order matches the order around the ring so leaders do not cross
-  const Rl = rTop + 22, Re = rTop + 8, minY = 22, maxY = CH - 22, under = [], text = [];
+  const Re = rTop + 8, under = [], text = [];
   let bx0 = CCX - rTop - 12, bx1 = CCX + rTop + 12, by0 = CCY - rTop - 12, by1 = CCY + rTop + 12;   // bounds of everything drawn, so the view can be fitted tightly
   labels.sort((p, q) => p.theta - q.theta);
   const segMin = (ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, -((ax - CCX) * dx + (ay - CCY) * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(ax + t * dx - CCX, ay + t * dy - CCY); };
   const labText = l => l.kind === 'e' ? `${l.g.names.join(', ')} (${l.g.top})` : l.text;
   const labFont = l => l.kind === 'e' ? `600 ${F.enz}px system-ui, sans-serif` : `700 ${F.feat}px system-ui, sans-serif`;
-  const labH = l => l.kind === 'e' ? 1.17 * F.enz : 1.125 * F.feat;
+  const labH = l => l.kind === 'e' ? 1.17 * F.enz : (App.settings.mapNameBox ? 1.45 : 1.125) * F.feat;
   // draws one name (right of the vertical axis: starts at x, left: ends at x) with its leader, which meets the near end of the name
   const emit = (l, s, x, y) => {
     const [ax, ay] = polar(l.rr, l.theta), lx = x - s * 3;
     // straight from the start of the leader to the name; if that would dip back towards the ring, leave the shape radially first
     let pts = `${f2(ax)},${f2(ay)} ${f2(lx)},${f2(y)}`;
     if (segMin(ax, ay, lx, y) < l.rr - 0.5) { const [ex, ey] = polar(Math.max(Re, l.rr), l.theta); pts = `${f2(ax)},${f2(ay)} ${f2(ex)},${f2(ey)} ${f2(lx)},${f2(y)}`; }
-    const lw = textWidth(labText(l), labFont(l)) + 6;
+    const lw = textWidth(labText(l), labFont(l)) + (l.kind === 'f' && App.settings.mapNameBox ? 12 : 6);
     bx0 = Math.min(bx0, s === 1 ? x : x - lw); bx1 = Math.max(bx1, s === 1 ? x + lw : x); by0 = Math.min(by0, y - 10); by1 = Math.max(by1, y + 10);
     const tattr = `x="${f2(x)}" y="${f2(y)}" text-anchor="${s === 1 ? 'start' : 'end'}" dominant-baseline="central"`;
     if (l.kind === 'e') {
       under.push(`<polyline class="mp-lead${l.g.items.some(isSel) ? ' on' : ''}" data-enz="${esc(l.g.names.join('|'))}" points="${pts}"/>`);
-      text.push(enzGroupSvg(l.g, `class="mp-lbl enz" ${tattr}`));
+      text.push(enzGroupSvg(l.g, `class="mp-lbl enz" ${tattr}`, s === -1));
     } else {
       under.push(`<polyline class="mp-lead${doc.selFid === l.f.id ? ' on' : ''}" data-fid="${l.f.id}" points="${pts}"/>`);
-      text.push(`<text class="mp-lbl" data-fid="${l.f.id}" ${tattr}>${esc(l.text)}</text>`);
+      text.push(featNameSvg(l.f, F, x, y, s, doc));
     }
   };
-  // names close to the vertical axis (right above / below the ring) sit in rows above / below the ring, starting at their own position
-  const A = 25 * Math.PI / 180, zTop = [], zBot = [], side = [];
-  for (const l of labels) (l.theta <= A || l.theta >= 2 * Math.PI - A ? zTop : Math.abs(l.theta - Math.PI) <= A ? zBot : side).push(l);
-  const cols = splitRingLabels(side);
-  let sideMin = CCY - Rl, sideMax = CCY + Rl;
+  // all names stand in two columns (SnapGene style): each column keeps the order around the ring and follows a circle that is larger than the ring, reaching
+  // a little above and below it so names near the vertical axis do not need rows of their own; the name ring grows until the fuller column fits all its
+  // names at full line height (the whole picture is fitted to the view afterwards, so a big name ring means a smaller map on screen)
+  const cols = splitRingLabels(labels), EXT = 0.2;
+  const colH = Math.max(0, ...[cols.right, cols.left].map(c => c.reduce((t, l) => t + labH(l), 0)));
+  const Rl = Math.max(rTop + 22, (colH + 8) / (2 * (1 + EXT))), minY = CCY - Rl * (1 + EXT), maxY = CCY + Rl * (1 + EXT);
   for (const [s, list] of [[1, cols.right], [-1, cols.left]]) {
     const ys = placeStack(list.map(l => CCY - Rl * Math.cos(l.theta)), list.map(labH), minY, maxY);
     list.forEach((l, i) => {
-      const y = ys[i], dy = y - CCY; sideMin = Math.min(sideMin, y); sideMax = Math.max(sideMax, y);
-      emit(l, s, CCX + s * (Math.sqrt(Math.max(Rl * Rl - dy * dy, (0.35 * Rl) ** 2)) + 10), y);
+      const y = ys[i], dy = y - CCY;
+      emit(l, s, CCX + s * (Math.max(Math.sqrt(Math.max(Rl * Rl - dy * dy, 0)), Re * Math.abs(Math.sin(l.theta))) + 8), y);   // never further out than the circle needs: names above / below the ring start right next to their site
     });
-  }
-  const rowH = Math.max(1.17 * F.enz, 1.125 * F.feat);
-  for (const [list, dir] of [[zTop, -1], [zBot, 1]]) {
-    const rows = [], base = dir < 0 ? Math.min(CCY - Rl - 6, sideMin - rowH) : Math.max(CCY + Rl + 6, sideMax + rowH);
-    for (const l of list) {
-      const s = Math.sin(l.theta) >= 0 ? 1 : -1, x0 = CCX + Re * Math.sin(l.theta) + s * 5, w = textWidth(labText(l), labFont(l)) + 10;
-      const lo = s === 1 ? x0 : x0 - w, hi = s === 1 ? x0 + w : x0;
-      let k = 0; while ((rows[k] || []).some(([a, b]) => lo < b && hi > a)) k++;
-      (rows[k] = rows[k] || []).push([lo, hi]);
-      emit(l, s, x0, base + dir * k * rowH);
-    }
   }
   out.splice(underAt, 0, ...under); out.push(...text);
   // caret
@@ -2250,7 +2253,7 @@ function renderLinear(doc, host) {
 
   // features lanes
   const items = feats.map(f => {
-    const nameW = textWidth(f.name, `700 ${F.feat}px system-ui, sans-serif`) + 8;
+    const nameW = textWidth(f.name, `700 ${F.feat}px system-ui, sans-serif`) + (App.settings.mapNameBox ? 16 : 8);
     const [a, b] = featBounds(f); const bw = (X(b) - X(a));
     const inside = nameW <= bw - 14;
     const ivs = f.locs.concat(hangSegs(f, n)).map(([s, e]) => [X(s), X(e)]);
@@ -2281,7 +2284,7 @@ function renderLinear(doc, host) {
     const k = lane.get(f.id), y = featY0 + k * LH, it = info.get(f.id);
     const headSeg = f.strand === -1 ? 0 : f.locs.length - 1;
     f.locs.forEach(([a, b], i) => {
-      const x1 = X(a), x2 = X(b), h = FH, hl = Math.min(11, x2 - x1);
+      const x1 = X(a), x2 = X(b), h = FH, hl = Math.min(11, (x2 - x1) / 2);   // short shapes: the head takes half of the length
       const head = f.strand === 0 || i !== headSeg ? 0 : f.strand;
       let d;
       if (head === 1) d = `M${f2(x1)} ${y} H${f2(x2 - hl)} L${f2(x2)} ${y + h / 2} L${f2(x2 - hl)} ${y + h} H${f2(x1)}Z`;
@@ -2296,8 +2299,8 @@ function renderLinear(doc, host) {
     }
     const [a, b] = featBounds(f);
     if (it.inside) out.push(`<text class="mp-flbl" data-fid="${f.id}" x="${f2((X(a) + X(b)) / 2)}" y="${y + FH / 2}" text-anchor="middle" dominant-baseline="central" fill="${textOn(f.color)}">${esc(f.name)}</text>`);
-    else if (f.strand === -1) out.push(`<text class="mp-lbl" data-fid="${f.id}" x="${f2(X(a) - 4)}" y="${y + FH / 2}" text-anchor="end" dominant-baseline="central">${esc(f.name)}</text>`);
-    else out.push(`<text class="mp-lbl" data-fid="${f.id}" x="${f2(X(b) + 4)}" y="${y + FH / 2}" dominant-baseline="central">${esc(f.name)}</text>`);
+    else if (f.strand === -1) out.push(featNameSvg(f, F, X(a) - (App.settings.mapNameBox ? 8 : 4), y + FH / 2, -1, doc));
+    else out.push(featNameSvg(f, F, X(b) + (App.settings.mapNameBox ? 8 : 4), y + FH / 2, 1, doc));
   }
   if (!sel) out.push(`<line class="mp-caret" x1="${f2(X(doc.caret))}" y1="${enzRows * EH + 12}" x2="${f2(X(doc.caret))}" y2="${H - 8}"/>`);
   out.push(`<text class="mp-title lin" x="${LIN_M}" y="16">${esc(doc.name)} <tspan class="mp-sub small">· ${n.toLocaleString('en-US')} bp · linear</tspan></text>`);
@@ -3259,7 +3262,7 @@ const actions = {
   display: e => {
     const r = e.target.closest('button').getBoundingClientRect(), S = App.settings;
     const tog = (k, label) => ({ label, checked: S[k], action: () => { S[k] = !S[k]; saveSettings(); requestUpdate(true); } });
-    showMenu(r.left, r.bottom + 4, [tog('showFeatures', 'Features'), tog('showOrfs', 'Open reading frames'), tog('showTrans', 'Amino acids in CDS bars'), '-',
+    showMenu(r.left, r.bottom + 4, [tog('showFeatures', 'Features'), tog('showOrfs', 'Open reading frames'), tog('showTrans', 'Amino acids in CDS bars'), tog('mapOverlap', 'Overlap feature shapes on circular map'), tog('mapNameBox', 'Color boxes behind feature names'), '-',
       { label: 'Map sizes (fonts, shape width)…', action: openMapFontDialog }, '-',
       { label: 'Zoom linear map in', action: () => { S.linZoom = Math.min(S.linZoom * 1.5, 12); saveSettings(); requestUpdate(false); } },
       { label: 'Zoom linear map out', action: () => { S.linZoom = Math.max(S.linZoom / 1.5, 1); saveSettings(); requestUpdate(false); } }]);
@@ -3278,7 +3281,7 @@ function wireMap() {
     const enz = e.target.closest('[data-enz]');
     if (enz) { setSel(doc, +enz.dataset.s % n, Math.min(+enz.dataset.e, n)); return; }
     const fe = e.target.closest('[data-fid]');
-    if (fe) { const f = doc.features.find(x => x.id === +fe.dataset.fid) || findORFs(doc, App.settings.orfMin).find(x => x.id === fe.dataset.fid); if (f) selectFeature(doc, f); return; }
+    if (fe) { const f = doc.features.find(x => x.id === +fe.dataset.fid) || findORFs(doc, App.settings.orfMin).find(x => x.id === fe.dataset.fid); if (f) { selectFeature(doc, f); if (e.detail === 2 && doc.features.includes(f)) openFeatureDialog(doc, f); } return; }   // double click edits; detected on the press because selecting redraws the map and a redrawn shape / name never receives the dblclick event
     let pos;
     if (circ) { const c = circularPos(svg, e, n); const rr = +svg.dataset.r || 160; if (c.r < rr * 0.7 || c.r > rr * 2.6) { return; } pos = c.pos; } else pos = linearPos(svg, e, n);
     drag = { start: pos, last: pos, cross: 0 }; setSel(doc, pos, pos, null, false);
@@ -3292,7 +3295,6 @@ function wireMap() {
     setSel(doc, drag.start, pos, null, false, doc.circular && drag.cross !== 0);
   });
   window.addEventListener('mouseup', () => { drag = null; });
-  pane.addEventListener('dblclick', e => { const fe = e.target.closest('[data-fid]'), doc = App.cur; if (fe && doc) { const f = doc.features.find(x => x.id === +fe.dataset.fid); if (f) openFeatureDialog(doc, f); } });
   pane.addEventListener('contextmenu', contextMenu);
 }
 
