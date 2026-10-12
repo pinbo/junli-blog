@@ -2356,7 +2356,8 @@ function buildMapSVG(doc) {
     else { w = +svg.getAttribute('width'); h = +svg.getAttribute('height'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); }
     svg.removeAttribute('class'); svg.removeAttribute('preserveAspectRatio');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svg.insertAdjacentHTML('afterbegin', `<style>${EXPORT_CSS}</style><rect width="100%" height="100%" fill="#ffffff"/>`);
+    const [vx, vy, vw, vh] = svg.getAttribute('viewBox').split(' ');   // the circular viewBox does not start at 0,0, so the background must cover exactly the viewBox
+    svg.insertAdjacentHTML('afterbegin', `<style>${EXPORT_CSS}</style><rect x="${vx}" y="${vy}" width="${vw}" height="${vh}" fill="#ffffff"/>`);
     return { svg: new XMLSerializer().serializeToString(svg), width: w, height: h };
   } finally { tmp.remove(); }
 }
@@ -3262,7 +3263,7 @@ const actions = {
   display: e => {
     const r = e.target.closest('button').getBoundingClientRect(), S = App.settings;
     const tog = (k, label) => ({ label, checked: S[k], action: () => { S[k] = !S[k]; saveSettings(); requestUpdate(true); } });
-    showMenu(r.left, r.bottom + 4, [tog('showFeatures', 'Features'), tog('showOrfs', 'Open reading frames'), tog('showTrans', 'Amino acids in CDS bars'), tog('mapOverlap', 'Overlap feature shapes on circular map'), tog('mapNameBox', 'Color boxes behind feature names'), '-',
+    showMenu(r.left, r.bottom + 4, [tog('showFeatures', 'Features'), tog('showOrfs', 'Open reading frames'), tog('showTrans', 'Amino acids in CDS bars'), tog('mapOverlap', 'Overlap feature shapes on circular map'), tog('mapNameBox', 'Colour boxes behind feature names'), '-',
       { label: 'Map sizes (fonts, shape width)…', action: openMapFontDialog }, '-',
       { label: 'Zoom linear map in', action: () => { S.linZoom = Math.min(S.linZoom * 1.5, 12); saveSettings(); requestUpdate(false); } },
       { label: 'Zoom linear map out', action: () => { S.linZoom = Math.max(S.linZoom / 1.5, 1); saveSettings(); requestUpdate(false); } }]);
