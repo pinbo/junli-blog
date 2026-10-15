@@ -132,6 +132,10 @@ tags:
         .checkbox-container {
             margin: 10px 0;
         }
+        .single-only { display: none; }
+        body.single-mode .single-only { display: block; }
+        body.single-mode .dual-only { display: none; }
+        .mode-select label { margin-right: 20px; }
         .download-all-container {
             margin: 15px 0;
             text-align: center;
@@ -141,8 +145,9 @@ tags:
 <body>
     <p>This tool can be used to demultiplex a fastq file (long reads or merged paired-end reads with barcodes on both ends). It supports both gzipped and uncompressed fastq files. The tool allows users to specify the left and right adapter sequences, as well as the lengths of the barcodes. It also provides options for trimming the adapter sequences from the reads.</p>
 
-    <p>Your reads should have the following structure:</p>
-    <code>[LeftBarcode][LeftAdapter]...[RightAdapter][RightBarcode]</code>
+    <p>Two modes are supported. Your reads should have one of the following structures:</p>
+    <p><strong>Both ends:</strong> <code>[LeftBarcode][LeftAdapter]...[RightAdapter][RightBarcode]</code></p>
+    <p><strong>5' end only (single adapter + barcode):</strong> <code>[Barcode][Adapter]...</code></p>
     <p></p>
     <div class="container">
         <h3>Step 1: Upload FASTQ File</h3>
@@ -156,6 +161,12 @@ tags:
     
     <div class="container">
         <h3>Step 2: Configure Barcodes</h3>
+
+        <div class="mode-select">
+            <strong>Barcode layout:</strong>
+            <label><input type="radio" name="demuxMode" value="dual" checked> Both ends (adapter + barcode on 5' and 3' ends)</label>
+            <label><input type="radio" name="demuxMode" value="single"> 5' end only (single adapter + barcode)</label>
+        </div>
         
         <div class="tab-buttons">
             <button class="tab-button active" data-tab="manual">Manual Entry</button>
@@ -170,7 +181,7 @@ tags:
                     <tr>
                         <th>Sample Name</th>
                         <th>Index 1 Sequence</th>
-                        <th>Index 2 Sequence</th>
+                        <th class="dual-only">Index 2 Sequence</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -182,10 +193,10 @@ tags:
         </div>
         
         <div id="upload" class="tab-content">
-            <p>Upload a tab-delimited file with barcode information (sample name, index 1, index 2):</p>
+            <p>Upload a tab-delimited file with barcode information (sample name, index 1<span class="dual-only">, index 2</span>):</p>
             <div class="file-input">
                 <input type="file" id="barcodeFile" accept=".txt,.tsv,.tab">
-                <p><small>Format: SampleName&lt;tab&gt;Index1&lt;tab&gt;Index2 (one per line)</small></p>
+                <p><small>Format: SampleName&lt;tab&gt;Index1<span class="dual-only">&lt;tab&gt;Index2</span> (one per line)</small></p>
             </div>
             <div id="barcodeFileInfo"></div>
             
@@ -195,7 +206,7 @@ tags:
                     <tr>
                         <th>Sample Name</th>
                         <th>Index 1 Sequence</th>
-                        <th>Index 2 Sequence</th>
+                        <th class="dual-only">Index 2 Sequence</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -206,32 +217,46 @@ tags:
         
         <div>
             <h3>Adapter Sequences</h3>
-            <label for="leftAdapter">Left Adapter sequence (5' side):</label><br>
+            <label for="leftAdapter"><span class="dual-only">Left </span>Adapter sequence (5' side):</label><br>
             <input type="text" id="leftAdapter" class="barcode-input" value="TCCTCTGTCACGGAAGCG"><br>
             
+            <span class="dual-only">
             <label for="rightAdapter">Right Adapter sequence (3' side):</label><br>
             <input type="text" id="rightAdapter" class="barcode-input" value="TTTAGCCTCCCCACCGAC">
+            </span>
             
             <div class="checkbox-container">
                 <input type="checkbox" id="trimAdapters">
                 <label for="trimAdapters">Trim adapter sequences from reads</label>
             </div>
             
-            <div class="sequence-structure">
+            <div class="checkbox-container single-only">
+                <input type="checkbox" id="checkReverse" checked>
+                <label for="checkReverse">Also check the reverse strand (reverse complement of adapter + barcode at the 3' end)</label>
+            </div>
+            
+            <div class="sequence-structure dual-only">
                 <strong>Detection Method:</strong>
                 <p>1. Find left adapter in first 30bp → extract left barcode before it</p>
                 <p>2. Find reverse complement of right adapter in last 30bp → extract right barcode after it</p>
                 <p>3. If not found, swap adapters and repeat search</p>
             </div>
+            <div class="sequence-structure single-only">
+                <strong>Detection Method:</strong>
+                <p>1. Find adapter in the first N bp (search window) → extract barcode before it</p>
+                <p>2. If not found and reverse strand is enabled, find reverse complement of the adapter in the last N bp → extract reverse complement of the barcode after it</p>
+            </div>
         </div>
         
         <div>
             <h3>Barcode Settings</h3>
-            <label for="index1Length">Left barcode length (bp):</label><br>
+            <label for="index1Length"><span class="dual-only">Left </span>Barcode length (bp):</label><br>
             <input type="number" id="index1Length" value="8" min="1" class="barcode-input"><br>
             
+            <span class="dual-only">
             <label for="index2Length">Right barcode length (bp):</label><br>
             <input type="number" id="index2Length" value="8" min="1" class="barcode-input"><br>
+            </span>
             
             <label for="maxMismatches">Maximum allowed mismatches:</label><br>
             <input type="number" id="maxMismatches" value="0" min="0" class="barcode-input"><br>
@@ -295,7 +320,17 @@ tags:
         const tabContents = document.querySelectorAll('.tab-content');
         const trimAdaptersCheckbox = document.getElementById('trimAdapters');
         
+        const modeRadios = document.querySelectorAll('input[name="demuxMode"]');
+        const isSingleEnd = () => document.querySelector('input[name="demuxMode"]:checked').value === 'single';
+        
         // Event listeners
+        modeRadios.forEach(r => r.addEventListener('change', () => {
+            document.body.classList.toggle('single-mode', isSingleEnd());
+            updateBarcodesArray();
+            if (barcodeFileInput.files[0] && document.getElementById('upload').classList.contains('active')) {
+                handleBarcodeFileUpload({ target: barcodeFileInput });
+            }
+        }));
         fastqFileInput.addEventListener('change', handleFileUpload);
         addBarcodeBtn.addEventListener('click', addBarcodeRow);
         demuxBtn.addEventListener('click', demultiplexFastq);
@@ -362,16 +397,16 @@ tags:
                     if (!line.trim()) continue; // Skip empty lines
                     
                     const parts = line.split('\t');
-                    if (parts.length < 3) {
+                    if (parts.length < (isSingleEnd() ? 2 : 3)) {
                         console.warn(`Skipping malformed line: ${line}`);
                         continue;
                     }
                     
                     const sampleName = parts[0].trim();
                     const index1 = parts[1].trim().toUpperCase();
-                    const index2 = parts[2].trim().toUpperCase();
+                    const index2 = isSingleEnd() ? '' : parts[2].trim().toUpperCase();
 
-                    if (sampleName && index1 && index2) {
+                    if (sampleName && index1 && (index2 || isSingleEnd())) {
                         uniqLeftBarcode.add(index1);
                         uniqRightBarcode.add(index2);
                         newBarcodes.push({
@@ -385,7 +420,7 @@ tags:
                         const row = uploadedBarcodeTable.insertRow();
                         row.insertCell(0).textContent = sampleName;
                         row.insertCell(1).textContent = index1;
-                        row.insertCell(2).textContent = index2;
+                        if (!isSingleEnd()) row.insertCell(2).textContent = index2;
                     }
                 }
                 
@@ -398,10 +433,10 @@ tags:
                     `;
                     let uniqIndex1 = uniqLeftBarcode.values().next().value; // first value
                     let uniqIndex2 = uniqRightBarcode.values().next().value; // first value
-                    if (uniqLeftBarcode.size == 1) {
+                    if (!isSingleEnd() && uniqLeftBarcode.size == 1) {
                         barcodeFileInfo.innerHTML += `<p class="success">Unique left barcode found: ${uniqIndex1}. Will only use RIGHT barcodes for demultiplex</p>`;
                     }
-                    if (uniqRightBarcode.size == 1) {
+                    if (!isSingleEnd() && uniqRightBarcode.size == 1) {
                         barcodeFileInfo.innerHTML += `<p class="success">Unique right barcode found: ${uniqIndex2}. Will only use LEFT barcodes for demultiplex</p>`;
                     }
                     
@@ -434,6 +469,7 @@ tags:
             
             sampleCell.innerHTML = `<input type="text" class="sample-name" placeholder="Sample1" value="Sample${barcodes.length + 1}">`;
             index1Cell.innerHTML = `<input type="text" class="index1-barcode" placeholder="ATGCATGC">`;
+            index2Cell.className = 'dual-only';
             index2Cell.innerHTML = `<input type="text" class="index2-barcode" placeholder="GCATGCAT">`;
             actionCell.innerHTML = `<button class="remove-btn">Remove</button>`;
             
@@ -466,13 +502,13 @@ tags:
                 const index1 = row.querySelector('.index1-barcode')?.value.toUpperCase();
                 const index2 = row.querySelector('.index2-barcode')?.value.toUpperCase();
                 
-                if (sampleName && index1 && index2) {
+                if (sampleName && index1 && (index2 || isSingleEnd())) {
                     uniqLeftBarcode.add(index1);
                     uniqRightBarcode.add(index2);
                     barcodes.push({
                         sampleName,
                         index1,
-                        index2,
+                        index2: index2 || '',
                         count: 0
                     });
                 }
@@ -503,11 +539,11 @@ tags:
             return distance;
         }
         
-        function findBestBarcodeMatch(index1Seq, index2Seq, maxMismatches) {
+        function findBestBarcodeMatch(index1Seq, index2Seq, maxMismatches, singleEnd = false) {
             let bestMatch = null;
             let bestDistance = Infinity;
             const index1Length = parseInt(document.getElementById('index1Length').value);
-            const index2Length = parseInt(document.getElementById('index2Length').value);
+            const index2Length = singleEnd ? 0 : parseInt(document.getElementById('index2Length').value);
             // let uniqIndex1 = uniqLeftBarcode.values().next().value; // first value
             // let uniqIndex2 = uniqRightBarcode.values().next().value; // first value
             // if (uniqLeftBarcode.size == 1) {
@@ -519,7 +555,7 @@ tags:
             
             for (const barcode of barcodes) {
                 const index1Distance = calculateHammingDistance(index1Seq, barcode.index1.slice(-index1Length), maxMismatches);
-                const index2Distance = calculateHammingDistance(index2Seq, barcode.index2.slice(-index2Length), maxMismatches);
+                const index2Distance = singleEnd ? 0 : calculateHammingDistance(index2Seq, barcode.index2.slice(-index2Length), maxMismatches);
                 const totalDistance = index1Distance + index2Distance;
                 
                 if (totalDistance < bestDistance) {
@@ -528,7 +564,7 @@ tags:
                 }
             }
             
-            return bestDistance <= maxMismatches * 2 ? bestMatch : null;
+            return bestDistance <= (singleEnd ? maxMismatches : maxMismatches * 2) ? bestMatch : null;
         }
         
         function findAdapterPosition(sequence, adapter, maxMismatches, searchWindow) {
@@ -561,11 +597,13 @@ tags:
             
             // Get parameters
             const index1Length = parseInt(document.getElementById('index1Length').value);
+            const singleEnd = isSingleEnd();
+            const checkReverse = document.getElementById('checkReverse').checked;
             const index2Length = parseInt(document.getElementById('index2Length').value);
             const maxMismatches = parseInt(document.getElementById('maxMismatches').value);
             const searchWindow = parseInt(document.getElementById('searchWindow').value);
             const leftAdapter = document.getElementById('leftAdapter').value.toUpperCase();
-            const rightAdapter = document.getElementById('rightAdapter').value.toUpperCase();
+            const rightAdapter = singleEnd ? '' : document.getElementById('rightAdapter').value.toUpperCase();
             const shouldTrimAdapters = trimAdaptersCheckbox.checked;
             const revCompRightAdapter = reverseComplement(rightAdapter);
             const revCompLeftAdapter = reverseComplement(leftAdapter);
@@ -621,6 +659,36 @@ tags:
                     let trimmedQuality = quality;
                     let structureFound = false;
                     
+                    if (singleEnd) {
+                        // Forward: [Index1][Adapter]...
+                        const fwdPos = findAdapterPosition(sequence, leftAdapter, maxMismatches, searchWindow);
+                        if (fwdPos >= index1Length) {
+                            index1Seq = sequence.substring(fwdPos - index1Length, fwdPos);
+                            if (shouldTrimAdapters) {
+                                trimmedSequence = sequence.substring(fwdPos + leftAdapter.length);
+                                trimmedQuality = quality.substring(fwdPos + leftAdapter.length);
+                            }
+                            structureFound = true;
+                            structure1Count++;
+                        } else if (checkReverse) {
+                            // Reverse strand: ...[rc(Adapter)][rc(Index1)]
+                            const offset = Math.max(0, sequence.length - searchWindow);
+                            const rcPos = findAdapterPosition(sequence.substring(offset), revCompLeftAdapter, maxMismatches, searchWindow);
+                            if (rcPos >= 0) {
+                                const globalPos = offset + rcPos;
+                                const bcStart = globalPos + revCompLeftAdapter.length;
+                                if (bcStart + index1Length <= sequence.length) {
+                                    index1Seq = reverseComplement(sequence.substring(bcStart, bcStart + index1Length));
+                                    if (shouldTrimAdapters) {
+                                        trimmedSequence = sequence.substring(0, globalPos);
+                                        trimmedQuality = quality.substring(0, globalPos);
+                                    }
+                                    structureFound = true;
+                                    structure2Count++;
+                                }
+                            }
+                        }
+                    } else {
                     // Try Structure 1: [Index1][LeftAdapter]...[RightAdapter][Index2]
                     let leftAdapterPos = findAdapterPosition(sequence, leftAdapter, maxMismatches, searchWindow);
                     if (leftAdapterPos >= index1Length || uniqLeftBarcode.size == 1) {
@@ -723,9 +791,11 @@ tags:
                         }
                     }
                     
+                    }
+                    
                     if (structureFound) {
                         // Find matching barcode
-                        const matchedBarcode = findBestBarcodeMatch(index1Seq, index2Seq, maxMismatches);
+                        const matchedBarcode = findBestBarcodeMatch(index1Seq, index2Seq, maxMismatches, singleEnd);
                         
                         if (matchedBarcode) {
                             matchedReads++;
@@ -755,8 +825,8 @@ tags:
                 let statsHTML = `<p><strong>Total reads processed:</strong> ${totalReads.toLocaleString()}</p>`;
                 statsHTML += `<p><strong>Matched reads:</strong> ${matchedReads.toLocaleString()} (${((matchedReads / totalReads) * 100).toFixed(2)}%)</p>`;
                 statsHTML += `<p><strong>Unmatched reads:</strong> ${unmatchedReads.toLocaleString()} (${((unmatchedReads / totalReads) * 100).toFixed(2)}%)</p>`;
-                statsHTML += `<p><strong>Structure 1 matches:</strong> ${structure1Count} (${((structure1Count / totalReads) * 100).toFixed(2)}%)</p>`;
-                statsHTML += `<p><strong>Structure 2 matches:</strong> ${structure2Count} (${((structure2Count / totalReads) * 100).toFixed(2)}%)</p>`;
+                statsHTML += `<p><strong>${singleEnd ? "Forward (5' end) matches" : "Structure 1 matches"}:</strong> ${structure1Count} (${((structure1Count / totalReads) * 100).toFixed(2)}%)</p>`;
+                statsHTML += `<p><strong>${singleEnd ? "Reverse strand (3' end) matches" : "Structure 2 matches"}:</strong> ${structure2Count} (${((structure2Count / totalReads) * 100).toFixed(2)}%)</p>`;
                 
                 statsHTML += `<h4>Breakdown by sample:</h4><ul>`;
                 for (const [sample, count] of Object.entries(barcodeCounts)) {
