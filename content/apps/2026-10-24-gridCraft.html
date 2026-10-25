@@ -1,0 +1,43 @@
+---
+title: 'gridCraft-Spreadsheet'
+author: Junli Zhang
+date: '2026-10-24'
+slug: gridCraft
+categories:
+  - tools
+tags:
+  - Excel
+  - Spreadsheet
+  - fullHtml
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GridCraft</title>
+  <link rel="icon" href="/tools/gridcraft/gridcraft.ico"/>
+
+<script type="module">
+import init, * as bindings from '/tools/gridcraft/gridcraft-web.js';
+const wasm = await init({ module_or_path: '/tools/gridcraft/gridcraft-web.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f3f3f3; }
+    #gridcraft_canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    #gridcraft_loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #555; font: 14px system-ui, sans-serif; pointer-events: none; }
+  </style>
+<link rel="modulepreload" href="/tools/gridcraft/gridcraft-web.js" crossorigin="anonymous"><link rel="preload" href="/tools/gridcraft/gridcraft-web.wasm" crossorigin="anonymous" as="fetch" type="application/wasm"></head>
+<body>
+  <canvas id="gridcraft_canvas"></canvas>
+  <div id="gridcraft_loading">Loading GridCraft&hellip;</div>
+</body>
+</html>
