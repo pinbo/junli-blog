@@ -917,6 +917,17 @@ tags:
 					<button class="btn" id="loadSampleBtn">
 						Use example layout
 					</button>
+					<select
+						id="layout96Select"
+						class="btn"
+						title="Map the 384-well plate to four 96-well plates in the downloaded CSV"
+						style="display: none"
+					>
+						<option value="none">96-well mapping: none</option>
+						<option value="1">Layout 1: plates 1/2 = rows A,C,E…; plates 3/4 = rows B,D,F… (cols 1-12 / 13-24)</option>
+						<option value="2">Layout 2: interleaved columns; plates 1/2 = rows A,C,E…; plates 3/4 = rows B,D,F…</option>
+						<option value="3">Layout 3: plates 1/2 = rows A-H; plates 3/4 = rows I-P (cols 1-12 / 13-24)</option>
+					</select>
 					<button class="btn download" id="downloadCallsBtn">
 						Download calls CSV
 					</button>
@@ -944,7 +955,14 @@ tags:
 					with
 					<span style="color: var(--text)">Chromatic: N</span> blocks,
 					either 8×12 (96-well) or 16×24 (384-well).<br>
-					Tested with the output of FLUOstar Omega microplate reader. Download an example (384-well) <a href="/files/Plate384-reader.csv">HERE</a>.
+					Tested with the output of FLUOstar Omega microplate reader. Download an example (384-well) <a href="Plate384-reader-output-example.csv">HERE</a>.
+				</div>
+				<div style="margin-top: 14px; font-size: 12.5px">
+					<strong style="color: var(--text)">Information</strong><br />
+					Source code:
+					<a href="https://github.com/pinbo/kasp-cluster" target="_blank" rel="noopener">https://github.com/pinbo/kasp-cluster</a><br />
+					Video tutorial:
+					<a href="https://youtu.be/bYdVu0kH5OQ" target="_blank" rel="noopener">https://youtu.be/bYdVu0kH5OQ</a>
 				</div>
 				<div class="drop-target">.csv · .txt</div>
 			</div>
@@ -1154,6 +1172,13 @@ tags:
 					384-well quadrant selection) are dimmed on the plate and
 					table, and left out of the scatter plot entirely.
 				</div>
+				<div class="footer-note">
+					<strong>Information</strong><br />
+					Source code:
+					<a href="https://github.com/pinbo/kasp-cluster" target="_blank" rel="noopener">https://github.com/pinbo/kasp-cluster</a><br />
+					Video tutorial:
+					<a href="https://youtu.be/bYdVu0kH5OQ" target="_blank" rel="noopener">https://youtu.be/bYdVu0kH5OQ</a>
+				</div>
 			</div>
 		</div>
 
@@ -1261,6 +1286,7 @@ tags:
 						document.getElementById("genotypeBtnList"),
 					hideSelectedBtn: document.getElementById("hideSelectedBtn"),
 					hideAllBtn: document.getElementById("hideAllBtn"),
+					layout96Select: document.getElementById("layout96Select"),
 					downloadCallsBtn:
 						document.getElementById("downloadCallsBtn"),
 				};
@@ -2421,6 +2447,7 @@ tags:
 				function updatePlateFormatUI() {
 					const is384 = plateFormat === 384;
 					els.quadrantRow.style.display = is384 ? "flex" : "none";
+					els.layout96Select.style.display = is384 ? "" : "none";
 					if (!is384 && activeQuadrant !== "all") {
 						activeQuadrant = "all";
 						setActiveQuadrantButton("all");
@@ -2466,7 +2493,35 @@ tags:
 					recompute(); // refresh labels/summary now that calls changed
 				}
 
+				// Maps a 384-well position (0-based row/col) to a 96-well plate
+				// number (1-4), 96-well row/col (0-based), per the chosen layout.
+				// Returns null if the well isn't part of the layout.
+				function map384to96(layout, r, c) {
+					const half = r % 2; // 0 = rows A,C,E.. (plates 1/2); 1 = rows B,D,F.. (plates 3/4)
+					if (layout === "1" || layout === "2") {
+						const right = layout === "1" ? (c >= 12 ? 1 : 0) : c % 2;
+						const col96 = layout === "1" ? c % 12 : Math.floor(c / 2);
+						return {
+							plate: half * 2 + right + 1,
+							row96: Math.floor(r / 2),
+							col96,
+						};
+					}
+					if (layout === "3") {
+						const bottom = r >= 8 ? 1 : 0;
+						return {
+							plate: bottom * 2 + (c >= 12 ? 1 : 0) + 1,
+							row96: r % 8,
+							col96: c % 12,
+						};
+					}
+					return null;
+				}
+
 				els.downloadCallsBtn.addEventListener("click", () => {
+					const layout =
+						plateFormat === 384 ? els.layout96Select.value : "none";
+					const withMap = layout !== "none";
 					const rows = [
 						[
 							"Well",
@@ -2476,9 +2531,27 @@ tags:
 							"FAM_ROX",
 							"HEX_ROX",
 							"GenotypeCall",
+							...(withMap
+								? ["Plate96", "Well96", "SortOrder96"]
+								: []),
 						],
 					];
+					// Sort order: plate 1, then 2, 3, 4; within a plate A1,B1,..H1,A2,B2,..H12
+					const sortOrder = new Map();
+					if (withMap) {
+						wells
+							.map((w) => ({ w, m: map384to96(layout, w.row, w.col) }))
+							.filter((x) => x.m)
+							.sort(
+								(a, b) =>
+									a.m.plate - b.m.plate ||
+									a.m.col96 - b.m.col96 ||
+									a.m.row96 - b.m.row96,
+							)
+							.forEach((x, i) => sortOrder.set(x.w.id, i + 1));
+					}
 					wells.forEach((w) => {
+						const m = withMap ? map384to96(layout, w.row, w.col) : null;
 						rows.push([
 							w.id,
 							w.fam,
@@ -2487,6 +2560,15 @@ tags:
 							w.famN,
 							w.hexN,
 							w.genotypeCall || w.label,
+							...(withMap
+								? m
+									? [
+											m.plate,
+											rowLetters[m.row96] + (m.col96 + 1),
+											sortOrder.get(w.id),
+										]
+									: ["", "", ""]
+								: []),
 						]);
 					});
 					const csv = rows.map((r) => r.join(",")).join("\n");
@@ -2715,4 +2797,3 @@ tags:
 		</script>
 	</body>
 </html>
-
