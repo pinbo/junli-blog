@@ -8,6 +8,7 @@ categories:
 tags:
   - Marker-assisted selection
   - breeding
+mermaid: true
 ---
 
 Marker-Assisted Selection (MAS) is a great tool to select lines with specific genes. I have been using it in my genetic studies: 
@@ -27,7 +28,7 @@ To maximize efficiency, the ideal approach is to prepare a single crossing donor
 
 **Wheat breeding process in Texas High Plains**
 
-```mermaid
+{{< mermaid >}}
 flowchart TB
     %% breeding years
     A(["Y1: Crossing block"])
@@ -62,4 +63,4 @@ flowchart TB
         I --> J --> K
     end
     P1 --> P2 --> P3
-```
+{{< /mermaid >}}
